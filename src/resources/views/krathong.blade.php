@@ -289,8 +289,10 @@
     function riverScene(types, recent) {
       const WATER_TOP = 25; // เริ่มน้ำที่ 58% ของจอ
       const WATER_BAND = 28;
-      const DUR_INIT_MIN = 14, DUR_INIT_MAX = 24;
-      const DUR_LOOP_MIN = 12, DUR_LOOP_MAX = 20;
+ // ชุดแรก
+const DUR_INIT_MIN = 22, DUR_INIT_MAX = 34;
+// รอบต่อไป
+const DUR_LOOP_MIN = 18, DUR_LOOP_MAX = 28;
 
       const typeImg = t => types?.[t]?.img || Object.values(types || {})[0]?.img || '';
 
