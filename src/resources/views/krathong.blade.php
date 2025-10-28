@@ -301,10 +301,10 @@
                 <template x-for="(s,i) in stars" :key="i">
                     <div class="absolute rounded-full bg-white animate-twinkle"
                         :style="`left:${s.left}%;top:${s.top}%;width:${s.size}px;height:${s.size}px;
-                                                animation-delay:${s.delay}s;animation-duration:${s.duration}s;
-                                                opacity:${s.opacity};
-                                                box-shadow:0 0 ${s.size*3}px rgba(255,255,255,${s.opacity*0.9}),
-                                                           0 0 ${s.size*6}px rgba(200,220,255,${s.opacity*0.5})`">
+                                                                                                animation-delay:${s.delay}s;animation-duration:${s.duration}s;
+                                                                                                opacity:${s.opacity};
+                                                                                                box-shadow:0 0 ${s.size*3}px rgba(255,255,255,${s.opacity*0.9}),
+                                                                                                           0 0 ${s.size*6}px rgba(200,220,255,${s.opacity*0.5})`">
                     </div>
                 </template>
             </div>
@@ -327,8 +327,8 @@
                 <template x-for="s in shooting" :key="s.id">
                     <div class="absolute w-1 h-1 bg-white rounded-full"
                         :style="`top:${s.top}%;left:${s.left}%;
-                                                animation: shootingStar ${s.duration}s ease-out forwards;
-                                                box-shadow: 0 0 8px rgba(255,255,255,0.9), 0 0 16px rgba(200,220,255,0.6)`">
+                                                                                                animation: shootingStar ${s.duration}s ease-out forwards;
+                                                                                                box-shadow: 0 0 8px rgba(255,255,255,0.9), 0 0 16px rgba(200,220,255,0.6)`">
                     </div>
                 </template>
             </div>
@@ -370,13 +370,6 @@
 
                         <!-- ตัวกระทง + glow -->
                         <div class="relative mt-2">
-                            <!-- ripple & wake (น้ำกระเพื่อมรอบกระทง) -->
-                            <div class="ripple" :style="`--rippleDur:${k.rippleDur}s`">
-                                <span class="ring r1"></span>
-                                <span class="ring r2"></span>
-                            </div>
-                            <div class="wake" :style="`--wakeDur:${k.wakeDur}s`"></div>
-
                             <img :src="k.img" alt="krathong"
                                 class="w-16 h-16 sm:w-20 sm:h-20 drop-shadow-[0_15px_25px_rgba(0,0,0,0.6)] relative z-10">
                             <div
@@ -632,119 +625,127 @@
         }
 
         function riverScene(types, recent) {
-            const WATER_TOP = 42; // จุดเริ่มน้ำ (%)
-            const WATER_BAND = 30; // ช่วงบนของผิวน้ำให้ลอยดูเป็นธรรมชาติ
+            const WATER_TOP = 42;
+            const WATER_BAND = 30;
 
-            // ความเร็วลอยตามธรรมชาติ (ยืดหยุ่นหน่อย)
             const DUR_INIT_MIN = 14,
                 DUR_INIT_MAX = 24;
             const DUR_LOOP_MIN = 12,
                 DUR_LOOP_MAX = 20;
-            const DELAY_MAX = 12;
 
-            const shuffled = [...(recent || [])].sort(() => Math.random() - 0.5).slice(0, 24);
+            // คิวเรียง "ใหม่→เก่า" + กันซ้ำด้วย id
+            const uniqRecent = Array.from(
+                new Map((recent || []).sort((a, b) => b.id - a.id).map(r => [r.id, r])).values()
+            );
 
             const typeImg = t => types?.[t]?.img || Object.values(types || {})[0]?.img || '';
-            const makeStyle = (dur, delay, top, opts) => {
+
+            function ensureKeyframeSheet() {
+                let el = document.getElementById('dyn-keyframes');
+                if (!el) {
+                    el = document.createElement('style');
+                    el.id = 'dyn-keyframes';
+                    document.head.appendChild(el);
+                }
+                if (!el.sheet) {
+                    const tmp = document.createElement('style');
+                    document.head.appendChild(tmp);
+                    const sheet = tmp.sheet;
+                    document.head.removeChild(tmp);
+                    return sheet;
+                }
+                return el.sheet;
+            }
+
+            const makeStyle = (dur, delay, top) => {
                 const name = `drift_${Math.random().toString(36).slice(2)}`;
                 const sheet = ensureKeyframeSheet();
-                // เส้นทาง: ซ้าย -> ขวา ด้วย fade-in/out
                 sheet.insertRule(
                     `@keyframes ${name}{0%{left:-20%;opacity:0}10%{opacity:1}90%{opacity:1}100%{left:120%;opacity:0}}`,
-                    sheet.cssRules.length);
-                // inject ความต่างเฉพาะชิ้นด้วย CSS vars
+                    sheet.cssRules.length
+                );
                 return `
-        top:${top}%;
-        left:-20%;
-        --floatDur:${opts.floatDur}s;
-        --swayDur:${opts.swayDur}s;
-        --rippleDur:${opts.rippleDur}s;
-        --wakeDur:${opts.wakeDur}s;
-        animation:${name} ${dur}s linear ${delay}s forwards, var(--_dummy,0s);
-      `;
-            };
-
-            // ตั้งเวลา remove item หลังครบรอบแอนิเมชัน (กันค้าง)
-            const scheduleRemoval = (vm, clientId, totalMs) => {
-                __schedule(() => {
-                    const idx = vm.items.findIndex(x => x.clientId === clientId);
-                    if (idx > -1) vm.items.splice(idx, 1);
-                }, totalMs + 30); // buffer เล็กน้อย
+      top:${top}%;
+      left:-20%;
+      --floatDur:${rnd(2.8, 4.4)}s;
+      --swayDur:${rnd(4.5, 6.5)}s;
+      animation:${name} ${dur}s linear ${delay}s forwards, var(--_dummy,0s);
+    `;
             };
 
             const toItem = r => {
                 const dur = rnd(DUR_INIT_MIN, DUR_INIT_MAX);
-                const delay = rnd(0, DELAY_MAX);
-                const top = rnd(WATER_TOP + 6, WATER_TOP + WATER_BAND); // ช่วงบนของน้ำ
-                const opts = {
-                    floatDur: rnd(2.8, 4.4), // ยก/ยุบคลื่น
-                    swayDur: rnd(4.5, 6.5), // เอียงซ้าย/ขวาเบา ๆ
-                    rippleDur: rnd(3.2, 4.6), // ระยะเวลาวงน้ำกระเพื่อม
-                    wakeDur: rnd(4.5, 6.5) // ความเร็ว wake ใต้น้ำ
-                };
-                const clientId = `srv_${r.id}_${Math.random().toString(36).slice(2)}`;
-                const style = makeStyle(dur, delay, top, opts);
+                const delay = rnd(0, 12);
+                const top = rnd(WATER_TOP + 6, WATER_TOP + WATER_BAND);
                 return {
                     id: r.id,
-                    clientId,
+                    clientId: `srv_${r.id}_${Math.random().toString(36).slice(2)}`,
                     img: typeImg(r.type),
                     wish: `${r.nickname} (${r.age}) : ${r.wish}`,
-                    style,
-                    rippleDur: opts.rippleDur,
-                    wakeDur: opts.wakeDur,
+                    style: makeStyle(dur, delay, top),
                     __life: (dur + delay) * 1000
                 };
             };
 
-            const initial = shuffled.map(toItem);
+            const scheduleRemoval = (vm, clientId, totalMs) => {
+                __schedule(() => {
+                    const idx = vm.items.findIndex(x => x.clientId === clientId);
+                    if (idx > -1) vm.items.splice(idx, 1);
+                }, totalMs + 30);
+            };
 
             return {
-                items: initial,
-                recentPool: recent || [],
-                init() {
-                    // ลบ initial หลังวิ่งครบ
-                    this.items.forEach(it => scheduleRemoval(this, it.clientId, it.__life));
+                items: [],
+                // เซ็ตกันซ้ำจนกว่าจะรีเฟรช
+                seenIds: new Set(),
+                // คิวแสดงผลใหม่→เก่า
+                queue: uniqRecent,
+                recentPool: uniqRecent.slice(),
 
-                    // spawn ต่อเนื่องแบบไม่ชนกัน
+                init() {
+                    // เติมชุดแรกจากบนสุดของคิว (ใหม่ก่อน) ไม่ซ้ำ
+                    const firstBatch = this.queue.slice(0, 24).filter(r => !this.seenIds.has(r.id));
+                    firstBatch.forEach(r => this._spawnInitial(r));
+
+                    // วนหยิบทีละตัวจากคิว ตามลำดับใหม่→เก่า
                     const tick = () => {
-                        const pool = this.recentPool;
-                        if (pool.length) {
-                            const visibleIds = new Set(this.items.map(i => i.id));
-                            const candidates = pool.filter(x => !visibleIds.has(x.id));
-                            if (candidates.length) {
-                                const r = candidates[Math.floor(Math.random() * candidates.length)];
-                                this.spawnFromRecord(r);
-                            }
-                        }
-                        __schedule(tick, rnd(4500, 7200)); // เวลาห่างระหว่างลำ
+                        const next = this.queue.find(r => !this.seenIds.has(r.id));
+                        if (next) this.spawnFromRecord(next);
+                        __schedule(tick, rnd(4500, 7200));
                     };
                     __schedule(tick, 900);
                 },
+
+                _spawnInitial(r) {
+                    if (this.seenIds.has(r.id)) return;
+                    this.seenIds.add(r.id);
+                    const k = toItem(r);
+                    this.items.push(k);
+                    scheduleRemoval(this, k.clientId, k.__life);
+                },
+
                 spawnFromRecord(r) {
+                    if (this.seenIds.has(r.id)) return; // กันซ้ำ
+                    this.seenIds.add(r.id);
+
                     const dur = rnd(DUR_LOOP_MIN, DUR_LOOP_MAX);
                     const top = rnd(WATER_TOP + 8, WATER_TOP + WATER_BAND + 4);
-                    const opts = {
-                        floatDur: rnd(3.0, 4.6),
-                        swayDur: rnd(4.2, 6.2),
-                        rippleDur: rnd(3.0, 4.8),
-                        wakeDur: rnd(4.3, 6.3)
-                    };
                     const clientId = `cli_${r.id}_${Math.random().toString(36).slice(2)}`;
                     const k = {
                         id: r.id,
                         clientId,
                         img: typeImg(r.type),
                         wish: `${r.nickname} (${r.age}) : ${r.wish}`,
-                        style: makeStyle(dur, 0, top, opts),
-                        rippleDur: opts.rippleDur,
-                        wakeDur: opts.wakeDur,
+                        style: makeStyle(dur, 0, top),
                         __life: dur * 1000
                     };
-                    this.items.push(k);
-                    if (this.items.length > 100) this.items.splice(0, this.items.length - 100);
+                    this.items.unshift(k); // ใส่หัวลิสต์ให้รู้สึก "มาใหม่"
+                    if (this.items.length > 100) this.items.splice(100);
                     scheduleRemoval(this, clientId, k.__life);
                 },
+
                 spawnNew(p) {
+                    // เพิ่มใหม่ให้เห็นทันที และกันซ้ำ
                     const r = {
                         id: Date.now(),
                         type: p.type,
@@ -752,10 +753,12 @@
                         age: p.age,
                         wish: p.wish
                     };
-                    this.recentPool.push(r);
+                    // ดันเข้า pool และคิวไว้หัวตาราง
+                    this.recentPool.unshift(r);
+                    this.queue.unshift(r);
                     this.spawnFromRecord(r);
                 }
-            }
+            };
         }
 
         function krathongForm() {
