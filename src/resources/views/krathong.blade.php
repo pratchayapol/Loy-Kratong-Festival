@@ -133,12 +133,12 @@
                                 radial-gradient(circle at 40% 70%, rgba(255,255,255,.19) 0 1.5px, transparent 2px);
                 background-size: 100% 100%;"></div>
 
-    <!-- ดาวระยิบระยับแบบ animated: ครอบคลุมเต็มฉาก และหนาแน่นขึ้น -->
+    <!-- ดาวระยิบระยับแบบ animated -->
     <div class="pointer-events-none absolute inset-0" x-data="{stars:[]}" x-init="
-      for(let i=0;i<220;i++){
+      for(let i=0;i<120;i++){
         stars.push({
           left:Math.random()*100,
-          top:Math.random()*100,    // เดิม 75 เปลี่ยนเป็น 100 ให้ทั่วทั้งฉาก
+          top:Math.random()*75,
           delay:Math.random()*4,
           duration:2+Math.random()*3,
           size:Math.random()>0.7?2:1
@@ -376,8 +376,7 @@
       clientId:`srv_${r.id}_${Math.random().toString(36).slice(2)}`,
       img:typeImg(r.type),
       wish:`${r.nickname} (${r.age}) : ${r.wish}`,
-      // ให้เริ่มเลื่อนทันที: delay = 0 แทนการสุ่ม
-      style:makeStyle(rnd(DUR_INIT_MIN,DUR_INIT_MAX), 0, rnd(8,88))
+      style:makeStyle(rnd(DUR_INIT_MIN,DUR_INIT_MAX), rnd(0,DELAY_MAX), rnd(8,88))
     });
 
     const initial=shuffled.map(toItem);
@@ -440,7 +439,7 @@
             body:JSON.stringify(this.form)
           });
           if(!res.ok){
-            let msg=`HTTP ${res.status}`; try{const j=await res.json(); msg=j.message||msg;}catch(_){}}
+            let msg=`HTTP ${res.status}`; try{const j=await res.json(); msg=j.message||msg;}catch(_){}
             throw new Error(msg);
           }
           const data=await res.json();
