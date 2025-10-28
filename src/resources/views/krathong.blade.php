@@ -161,99 +161,107 @@
   </div>
 
   <script>
-    const readCookie = n => decodeURIComponent((document.cookie.split('; ').find(x=>x.startsWith(n+'='))||'').split('=')[1]||'');
+  const readCookie = n => decodeURIComponent((document.cookie.split('; ').find(x=>x.startsWith(n+'='))||'').split('=')[1]||'');
 
-    function riverScene(types, recent){
-      // สุ่มลำดับเริ่มต้นจากฐานข้อมูล
-      const shuffled = [...(recent||[])].sort(()=>Math.random()-0.5).slice(0, 24);
+  function riverScene(types, recent){
+    // เร่งความเร็ว: ลดช่วงเวลาเคลื่อน
+    const DUR_INIT_MIN=12, DUR_INIT_MAX=20;   // เดิม ~22–36
+    const DUR_LOOP_MIN=10, DUR_LOOP_MAX=16;   // เดิม ~22–36
+    const DELAY_MAX=10;                       // เว้นจังหวะเริ่ม
 
-      const typeImg=(t)=>types?.[t]?.img || Object.values(types||{})[0]?.img || '';
-      const makeStyle=(dur,delay,top)=>{
-        const name=`drift_${Math.random().toString(36).slice(2)}`;
-        const sheet=document.getElementById('dyn-keyframes').sheet;
-        sheet.insertRule(`@keyframes ${name}{0%{transform:translateX(-12%)}100%{transform:translateX(112%)}}`,sheet.cssRules.length);
-        return `top:${top}%;left:-12%;animation:${name} ${dur}s linear ${delay}s forwards`;
-      };
+    // สุ่มชุดเริ่มต้นจากฐานข้อมูล
+    const shuffled=[...(recent||[])].sort(()=>Math.random()-0.5).slice(0,24);
 
-      const toItem = (r) => ({
-        clientId:`srv_${r.id}_${Math.random().toString(36).slice(2)}`,
-        img:typeImg(r.type),
-        wish:`${r.nickname} (${r.age}) : ${r.wish}`,
-        style:makeStyle(rnd(22,36), rnd(0,16), rnd(8,88)),
-        ttl:Date.now()+1000*(rnd(22,36)+rnd(0,16)+1)
-      });
+    const typeImg=t=>types?.[t]?.img || Object.values(types||{})[0]?.img || '';
+    const makeStyle=(dur,delay,top)=>{
+      const name=`drift_${Math.random().toString(36).slice(2)}`;
+      const sheet=document.getElementById('dyn-keyframes').sheet;
+      sheet.insertRule(`@keyframes ${name}{0%{transform:translateX(-12%)}100%{transform:translateX(112%)}}`,sheet.cssRules.length);
+      return `top:${top}%;left:-12%;animation:${name} ${dur}s linear ${delay}s forwards`;
+    };
+    const toItem=r=>({
+      id:r.id,                                  // เก็บ id ไว้กันซ้ำบนจอ
+      clientId:`srv_${r.id}_${Math.random().toString(36).slice(2)}`,
+      img:typeImg(r.type),
+      wish:`${r.nickname} (${r.age}) : ${r.wish}`,
+      style:makeStyle(rnd(DUR_INIT_MIN,DUR_INIT_MAX), rnd(0,DELAY_MAX), rnd(8,88))
+    });
 
-      const initial = shuffled.map(toItem);
+    const initial=shuffled.map(toItem);
 
-      return {
-        items: initial,
-        recentPool: recent||[],
-        init(){
-          // ปล่อยกระทงสุ่มต่อเนื่องจากฐานข้อมูลทุก 4–7 วินาที
-          const tick = () => {
-            const pool = this.recentPool;
-            if(pool.length){
-              const r = pool[Math.floor(Math.random()*pool.length)];
+    return{
+      items: initial,
+      recentPool: recent||[],
+      init(){
+        // ปล่อยกระทงจากฐานข้อมูลต่อเนื่อง โดย "ไม่ซ้ำกับที่กำลังแสดงอยู่"
+        const tick=()=>{
+          const pool=this.recentPool;
+          if(pool.length){
+            const visibleIds=new Set(this.items.map(i=>i.id));
+            const candidates=pool.filter(x=>!visibleIds.has(x.id));
+            if(candidates.length){
+              const r=candidates[Math.floor(Math.random()*candidates.length)];
               this.spawnFromRecord(r);
             }
-            setTimeout(tick, rnd(4000,7000));
-          };
-          setTimeout(tick, 1500);
-        },
-        spawnFromRecord(r){
-          const k = toItem(r);
-          this.items.push(k);
-          if(this.items.length>80) this.items.splice(0, this.items.length-80);
-        },
-        // ใช้ตอนบันทึกใหม่สำเร็จ
-        spawnNew(p){
-          const r = { id: Date.now(), type:p.type, nickname:p.nickname, age:p.age, wish:p.wish };
-          this.recentPool.push(r);
-          this.spawnFromRecord(r);
-        }
-      }
-    }
-
-    function krathongForm(){
-      return {
-        form:{ type:'banana', nickname:'', age:'', wish:'' },
-        error:'', ok:'',
-        async submit(){
-          this.error=''; this.ok='';
-          try{
-            const meta = document.querySelector('meta[name="csrf-token"]').content;
-            const xsrf = readCookie('XSRF-TOKEN');
-            const res = await fetch('/krathongs', {
-              method:'POST',
-              headers:{
-                'Content-Type':'application/json',
-                'Accept':'application/json',
-                'X-CSRF-TOKEN': meta,
-                'X-XSRF-TOKEN': xsrf,
-                'X-Requested-With':'XMLHttpRequest'
-              },
-              credentials:'same-origin',
-              body: JSON.stringify(this.form)
-            });
-            if(!res.ok){
-              let msg=`HTTP ${res.status}`;
-              try{ const j=await res.json(); msg=j.message||msg; }catch(_){}
-              throw new Error(msg);
-            }
-            const data = await res.json();
-            this.ok='ลอยแล้ว';
-            // แจ้งฉากให้ spawn กระทงใหม่ และปิดโมดัล
-            const scene = document.querySelector('main [x-data]');
-            const api = scene?._x_dataStack?.[0];
-            api?.spawnNew?.(data);
-            this.form.wish='';
-            Alpine.store('ui').open=false;
-          }catch(e){
-            this.error=e.message;
           }
-        }
+          setTimeout(tick, rnd(3500,6000)); // เร่งรอบเกิดนิดหน่อย
+        };
+        setTimeout(tick, 1000);
+      },
+      spawnFromRecord(r){
+        const k={
+          id:r.id,
+          clientId:`cli_${r.id}_${Math.random().toString(36).slice(2)}`,
+          img:typeImg(r.type),
+          wish:`${r.nickname} (${r.age}) : ${r.wish}`,
+          style:makeStyle(rnd(DUR_LOOP_MIN,DUR_LOOP_MAX), 0, rnd(10,90))
+        };
+        this.items.push(k);
+        if(this.items.length>80) this.items.splice(0,this.items.length-80);
+      },
+      // ใช้หลังบันทึกใหม่สำเร็จ
+      spawnNew(p){
+        const r={ id:Date.now(), type:p.type, nickname:p.nickname, age:p.age, wish:p.wish };
+        this.recentPool.push(r);
+        this.spawnFromRecord(r);
       }
     }
-  </script>
+  }
+
+  function krathongForm(){
+    return {
+      form:{ type:'banana', nickname:'', age:'', wish:'' },
+      error:'', ok:'',
+      async submit(){
+        this.error=''; this.ok='';
+        try{
+          const meta=document.querySelector('meta[name="csrf-token"]').content;
+          const xsrf=readCookie('XSRF-TOKEN');
+          const res=await fetch('/krathongs',{
+            method:'POST',
+            headers:{
+              'Content-Type':'application/json','Accept':'application/json',
+              'X-CSRF-TOKEN':meta,'X-XSRF-TOKEN':xsrf,'X-Requested-With':'XMLHttpRequest'
+            },
+            credentials:'same-origin',
+            body:JSON.stringify(this.form)
+          });
+          if(!res.ok){
+            let msg=`HTTP ${res.status}`; try{const j=await res.json(); msg=j.message||msg;}catch(_){}
+            throw new Error(msg);
+          }
+          const data=await res.json();
+          this.ok='ลอยแล้ว';
+          const scene=document.querySelector('main [x-data]');
+          const api=scene?._x_dataStack?.[0];
+          api?.spawnNew?.(data);
+          this.form.wish='';
+          Alpine.store('ui').open=false;
+        }catch(e){ this.error=e.message; }
+      }
+    }
+  }
+</script>
+
 </body>
 </html>
