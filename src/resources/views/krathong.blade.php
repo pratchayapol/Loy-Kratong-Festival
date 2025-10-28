@@ -71,7 +71,7 @@
   <!-- Alpine store -->
   <script>
     document.addEventListener('alpine:init', () => {
-      Alpine.store('ui', { open:false });
+      Alpine.store('ui', { open:false, aboutOpen:false });
     });
   </script>
 
