@@ -7,36 +7,26 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    // Tailwind config
     tailwind.config = {
       theme: {
         extend: {
-          fontFamily: { display: ['Inter', 'ui-sans-serif', 'system-ui'] },
-          colors: {
-            river1: '#0e3a5f',
-            river2: '#0b2e4a',
-            glass: 'rgba(255,255,255,0.06)'
-          },
-          boxShadow: {
-            glass: '0 20px 50px rgba(0,0,0,0.35)'
-          },
+          fontFamily: { display: ['Inter','ui-sans-serif','system-ui'] },
+          colors: { river1:'#0e3a5f', river2:'#0b2e4a', glass:'rgba(255,255,255,0.06)' },
+          boxShadow: { glass:'0 20px 50px rgba(0,0,0,0.35)' },
           keyframes: {
-            floatY: { '0%,100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-6px)' } },
-            waves: { '0%': { transform: 'translateX(0)' }, '100%': { transform: 'translateX(-50%)' } },
+            floatY:{'0%,100%':{transform:'translateY(0)'},
+                    '50%':{transform:'translateY(-6px)'}},
+            waves:{'0%':{transform:'translateX(0)'},
+                   '100%':{transform:'translateX(-50%)'}}
           },
-          animation: {
-            floatY: 'floatY 3.2s ease-in-out infinite',
-            waves: 'waves 18s linear infinite',
-          }
+          animation:{ floatY:'floatY 3.2s ease-in-out infinite', waves:'waves 18s linear infinite' }
         }
       }
     }
   </script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script>const rnd=(min,max)=>Math.random()*(max-min)+min;</script>
-  <style>
-    /* dynamic drift keyframes will be injected at runtime */
-  </style>
+  <style id="dyn-keyframes"></style>
 </head>
 <body class="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100 font-display">
   <div class="grid min-h-screen lg:grid-cols-[420px_1fr] gap-4">
@@ -109,7 +99,6 @@
             <span x-text="ok" class="text-emerald-400 text-sm"></span>
             <span x-text="error" class="text-rose-400 text-sm"></span>
           </div>
-          @csrf
         </form>
 
         <div class="px-5 lg:px-6 py-4 border-t border-white/10 text-sm text-slate-300">
@@ -144,7 +133,6 @@
           </div>
         </template>
 
-        <!-- River gradient vignette -->
         <div class="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-slate-950/70 to-transparent"></div>
       </div>
     </main>
@@ -152,10 +140,10 @@
 
   <script>
     function riverScene(types, recent){
-      const typeImg = (t)=>types[t]?.img || Object.values(types)[0]?.img || '';
+      const typeImg = (t)=>types?.[t]?.img || Object.values(types||{})[0]?.img || '';
       const makeStyle = (dur, delay, topPct)=>{
         const name = `drift_${Math.random().toString(36).slice(2)}`;
-        const sheet = document.styleSheets[document.styleSheets.length-1];
+        const sheet = document.getElementById('dyn-keyframes').sheet;
         sheet.insertRule(`@keyframes ${name}{0%{transform:translateX(-12%)}100%{transform:translateX(112%)}}`, sheet.cssRules.length);
         return `top:${topPct}%;left:-12%;animation:${name} ${dur}s linear ${delay}s forwards`;
       };
@@ -170,7 +158,7 @@
         items: initial,
         spawn(p){
           const k = {
-            clientId:`cli_${crypto.randomUUID()}`,
+            clientId:`cli_${crypto.randomUUID?.()||Math.random().toString(36).slice(2)}`,
             img:typeImg(p.type),
             wish:`${p.nickname} (${p.age}) : ${p.wish}`,
             style:makeStyle(rnd(22,34), 0, rnd(10,90)),
@@ -180,15 +168,11 @@
           if(this.items.length>80) this.items.splice(0, this.items.length-80);
         },
         spawnRandom(){
-          const keys = Object.keys(types);
-          const type = keys[Math.floor(Math.random()*keys.length)];
+          const keys = Object.keys(types||{});
+          const type = keys[Math.floor(Math.random()*keys.length)]||'banana';
           this.spawn({type, nickname:'ผู้ร่วมงาน', age: Math.floor(rnd(10,60)), wish:'สุขภาพแข็งแรง'});
         }
       }
-    }
-
-    function readCookie(name){
-      return decodeURIComponent(document.cookie.split('; ').find(r=>r.startsWith(name+'='))?.split('=')[1]||'');
     }
 
     function krathongForm(){
@@ -198,29 +182,28 @@
         async submit(){
           this.error=''; this.ok='';
           try{
-            const tokenMeta = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            const tokenCookie = readCookie('XSRF-TOKEN');
-            const res = await fetch(`{{ route('krathong.store') }}`, {
+            const token = document.querySelector('meta[name="csrf-token"]').content;
+            const res = await fetch(`{{ route('krathongs.store') }}`, {
               method:'POST',
               headers:{
                 'Content-Type':'application/json',
                 'Accept':'application/json',
-                'X-CSRF-TOKEN': tokenMeta,
-                'X-XSRF-TOKEN': tokenCookie
+                'X-CSRF-TOKEN': token,
+                'X-Requested-With': 'XMLHttpRequest'
               },
               credentials:'same-origin',
               body: JSON.stringify(this.form)
             });
             if(!res.ok){
-              const j = await res.json().catch(()=>({}));
-              throw new Error(j.message || `HTTP ${res.status}`);
+              let msg = `HTTP ${res.status}`;
+              try { const j = await res.json(); msg = j.message || msg; } catch(_){}
+              throw new Error(msg);
             }
             const data = await res.json();
             this.ok = 'ลอยแล้ว';
             document.querySelectorAll('main [x-data]').forEach(el=>{
-              if(el._x_dataStack?.[0]?.spawn){
-                el._x_dataStack[0].spawn({ type:data.type, nickname:data.nickname, age:data.age, wish:data.wish });
-              }
+              const x = el._x_dataStack?.[0];
+              if(x?.spawn){ x.spawn({ type:data.type, nickname:data.nickname, age:data.age, wish:data.wish }); }
             });
             this.form.wish = '';
           }catch(e){ this.error = e.message; }
