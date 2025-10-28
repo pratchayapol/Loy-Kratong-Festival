@@ -8,17 +8,21 @@ use Illuminate\Http\Request;
 class KrathongController extends Controller
 {
     // ชนิดกระทงที่เปิดให้เลือก
+    // ชนิดกระทงที่เปิดให้เลือก
     private array $types = [
-        'banana' => ['label' => 'ใบตอง', 'img' => '/images/krathongs/banana.png'],
-        'flower' => ['label' => 'ดอกไม้', 'img' => '/images/krathongs/flower.png'],
-        'candle' => ['label' => 'เทียน',   'img' => '/images/krathongs/candle.png'],
+        'banana' => ['label' => 'ใบตอง',   'img' => '/images/krathongs/banana.png'],
+        'banana' => ['label' => 'ต้นกล้วย',   'img' => '/images/krathongs/nana1.png'],
+        'flower' => ['label' => 'ดอกไม้',  'img' => '/images/krathongs/flower.png'],
+        'candle' => ['label' => 'เทียน',    'img' => '/images/krathongs/candle.png'],
         'eco'    => ['label' => 'รักษ์โลก', 'img' => '/images/krathongs/eco.png'],
+        'silver' => ['label' => 'กระทงเงิน', 'img' => '/images/krathongs/silver.png'],
+        'gold'   => ['label' => 'กระทงทอง', 'img' => '/images/krathongs/gold.png'],
     ];
 
     public function show()
     {
         // โหลดรายการล่าสุด 30 ชิ้นสำหรับปล่อยลอย
-        $recent = Krathong::latest()->take(30)->get(['id','type','nickname','age','wish','created_at']);
+        $recent = Krathong::latest()->take(30)->get(['id', 'type', 'nickname', 'age', 'wish', 'created_at']);
         return view('krathong', [
             'types' => $this->types,
             'recent' => $recent,
