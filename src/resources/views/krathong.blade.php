@@ -120,6 +120,20 @@
 
 <body x-data="{}" class="min-h-screen bg-slate-950 text-slate-100 font-display overflow-hidden">
 
+    <!-- ป้ายเชิญด้านบนตรงกลาง -->
+    <div class="fixed top-3 left-1/2 -translate-x-1/2 z-40 select-none">
+        <div
+            class="px-5 sm:px-7 py-2.5 sm:py-3 rounded-2xl border border-white/15 bg-white/10 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.35)] text-center">
+            <div
+                class="text-sm sm:text-base font-extrabold tracking-wide bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-transparent">
+                ลอยกระทงออนไลน์
+            </div>
+            <div class="mt-0.5 text-[11px] sm:text-xs text-slate-200/80">
+                ตั้งจิตอธิษฐาน แล้วปล่อยความกังวลให้ลอยไปกับสายน้ำ
+            </div>
+        </div>
+    </div>
+
     <!-- Alpine store -->
     <script>
         document.addEventListener('alpine:init', () => {
@@ -198,8 +212,10 @@
 
             <!-- ดาวระยิบ -->
             <div class="pointer-events-none absolute inset-0" x-data="{ stars: [] }" x-init="const count = Math.round(Math.min(180, 90 + window.innerWidth / 8));
-            for (let i = 0; i < count; i++) { const s = Math.random();
-                stars.push({ left: Math.random() * 100, top: Math.random() * 100, delay: Math.random() * 5, duration: 3 + Math.random() * 6, size: s > 0.92 ? 2.5 : (s > 0.75 ? 1.5 : 1), opacity: s > 0.85 ? 1 : 0.7 }); }">
+            for (let i = 0; i < count; i++) {
+                const s = Math.random();
+                stars.push({ left: Math.random() * 100, top: Math.random() * 100, delay: Math.random() * 5, duration: 3 + Math.random() * 6, size: s > 0.92 ? 2.5 : (s > 0.75 ? 1.5 : 1), opacity: s > 0.85 ? 1 : 0.7 });
+            }">
                 <template x-for="(s,i) in stars" :key="i">
                     <div class="absolute rounded-full bg-white animate-twinkle"
                         :style="`left:${s.left}%;top:${s.top}%;width:${s.size}px;height:${s.size}px;animation-delay:${s.delay}s;animation-duration:${s.duration}s;opacity:${s.opacity};box-shadow:0 0 ${s.size*3}px rgba(255,255,255,${s.opacity*0.9}),0 0 ${s.size*6}px rgba(200,220,255,${s.opacity*0.5})`">
@@ -208,10 +224,12 @@
             </div>
 
             <!-- ดาวพุ่ง -->
-            <div class="pointer-events-none absolute inset-0" x-data="{ shooting: [] }" x-init="const add = () => { const id = Date.now() + Math.random();
+            <div class="pointer-events-none absolute inset-0" x-data="{ shooting: [] }" x-init="const add = () => {
+                const id = Date.now() + Math.random();
                 shooting.push({ id, top: Math.random() * 40, left: 20 + Math.random() * 60, duration: 1.5 + Math.random() * 1 });
                 setTimeout(() => { shooting = shooting.filter(s => s.id !== id) }, 3000);
-                setTimeout(add, 8000 + Math.random() * 15000) };
+                setTimeout(add, 8000 + Math.random() * 15000)
+            };
             setTimeout(add, 3000);">
                 <template x-for="s in shooting" :key="s.id">
                     <div class="absolute w-1 h-1 bg-white rounded-full"
