@@ -625,18 +625,12 @@
         }
 
         function riverScene(types, recent) {
-            const WATER_TOP = 42;
-            const WATER_BAND = 30;
-
+            const WATER_TOP = 42,
+                WATER_BAND = 30;
             const DUR_INIT_MIN = 14,
                 DUR_INIT_MAX = 24;
             const DUR_LOOP_MIN = 12,
                 DUR_LOOP_MAX = 20;
-
-            // คิวเรียง "ใหม่→เก่า" + กันซ้ำด้วย id
-            const uniqRecent = Array.from(
-                new Map((recent || []).sort((a, b) => b.id - a.id).map(r => [r.id, r])).values()
-            );
 
             const typeImg = t => types?.[t]?.img || Object.values(types || {})[0]?.img || '';
 
@@ -656,14 +650,12 @@
                 }
                 return el.sheet;
             }
-
             const makeStyle = (dur, delay, top) => {
                 const name = `drift_${Math.random().toString(36).slice(2)}`;
                 const sheet = ensureKeyframeSheet();
                 sheet.insertRule(
                     `@keyframes ${name}{0%{left:-20%;opacity:0}10%{opacity:1}90%{opacity:1}100%{left:120%;opacity:0}}`,
-                    sheet.cssRules.length
-                );
+                    sheet.cssRules.length);
                 return `
       top:${top}%;
       left:-20%;
@@ -673,13 +665,13 @@
     `;
             };
 
-            const toItem = r => {
-                const dur = rnd(DUR_INIT_MIN, DUR_INIT_MAX);
-                const delay = rnd(0, 12);
-                const top = rnd(WATER_TOP + 6, WATER_TOP + WATER_BAND);
+            const toItem = (r, isInitial = false) => {
+                const dur = isInitial ? rnd(DUR_INIT_MIN, DUR_INIT_MAX) : rnd(DUR_LOOP_MIN, DUR_LOOP_MAX);
+                const delay = isInitial ? rnd(0, 12) : 0;
+                const top = rnd(WATER_TOP + 6, WATER_TOP + WATER_BAND + (isInitial ? 0 : 4));
                 return {
                     id: r.id,
-                    clientId: `srv_${r.id}_${Math.random().toString(36).slice(2)}`,
+                    clientId: `${isInitial ? 'srv' : 'cli'}_${r.id}_${Math.random().toString(36).slice(2)}`,
                     img: typeImg(r.type),
                     wish: `${r.nickname} (${r.age}) : ${r.wish}`,
                     style: makeStyle(dur, delay, top),
@@ -694,58 +686,44 @@
                 }, totalMs + 30);
             };
 
+            // uniq recent by id
+            const uniqRecent = Array.from(new Map((recent || []).map(r => [r.id, r])).values());
+
             return {
                 items: [],
-                // เซ็ตกันซ้ำจนกว่าจะรีเฟรช
-                seenIds: new Set(),
-                // คิวแสดงผลใหม่→เก่า
-                queue: uniqRecent,
-                recentPool: uniqRecent.slice(),
+                seenIds: new Set(), // กันซ้ำทั้งเซสชัน
+                recentPool: uniqRecent.slice(), // แหล่งข้อมูลทั้งหมดที่สุ่มได้
 
                 init() {
-                    // เติมชุดแรกจากบนสุดของคิว (ใหม่ก่อน) ไม่ซ้ำ
-                    const firstBatch = this.queue.slice(0, 24).filter(r => !this.seenIds.has(r.id));
-                    firstBatch.forEach(r => this._spawnInitial(r));
+                    // ยิงชุดแรกแบบ “สุ่มและไม่ซ้ำ”
+                    const pool = this.recentPool.filter(r => !this.seenIds.has(r.id));
+                    const initial = pool.sort(() => Math.random() - 0.5).slice(0, 24);
+                    for (const r of initial) this._spawn(r, true);
 
-                    // วนหยิบทีละตัวจากคิว ตามลำดับใหม่→เก่า
+                    // สุ่มเรื่อยๆจากที่ยังไม่เคยแสดง
                     const tick = () => {
-                        const next = this.queue.find(r => !this.seenIds.has(r.id));
-                        if (next) this.spawnFromRecord(next);
+                        const candidates = this.recentPool.filter(r => !this.seenIds.has(r.id));
+                        if (candidates.length) {
+                            const r = candidates[Math.floor(Math.random() * candidates.length)];
+                            this._spawn(r, false);
+                        }
                         __schedule(tick, rnd(4500, 7200));
                     };
                     __schedule(tick, 900);
                 },
 
-                _spawnInitial(r) {
+                _spawn(r, isInitial) {
                     if (this.seenIds.has(r.id)) return;
                     this.seenIds.add(r.id);
-                    const k = toItem(r);
-                    this.items.push(k);
+                    const k = toItem(r, isInitial);
+                    // ใส่หัวลิสต์ให้เห็นเด่นเมื่อมาใหม่
+                    this.items.unshift(k);
+                    if (this.items.length > 100) this.items.splice(100);
                     scheduleRemoval(this, k.clientId, k.__life);
                 },
 
-                spawnFromRecord(r) {
-                    if (this.seenIds.has(r.id)) return; // กันซ้ำ
-                    this.seenIds.add(r.id);
-
-                    const dur = rnd(DUR_LOOP_MIN, DUR_LOOP_MAX);
-                    const top = rnd(WATER_TOP + 8, WATER_TOP + WATER_BAND + 4);
-                    const clientId = `cli_${r.id}_${Math.random().toString(36).slice(2)}`;
-                    const k = {
-                        id: r.id,
-                        clientId,
-                        img: typeImg(r.type),
-                        wish: `${r.nickname} (${r.age}) : ${r.wish}`,
-                        style: makeStyle(dur, 0, top),
-                        __life: dur * 1000
-                    };
-                    this.items.unshift(k); // ใส่หัวลิสต์ให้รู้สึก "มาใหม่"
-                    if (this.items.length > 100) this.items.splice(100);
-                    scheduleRemoval(this, clientId, k.__life);
-                },
-
+                // เรียกตอนสร้างกระทงใหม่จากฟอร์ม -> โผล่ทันที และถูกกันซ้ำ
                 spawnNew(p) {
-                    // เพิ่มใหม่ให้เห็นทันที และกันซ้ำ
                     const r = {
                         id: Date.now(),
                         type: p.type,
@@ -753,13 +731,12 @@
                         age: p.age,
                         wish: p.wish
                     };
-                    // ดันเข้า pool และคิวไว้หัวตาราง
-                    this.recentPool.unshift(r);
-                    this.queue.unshift(r);
-                    this.spawnFromRecord(r);
+                    this.recentPool.unshift(r); // เพิ่มเข้าแหล่งสุ่ม
+                    this._spawn(r, false); // แสดงทันทีหนึ่งครั้ง
                 }
             };
         }
+
 
         function krathongForm() {
             return {
