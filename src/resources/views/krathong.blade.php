@@ -12,23 +12,18 @@
         extend: {
           fontFamily:{display:['Inter','ui-sans-serif','system-ui']},
           colors:{river1:'#0e3a5f',river2:'#0b2e4a',glass:'rgba(255,255,255,0.08)'},
-          boxShadow:{
-            glass:'0 25px 80px rgba(0,0,0,0.45)',
-            btn:'0 10px 30px rgba(34,211,238,0.35)'
-          },
+          boxShadow:{glass:'0 25px 80px rgba(0,0,0,0.45)',btn:'0 10px 30px rgba(34,211,238,0.35)'},
           keyframes:{
             floatY:{'0%,100%':{transform:'translateY(0)'},'50%':{transform:'translateY(-6px)'}},
             waves:{'0%':{transform:'translateX(0)'},'100%':{transform:'translateX(-50%)'}},
             overlayIn:{'0%':{opacity:0},'100%':{opacity:1}},
-            scaleIn:{'0%':{transform:'scale(.95)',opacity:0},'100%':{transform:'scale(1)',opacity:1}},
-            toastIn:{'0%':{transform:'translateY(12px)',opacity:0},'100%':{transform:'translateY(0)',opacity:1}},
+            scaleIn:{'0%':{transform:'scale(.96)',opacity:0},'100%':{transform:'scale(1)',opacity:1}}
           },
           animation:{
             floatY:'floatY 3.2s ease-in-out infinite',
             waves:'waves 18s linear infinite',
             overlayIn:'overlayIn .15s ease-out',
-            scaleIn:'scaleIn .18s ease-out',
-            toastIn:'toastIn .18s ease-out',
+            scaleIn:'scaleIn .18s ease-out'
           }
         }
       }
@@ -37,10 +32,19 @@
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script>const rnd=(min,max)=>Math.random()*(max-min)+min;</script>
   <style id="dyn-keyframes"></style>
+  <style>[x-cloak]{display:none !important}</style>
 </head>
-<body class="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100 font-display" x-data="{open:false}">
+<body class="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100 font-display">
+
+  <!-- Alpine store กลาง -->
+  <script>
+    document.addEventListener('alpine:init', () => {
+      Alpine.store('ui', { open:false });
+    });
+  </script>
+
   <!-- ปุ่มมุมซ้ายบน -->
-  <button @click="open=true"
+  <button @click="$store.ui.open=true"
           class="fixed left-4 top-4 z-40 inline-flex items-center gap-2 rounded-xl
                  bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-2.5 font-medium
                  shadow-btn hover:brightness-110 active:scale-[.99] focus:outline-none focus:ring-2 focus:ring-cyan-400/40">
@@ -49,16 +53,6 @@
     </svg>
     ลอยกระทงด้วย
   </button>
-
-  <!-- Toast -->
-  <div x-show="$store.toast?.msg" x-transition.opacity
-       x-data x-init="$store.toast={msg:'',ok:false,show(m,ok=true){this.msg=m;this.ok=ok;setTimeout(()=>this.msg='',2500)}}"
-       class="fixed inset-x-0 top-4 z-40 flex justify-center pointer-events-none">
-    <div x-show="$store.toast.msg" class="pointer-events-auto animate-toastIn rounded-xl border px-4 py-2 text-sm"
-         :class="$store.toast.ok ? 'bg-emerald-500/10 border-emerald-400/30 text-emerald-200' : 'bg-rose-500/10 border-rose-400/30 text-rose-200'">
-      <span x-text="$store.toast.msg"></span>
-    </div>
-  </div>
 
   <!-- ฉากสายน้ำ -->
   <main class="relative min-h-screen">
@@ -87,15 +81,14 @@
       <div class="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-slate-950/70 to-transparent"></div>
     </div>
 
-    <!-- ป้ายคำแนะนำ -->
     <div class="absolute right-4 bottom-4 text-slate-300/90 text-sm backdrop-blur-xl bg-glass border border-white/10 px-4 py-2 rounded-xl shadow-glass">
       ดับเบิลคลิกที่สายน้ำเพื่อปล่อยกระทงสุ่ม
     </div>
   </main>
 
   <!-- Modal ฟอร์ม -->
-  <div x-show="open" class="fixed inset-0 z-50" @keydown.escape.window="open=false" x-cloak>
-    <div class="absolute inset-0 bg-slate-950/70 animate-overlayIn"></div>
+  <div x-show="$store.ui.open" x-cloak class="fixed inset-0 z-50" @keydown.escape.window="$store.ui.open=false">
+    <div class="absolute inset-0 bg-slate-950/70 animate-overlayIn" @click="$store.ui.open=false"></div>
 
     <div class="absolute inset-0 grid place-items-center p-4">
       <div class="w-full max-w-xl animate-scaleIn backdrop-blur-2xl rounded-2xl border border-white/10 bg-glass shadow-glass"
@@ -105,32 +98,33 @@
             <h2 class="text-xl font-semibold">ลอยกระทง</h2>
             <p class="text-sm text-slate-300 mt-1">เลือกแบบ กรอกข้อมูล แล้วปล่อยลอยเลย</p>
           </div>
-          <button @click="$root.open=false" class="rounded-lg p-2 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-cyan-400/40">
+          <button @click="$store.ui.open=false" class="rounded-lg p-2 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-cyan-400/40">
             <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M6 18L18 6M6 6l12 12"/>
             </svg>
           </button>
         </div>
 
-        <form @submit.prevent="submit"
-              class="p-5 lg:p-6 space-y-5">
-          <!-- ชนิดกระทง -->
+        <form @submit.prevent="submit" class="p-5 lg:p-6 space-y-5">
           <div>
             <label class="text-sm font-medium">เลือกแบบกระทง</label>
             <div class="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
               @foreach($types as $key=>$t)
-              <label class="group relative cursor-pointer rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition ring-0 data-[checked=true]:ring-2 data-[checked=true]:ring-cyan-400/60 p-3 flex flex-col items-center gap-2"
-                     :data-checked="form.type==='{{ $key }}'">
+              <label
+                @click="form.type='{{ $key }}'"
+                class="group relative cursor-pointer rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition p-3 flex flex-col items-center gap-2"
+                :class="form.type==='{{ $key }}' ? 'ring-2 ring-cyan-400/60' : 'ring-0'">
                 <input class="sr-only" type="radio" name="type" x-model="form.type" value="{{ $key }}">
                 <img src="{{ $t['img'] }}" alt="{{ $t['label'] }}" class="w-12 h-12 drop-shadow" loading="lazy">
                 <span class="text-sm">{{ $t['label'] }}</span>
-                <span class="absolute -top-2 -right-2 hidden data-[checked=true]:inline-flex items-center justify-center w-6 h-6 rounded-full bg-cyan-500 text-white text-xs shadow">✓</span>
+                <span class="absolute -top-2 -right-2" :class="form.type==='{{ $key }}' ? 'inline-flex' : 'hidden'">
+                  <span class="w-6 h-6 rounded-full bg-cyan-500 text-white text-xs shadow grid place-items-center">✓</span>
+                </span>
               </label>
               @endforeach
             </div>
           </div>
 
-          <!-- ฟิลด์ -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="space-y-2">
               <label class="text-sm font-medium">ชื่อเล่น</label>
@@ -164,7 +158,7 @@
               </svg>
               ลอยเลย
             </button>
-            <button type="button" @click="$root.open=false"
+            <button type="button" @click="$store.ui.open=false"
                     class="rounded-xl border border-white/10 px-4 py-3 hover:bg-white/10">ปิด</button>
             <span x-text="ok" class="text-emerald-400 text-sm"></span>
             <span x-text="error" class="text-rose-400 text-sm"></span>
@@ -232,16 +226,15 @@
               throw new Error(msg);
             }
             const data = await res.json();
-            // Toast + spawn + ปิดโมดัล
-            window.Alpine.store('toast')?.show?.('ลอยแล้ว', true);
+            this.ok='ลอยแล้ว';
+            // spawn กระทงใหม่ในฉาก
             document.querySelectorAll('main [x-data]').forEach(el=>{
               const x = el._x_dataStack?.[0];
               if(x?.spawn){ x.spawn({ type:data.type, nickname:data.nickname, age:data.age, wish:data.wish }); }
             });
             this.form.wish='';
-            document.body.closest('[x-data]')?.__x?.$data.open = false;
+            Alpine.store('ui').open = false; // ปิดโมดัล
           }catch(e){
-            window.Alpine.store('toast')?.show?.(e.message, false);
             this.error=e.message;
           }
         }
