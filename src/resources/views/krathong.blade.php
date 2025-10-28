@@ -16,6 +16,14 @@
     <meta name="theme-color" content="#0b2e4a">
     <!-- Tailwind & Alpine -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .ribbon-black {
+            position: fixed;
+            right: 0;
+            top: 0;
+            z-index: 2568;
+        }
+    </style>
     <script>
         tailwind.config = {
             theme: {
@@ -126,7 +134,10 @@
 </head>
 
 <body x-data="{}" class="min-h-screen bg-slate-950 text-slate-100 font-display overflow-hidden">
-
+    <div class="ribbon-black">
+        <img src="https://roietonline.net/images/black-ribbon.png" alt="โบว์แสดงความอาลัย"
+            title="ปวงพสกนิกรชาวไทยน้อมสำนึกในพระมหากรุณาธิคุณตราบนิจนิรันดร์" class="img-responsive">
+    </div>
     <!-- ป้ายเชิญด้านบนตรงกลาง -->
     <div class="fixed top-3 left-1/2 -translate-x-1/2 z-40 select-none">
         <div
