@@ -230,23 +230,23 @@
           <div>
             <label class="text-sm font-semibold text-slate-200">เลือกแบบกระทง</label>
             <div class="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <template x-for="type in types" :key="type.key">
-                <label
-                  @click="form.type=type.key"
-                  class="group relative cursor-pointer rounded-2xl border border-white/10 bg-white/5 
-                         hover:bg-white/10 hover:border-cyan-400/40 hover:scale-105
-                         transition-all duration-300 p-3 sm:p-4 flex flex-col items-center gap-2"
-                  :class="form.type===type.key ? 'ring-2 ring-cyan-400/80 bg-cyan-500/10' : 'ring-0'">
-                  <input class="sr-only" type="radio" name="type" x-model="form.type" :value="type.key">
-                  <img :src="type.img" :alt="type.label" class="w-10 h-10 sm:w-12 sm:h-12 drop-shadow-lg" loading="lazy">
-                  <span class="text-xs sm:text-sm font-medium" x-text="type.label"></span>
-                  <span class="absolute -top-2 -right-2 transition-all duration-200" 
-                        :class="form.type===type.key ? 'scale-100 opacity-100' : 'scale-0 opacity-0'">
-                    <span class="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 
-                                 text-white text-xs shadow-lg grid place-items-center font-bold">✓</span>
-                  </span>
-                </label>
-              </template>
+              @foreach($types as $key=>$t)
+              <label
+                @click="form.type='{{ $key }}'"
+                class="group relative cursor-pointer rounded-2xl border border-white/10 bg-white/5 
+                       hover:bg-white/10 hover:border-cyan-400/40 hover:scale-105
+                       transition-all duration-300 p-3 sm:p-4 flex flex-col items-center gap-2"
+                :class="form.type==='{{ $key }}' ? 'ring-2 ring-cyan-400/80 bg-cyan-500/10' : 'ring-0'">
+                <input class="sr-only" type="radio" name="type" x-model="form.type" value="{{ $key }}">
+                <img src="{{ $t['img'] }}" alt="{{ $t['label'] }}" class="w-10 h-10 sm:w-12 sm:h-12 drop-shadow-lg" loading="lazy">
+                <span class="text-xs sm:text-sm font-medium">{{ $t['label'] }}</span>
+                <span class="absolute -top-2 -right-2 transition-all duration-200" 
+                      :class="form.type==='{{ $key }}' ? 'scale-100 opacity-100' : 'scale-0 opacity-0'">
+                  <span class="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 
+                               text-white text-xs shadow-lg grid place-items-center font-bold">✓</span>
+                </span>
+              </label>
+              @endforeach
             </div>
           </div>
 
