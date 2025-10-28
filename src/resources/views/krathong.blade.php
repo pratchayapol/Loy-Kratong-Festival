@@ -40,6 +40,7 @@
     }
   </script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style id="dyn-keyframes"></style>
   
   <style>
     [x-cloak]{display:none !important}
@@ -183,7 +184,7 @@
     </div>
 
     <!-- พื้นที่แสดงกระทง -->
-    <div class="absolute inset-x-0 bottom-0 h-[45%] overflow-hidden z-15" x-data="riverScene()">
+    <div class="absolute inset-x-0 bottom-0 h-[45%] overflow-hidden z-15" x-data="riverScene(mockTypes, mockRecent)">
       <template x-for="k in items" :key="k.clientId">
         <div class="absolute flex flex-col items-center krathong-item will-change-transform" :style="k.style">
           <!-- คำอธิษฐาน -->
@@ -376,120 +377,114 @@
   </div>
 
   <script>
-  function riverScene(){
-    const types = [
-      {key:'banana', label:'กระทงใบตอง', img:'https://img.icons8.com/color/96/lotus.png'},
-      {key:'bread', label:'กระทงขนมปัง', img:'https://img.icons8.com/color/96/bread.png'},
-      {key:'flower', label:'กระทงดอกไม้', img:'https://img.icons8.com/color/96/flower-bouquet.png'},
-      {key:'ice', label:'กระทงน้ำแข็ง', img:'https://img.icons8.com/color/96/snowflake.png'}
-    ];
+  const rnd=(min,max)=>Math.random()*(max-min)+min;
 
-    const DUR_MIN = 15;
-    const DUR_MAX = 25;
+  function riverScene(types, recent){
+    const DUR_INIT_MIN=12, DUR_INIT_MAX=20;
+    const DUR_LOOP_MIN=10, DUR_LOOP_MAX=16;
+    const DELAY_MAX=10;
 
-    const makeStyle = (dur, top) => {
-      const name = `drift_${Math.random().toString(36).slice(2)}`;
-      const sheet = document.getElementById('dyn-keyframes').sheet;
-      sheet.insertRule(`@keyframes ${name}{0%{left:-15%;opacity:0}5%{opacity:1}95%{opacity:1}100%{left:115%;opacity:0}}`, sheet.cssRules.length);
-      return `top:${top}%;animation:${name} ${dur}s linear forwards`;
+    // เรียงจากใหม่ไปเก่า แล้วสุ่ม 24 รายการ
+    const sorted = [...(recent||[])].sort((a,b)=>b.id-a.id);
+    const shuffled = sorted.slice(0,24).sort(()=>Math.random()-0.5);
+
+    const typeImg=t=>types?.[t]?.img || Object.values(types||{})[0]?.img || '';
+    const makeStyle=(dur,delay,top)=>{
+      const name=`drift_${Math.random().toString(36).slice(2)}`;
+      const sheet=document.getElementById('dyn-keyframes').sheet;
+      sheet.insertRule(`@keyframes ${name}{0%{left:-15%;opacity:0}3%{opacity:1}97%{opacity:1}100%{left:115%;opacity:0}}`,sheet.cssRules.length);
+      return `top:${top}%;animation:${name} ${dur}s linear ${delay}s forwards`;
     };
+    const toItem=r=>({
+      id:r.id,
+      clientId:`srv_${r.id}_${Math.random().toString(36).slice(2)}`,
+      img:typeImg(r.type),
+      wish:`${r.nickname} (${r.age}) : ${r.wish}`,
+      style:makeStyle(rnd(DUR_INIT_MIN,DUR_INIT_MAX), rnd(0,DELAY_MAX), rnd(8,88))
+    });
 
-    return {
-      items: [],
-      types: types,
-      
+    const initial=shuffled.map(toItem);
+
+    return{
+      items: initial,
+      recentPool: sorted,
       init(){
-        // สร้างกระทงใหม่เป็นระยะ
-        const tick = () => {
-          if(this.items.length < 15) {
-            this.spawnNew({
-              type: types[Math.floor(Math.random() * types.length)].key,
-              nickname: 'ผู้ใช้',
-              age: Math.floor(Math.random() * 50) + 10,
-              wish: 'ขอให้โชคดีตลอดปี'
-            });
+        const tick=()=>{
+          const pool=this.recentPool;
+          if(pool.length){
+            const visibleIds=new Set(this.items.map(i=>i.id));
+            const candidates=pool.filter(x=>!visibleIds.has(x.id));
+            if(candidates.length){
+              const r=candidates[Math.floor(Math.random()*candidates.length)];
+              this.spawnFromRecord(r);
+            }
           }
-          setTimeout(tick, Math.random() * 4000 + 3000);
+          setTimeout(tick, rnd(3500,6000));
         };
         setTimeout(tick, 1000);
       },
-
-      spawnNew(data){
-        const typeObj = this.types.find(t => t.key === data.type) || this.types[0];
-        const k = {
-          clientId: `k_${Date.now()}_${Math.random().toString(36).slice(2)}`,
-          img: typeObj.img,
-          wish: `${data.nickname} (${data.age}) : ${data.wish}`,
-          style: makeStyle(
-            Math.random() * (DUR_MAX - DUR_MIN) + DUR_MIN,
-            Math.random() * 70 + 15
-          )
+      spawnFromRecord(r){
+        const k={
+          id:r.id,
+          clientId:`cli_${r.id}_${Math.random().toString(36).slice(2)}`,
+          img:typeImg(r.type),
+          wish:`${r.nickname} (${r.age}) : ${r.wish}`,
+          style:makeStyle(rnd(DUR_LOOP_MIN,DUR_LOOP_MAX), 0, rnd(10,90))
         };
         this.items.push(k);
-        
-        // จำกัดจำนวนกระทงไม่เกิน 20 ตัว
-        if(this.items.length > 20) {
-          this.items.shift();
-        }
+        if(this.items.length>80) this.items.splice(0,this.items.length-80);
+      },
+      spawnNew(p){
+        const r={ id:Date.now(), type:p.type, nickname:p.nickname, age:p.age, wish:p.wish };
+        this.recentPool.unshift(r);
+        this.spawnFromRecord(r);
       }
     }
   }
 
   function krathongForm(){
+    const types = {
+      banana: {label:'กระทงใบตอง', img:'https://img.icons8.com/color/96/lotus.png'},
+      bread: {label:'กระทงขนมปัง', img:'https://img.icons8.com/color/96/bread.png'},
+      flower: {label:'กระทงดอกไม้', img:'https://img.icons8.com/color/96/flower-bouquet.png'},
+      ice: {label:'กระทงน้ำแข็ง', img:'https://img.icons8.com/color/96/snowflake.png'}
+    };
+
     return {
-      types: [
-        {key:'banana', label:'กระทงใบตอง', img:'https://img.icons8.com/color/96/lotus.png'},
-        {key:'bread', label:'กระทงขนมปัง', img:'https://img.icons8.com/color/96/bread.png'},
-        {key:'flower', label:'กระทงดอกไม้', img:'https://img.icons8.com/color/96/flower-bouquet.png'},
-        {key:'ice', label:'กระทงน้ำแข็ง', img:'https://img.icons8.com/color/96/snowflake.png'}
-      ],
+      types: Object.entries(types).map(([key,val])=>({key,...val})),
       form:{ type:'banana', nickname:'', age:'', wish:'' },
-      error:'', 
-      ok:'',
-      
+      error:'', ok:'',
       async submit(){
-        this.error=''; 
-        this.ok='';
-        
+        this.error=''; this.ok='';
         try{
-          // จำลองการบันทึก (ในโปรเจคจริงจะส่งไป backend)
-          await new Promise(resolve => setTimeout(resolve, 500));
-          
+          // จำลองการบันทึก
+          await new Promise(resolve=>setTimeout(resolve,500));
           this.ok='ลอยแล้ว ✨';
-          
-          // ส่งข้อมูลไปยัง riverScene เพื่อแสดงกระทง
-          const mainElement = document.querySelector('main [x-data]');
-          if(mainElement && mainElement._x_dataStack) {
-            const sceneData = mainElement._x_dataStack[0];
-            if(sceneData && sceneData.spawnNew) {
-              sceneData.spawnNew({
-                type: this.form.type,
-                nickname: this.form.nickname,
-                age: this.form.age,
-                wish: this.form.wish
-              });
-            }
-          }
-          
-          // รีเซ็ตฟอร์ม
-          this.form.wish = '';
-          this.form.nickname = '';
-          this.form.age = '';
-          
-          setTimeout(() => {
-            Alpine.store('ui').open = false;
-            this.ok = '';
+          const scene=document.querySelector('main [x-data]');
+          const api=scene?._x_dataStack?.[0];
+          api?.spawnNew?.(this.form);
+          this.form.wish='';
+          setTimeout(()=>{
+            Alpine.store('ui').open=false;
+            this.ok='';
           }, 1500);
-          
-        } catch(e) { 
-          this.error = e.message || 'เกิดข้อผิดพลาด'; 
-        }
+        }catch(e){ this.error=e.message; }
       }
     }
   }
-</script>
 
-<style id="dyn-keyframes"></style>
+  // ข้อมูลจำลอง
+  const mockTypes = {
+    banana: {label:'กระทงใบตอง', img:'https://img.icons8.com/color/96/lotus.png'},
+    bread: {label:'กระทงขนมปัง', img:'https://img.icons8.com/color/96/bread.png'},
+    flower: {label:'กระทงดอกไม้', img:'https://img.icons8.com/color/96/flower-bouquet.png'},
+    ice: {label:'กระทงน้ำแข็ง', img:'https://img.icons8.com/color/96/snowflake.png'}
+  };
 
-</body>
-</html>
+  const mockRecent = [
+    {id:1,type:'banana',nickname:'สมชาย',age:25,wish:'ขอให้โชคดีตลอดปี'},
+    {id:2,type:'flower',nickname:'สมหญิง',age:22,wish:'ขอให้ครอบครัวมีความสุข'},
+    {id:3,type:'bread',nickname:'นิด',age:30,wish:'ขอให้งานราบรื่น'},
+    {id:4,type:'ice',nickname:'แอน',age:28,wish:'ขอให้สุขภาพแข็งแรง'},
+    {id:5,type:'banana',nickname:'บอล',age:35,wish:'ขอให้ธุรกิจเจริญรุ่งเรือง'}
+  ]
