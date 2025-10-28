@@ -109,6 +109,7 @@
             <span x-text="ok" class="text-emerald-400 text-sm"></span>
             <span x-text="error" class="text-rose-400 text-sm"></span>
           </div>
+          @csrf
         </form>
 
         <div class="px-5 lg:px-6 py-4 border-t border-white/10 text-sm text-slate-300">
