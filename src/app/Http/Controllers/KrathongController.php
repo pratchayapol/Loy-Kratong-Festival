@@ -11,7 +11,7 @@ class KrathongController extends Controller
     // ชนิดกระทงที่เปิดให้เลือก
     private array $types = [
         'banana' => ['label' => 'ใบตอง',   'img' => '/images/krathongs/banana.png'],
-        'banana' => ['label' => 'ต้นกล้วย',   'img' => '/images/krathongs/nana1.png'],
+        'banana1' => ['label' => 'ต้นกล้วย',   'img' => '/images/krathongs/nana1.png'],
         'flower' => ['label' => 'ดอกไม้',  'img' => '/images/krathongs/flower.png'],
         'candle' => ['label' => 'เทียน',    'img' => '/images/krathongs/candle.png'],
         'eco'    => ['label' => 'รักษ์โลก', 'img' => '/images/krathongs/eco.png'],
