@@ -89,6 +89,21 @@
     <span class="sm:hidden">ลอย</span>
   </button>
 
+  <!-- ปุ่มเกี่ยวกับ (ล่างขวา) -->
+  <button @click="$store.ui.aboutOpen=true"
+          class="fixed right-4 bottom-4 z-40 w-12 h-12 rounded-full
+                 bg-gradient-to-br from-purple-500 to-pink-600 
+                 shadow-lg hover:shadow-purple-500/50 hover:scale-110
+                 active:scale-100 transition-all duration-300
+                 focus:outline-none focus:ring-2 focus:ring-purple-400/50
+                 flex items-center justify-center group"
+          title="เกี่ยวกับ">
+    <svg xmlns="http://www.w3.org/2000/svg" class="size-6 group-hover:rotate-12 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <circle cx="12" cy="12" r="10" stroke-width="2"/>
+      <path d="M12 16v-4M12 8h.01" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </button>
+
   <!-- ฉากสายน้ำ -->
   <main class="relative min-h-screen">
     <div class="absolute inset-0 bg-gradient-to-b from-river1 to-river2"></div>
@@ -115,6 +130,25 @@
                                 radial-gradient(circle at 95% 65%, rgba(255,255,255,.16) 0 1px, transparent 2px),
                                 radial-gradient(circle at 40% 70%, rgba(255,255,255,.19) 0 1.5px, transparent 2px);
                 background-size: 100% 100%;"></div>
+
+    <!-- ดาวระยิบระยับแบบ animated -->
+    <div class="pointer-events-none absolute inset-0" x-data="{stars:[]}" x-init="
+      for(let i=0;i<120;i++){
+        stars.push({
+          left:Math.random()*100,
+          top:Math.random()*75,
+          delay:Math.random()*4,
+          duration:2+Math.random()*3,
+          size:Math.random()>0.7?2:1
+        })
+      }
+    ">
+      <template x-for="(s,i) in stars" :key="i">
+        <div class="absolute rounded-full bg-white animate-twinkle" 
+             :style="`left:${s.left}%;top:${s.top}%;width:${s.size}px;height:${s.size}px;animation-delay:${s.delay}s;animation-duration:${s.duration}s;box-shadow:0 0 ${s.size*2}px rgba(255,255,255,0.8)`">
+        </div>
+      </template>
+    </div>
 
     <!-- คลื่นน้ำ + กระทง (สุ่มแสดงอัตโนมัติ) -->
     <div class="absolute inset-0 overflow-hidden" x-data="riverScene(@js($types), @js($recent))">
@@ -145,8 +179,8 @@
   <div x-show="$store.ui.open" x-cloak class="fixed inset-0 z-50" @keydown.escape.window="$store.ui.open=false">
     <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity" @click="$store.ui.open=false"></div>
 
-    <div class="absolute inset-0 grid place-items-center p-4 sm:p-6" @click.stop>
-      <div class="w-full max-w-xl modal-enter backdrop-blur-2xl rounded-3xl border border-white/20 bg-slate-900/50 shadow-glass"
+    <div class="absolute inset-0 flex items-center justify-center p-4 sm:p-6 overflow-y-auto" @click.stop>
+      <div class="w-full max-w-xl modal-enter backdrop-blur-2xl rounded-3xl border border-white/20 bg-slate-900/50 shadow-glass my-8"
            x-data="krathongForm()">
         <div class="flex items-start justify-between p-5 sm:p-6 border-b border-white/10">
           <div>
@@ -240,6 +274,78 @@
             <span x-show="error" x-text="error" class="text-rose-400 text-sm font-semibold"></span>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal เกี่ยวกับ -->
+  <div x-show="$store.ui.aboutOpen" x-cloak class="fixed inset-0 z-50" @keydown.escape.window="$store.ui.aboutOpen=false">
+    <div class="absolute inset-0 bg-slate-950/85 backdrop-blur-md transition-opacity" @click="$store.ui.aboutOpen=false"></div>
+
+    <div class="absolute inset-0 flex items-center justify-center p-4" @click.stop>
+      <div class="w-full max-w-md modal-enter backdrop-blur-2xl rounded-3xl border border-purple-400/30 bg-gradient-to-br from-slate-900/80 to-purple-900/30 shadow-glass">
+        <div class="flex items-start justify-between p-6 border-b border-white/10">
+          <div>
+            <h2 class="text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-500 bg-clip-text text-transparent">
+              เกี่ยวกับ
+            </h2>
+          </div>
+          <button @click="$store.ui.aboutOpen=false" 
+                  class="rounded-xl p-2 hover:bg-white/10 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="p-6 space-y-6">
+          <!-- ชื่อโปรเจค -->
+          <div class="text-center space-y-3">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-purple-600 shadow-lg mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.5 12a7.5 7.5 0 0015 0m-15 0a7.5 7.5 0 0115 0M12 3v9"/>
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-white">ลอยกระทงออนไลน์</h3>
+            <p class="text-sm text-slate-300">ระบบลอยกระทงออนไลน์ เพื่อส่งต่อความปรารถนาดีในวันลอยกระทง</p>
+          </div>
+
+          <div class="h-px bg-gradient-to-r from-transparent via-purple-400/30 to-transparent"></div>
+
+          <!-- ข้อมูลนักพัฒนา -->
+          <div class="space-y-4">
+            <div class="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+              <div class="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+              </div>
+              <div class="flex-1">
+                <div class="text-xs text-slate-400 mb-0.5">นักพัฒนา</div>
+                <div class="font-semibold text-white">นายปรัชญาพล จำปาลาด</div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10">
+              <div class="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="8" y1="2" x2="8" y2="6" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"/>
+                </svg>
+              </div>
+              <div class="flex-1">
+                <div class="text-xs text-slate-400 mb-0.5">เวอร์ชัน</div>
+                <div class="font-semibold text-white">1.0.0</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-center pt-2">
+            <p class="text-xs text-slate-400">© 2024 สงวนลิขสิทธิ์</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
