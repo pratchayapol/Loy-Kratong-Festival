@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ลอยกระทงออนไลน์</title>
   <meta name="csrf-token" content="{{ csrf_token() }}">
+
+  <!-- Tailwind & Alpine -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -16,9 +18,13 @@
           keyframes:{
             floatY:{'0%,100%':{transform:'translateY(0)'},'50%':{transform:'translateY(-6px)'}},
             waves:{'0%':{transform:'translateX(0)'},'100%':{transform:'translateX(-50%)'}},
-            sway:{'0%,100%':{transform:'translateX(0) rotate(0deg)'},'25%':{transform:'translateX(-10px) rotate(-2deg)'},'75%':{transform:'translateX(10px) rotate(2deg)'}},
-            twinkle:{'0%,100%':{opacity:'0.3',transform:'scale(1)'},'50%':{opacity:'1',transform:'scale(1.2)'}},
-            moonGlow:{'0%,100%':{boxShadow:'0 0 50px rgba(255,244,200,0.5), 0 0 90px rgba(255,244,200,0.25)'},'50%':{boxShadow:'0 0 70px rgba(255,244,200,0.7), 0 0 130px rgba(255,244,200,0.35)'}}
+            sway:{'0%,100%':{transform:'translateX(0) rotate(0deg)'},
+                  '25%':{transform:'translateX(-10px) rotate(-2deg)'},
+                  '75%':{transform:'translateX(10px) rotate(2deg)'}},
+            twinkle:{'0%,100%':{opacity:'0.3',transform:'scale(1)'},
+                     '50%':{opacity:'1',transform:'scale(1.2)'}},
+            moonGlow:{'0%,100%':{boxShadow:'0 0 50px rgba(255,244,200,0.5), 0 0 90px rgba(255,244,200,0.25)'},
+                      '50%':{boxShadow:'0 0 70px rgba(255,244,200,0.7), 0 0 130px rgba(255,244,200,0.35)'}}
           },
           animation:{
             floatY:'floatY 3.2s ease-in-out infinite',
@@ -32,40 +38,19 @@
     }
   </script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <!-- util -->
   <script>const rnd=(min,max)=>Math.random()*(max-min)+min;</script>
+
+  <!-- keyframes runtime -->
   <style id="dyn-keyframes"></style>
-  
+
   <style>
-    
     [x-cloak]{display:none !important}
-    
-    .star {
-      position: absolute;
-      width: 2px;
-      height: 2px;
-      background: white;
-      border-radius: 50%;
-      box-shadow: 0 0 3px rgba(255,255,255,0.8);
-    }
-    
-    .krathong-item {
-      animation: floatY 3.2s ease-in-out infinite, sway 5s ease-in-out infinite;
-    }
-    
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px) scale(0.95);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-    }
-    
-    .modal-enter {
-      animation: slideUp 0.3s ease-out;
-    }
+    .star{position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;box-shadow:0 0 3px rgba(255,255,255,.8)}
+    .krathong-item{animation:floatY 3.2s ease-in-out infinite, sway 5s ease-in-out infinite}
+    @keyframes slideUp{from{opacity:0;transform:translateY(30px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+    .modal-enter{animation:slideUp .3s ease-out}
   </style>
 </head>
 <body x-data="{}" class="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100 font-display overflow-hidden">
@@ -108,40 +93,25 @@
 
   <!-- ฉากสายน้ำ -->
   <main class="relative min-h-screen">
-    <div class="absolute inset-0 bg-gradient-to-b from-river1 to-river2"></div>
+    <!-- ท้องฟ้าไล่น้ำเงิน + วินเย็ต -->
+    <div class="absolute inset-0 bg-gradient-to-b from-[#091826] via-[#0c2236] to-[#0b2e4a]"></div>
+    <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.06),transparent_60%)] mix-blend-soft-light"></div>
 
-    <!-- พระจันทร์ -->
+    <!-- พระจันทร์ (เรืองแสงนุ่ม ๆ) -->
     <div class="absolute top-[8%] right-[10%] w-16 h-16 sm:w-20 sm:h-20 rounded-full 
                 bg-gradient-to-br from-yellow-50 via-yellow-100 to-yellow-200
-                animate-moonGlow pointer-events-none z-10 opacity-90"></div>
+                animate-moonGlow pointer-events-none z-10 opacity-90 shadow-[0_0_40px_rgba(255,244,200,0.6)]"></div>
 
-    <!-- ดาวระยิบระยับ (pattern แบบเดิม) -->
-    <div class="pointer-events-none absolute inset-0 opacity-40"
-         style="background-image: radial-gradient(circle at 15% 8%, rgba(255,255,255,.25) 0 1.5px, transparent 2px),
-                                radial-gradient(circle at 35% 15%, rgba(255,255,255,.18) 0 1px, transparent 2px),
-                                radial-gradient(circle at 75% 12%, rgba(255,255,255,.22) 0 1.5px, transparent 2px),
-                                radial-gradient(circle at 85% 25%, rgba(255,255,255,.15) 0 1px, transparent 2px),
-                                radial-gradient(circle at 25% 30%, rgba(255,255,255,.2) 0 1px, transparent 2px),
-                                radial-gradient(circle at 60% 8%, rgba(255,255,255,.17) 0 1px, transparent 2px),
-                                radial-gradient(circle at 90% 40%, rgba(255,255,255,.19) 0 1px, transparent 2px),
-                                radial-gradient(circle at 45% 35%, rgba(255,255,255,.16) 0 1px, transparent 2px),
-                                radial-gradient(circle at 10% 45%, rgba(255,255,255,.21) 0 1.5px, transparent 2px),
-                                radial-gradient(circle at 55% 50%, rgba(255,255,255,.14) 0 1px, transparent 2px),
-                                radial-gradient(circle at 70% 55%, rgba(255,255,255,.18) 0 1px, transparent 2px),
-                                radial-gradient(circle at 20% 60%, rgba(255,255,255,.2) 0 1px, transparent 2px),
-                                radial-gradient(circle at 95% 65%, rgba(255,255,255,.16) 0 1px, transparent 2px),
-                                radial-gradient(circle at 40% 70%, rgba(255,255,255,.19) 0 1.5px, transparent 2px);
-                background-size: 100% 100%;"></div>
-
-    <!-- ดาวระยิบระยับแบบ animated -->
+    <!-- ดาวระยิบระยับแบบ dynamic (แทน pattern เดิม) -->
     <div class="pointer-events-none absolute inset-0" x-data="{stars:[]}" x-init="
-      for(let i=0;i<120;i++){
+      const count = Math.round(Math.min(140, 60 + window.innerWidth/12));
+      for(let i=0;i<count;i++){
         stars.push({
           left:Math.random()*100,
           top:Math.random()*75,
           delay:Math.random()*4,
           duration:2+Math.random()*3,
-          size:Math.random()>0.7?2:1
+          size:Math.random()>0.75?2:1
         })
       }
     ">
@@ -152,13 +122,14 @@
       </template>
     </div>
 
-    <!-- คลื่นน้ำ + กระทง (สุ่มแสดงอัตโนมัติ) -->
-    <div class="absolute inset-0 overflow-hidden" x-data="riverScene(@js($types), @js($recent))">
-      <!-- คลื่นน้ำ -->
-      <div class="absolute left-0 w-[200%] h-28 top-[12%] opacity-30 blur-2xl bg-[radial-gradient(ellipse_at_center,_white_0%,_transparent_60%)] animate-waves"></div>
-      <div class="absolute left-0 w-[200%] h-28 top-[44%] opacity-25 blur-2xl bg-[radial-gradient(ellipse_at_center,_white_0%,_transparent_60%)] animate-[waves_22s_linear_infinite]"></div>
-      <div class="absolute left-0 w-[200%] h-28 top-[72%] opacity-20 blur-2xl bg-[radial-gradient(ellipse_at_center,_white_0%,_transparent_60%)] animate-[waves_26s_linear_infinite]"></div>
+    <!-- ผิวน้ำไล่เลเยอร์ + คลื่น -->
+    <div class="absolute inset-0 bg-gradient-to-b from-river1/80 via-river1 to-river2"></div>
+    <div class="absolute left-0 w-[220%] h-28 top-[18%] opacity-30 blur-2xl bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,.9)_0%,_transparent_60%)] animate-waves"></div>
+    <div class="absolute left-0 w-[220%] h-28 top-[46%] opacity-25 blur-2xl bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,.85)_0%,_transparent_60%)] animate-[waves_22s_linear_infinite]"></div>
+    <div class="absolute left-0 w-[220%] h-28 top-[74%] opacity-20 blur-2xl bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,.8)_0%,_transparent_60%)] animate-[waves_26s_linear_infinite]"></div>
 
+    <!-- กระทง -->
+    <div class="absolute inset-0 overflow-hidden" x-data="riverScene(@js($types), @js($recent))" x-init="init()">
       <template x-for="k in items" :key="k.clientId">
         <div class="absolute flex flex-col items-center krathong-item will-change-transform" :style="k.style">
           <div class="px-3 py-2 rounded-2xl text-xs sm:text-sm max-w-[220px] sm:max-w-[280px] 
@@ -173,6 +144,7 @@
         </div>
       </template>
 
+      <!-- เงาคลื่นท้ายน้ำ -->
       <div class="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-slate-950/80 via-slate-950/40 to-transparent"></div>
     </div>
   </main>
@@ -301,7 +273,6 @@
         </div>
 
         <div class="p-6 space-y-6">
-          <!-- ชื่อโปรเจค -->
           <div class="text-center space-y-3">
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-purple-600 shadow-lg mb-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="size-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -314,7 +285,6 @@
 
           <div class="h-px bg-gradient-to-r from-transparent via-purple-400/30 to-transparent"></div>
 
-          <!-- ข้อมูลนักพัฒนา -->
           <div class="space-y-4">
             <div class="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
               <div class="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg">
@@ -355,29 +325,68 @@
   <script>
   const readCookie = n => decodeURIComponent((document.cookie.split('; ').find(x=>x.startsWith(n+'='))||'').split('=')[1]||'');
 
+  // เก็บ timer ไว้ล้าง กันค้างเวลาปิด/รีเฟรช
+  const __timers = new Set();
+  const __schedule = (fn, ms) => { const t = setTimeout(fn, ms); __timers.add(t); return t; };
+  const __clearAll = () => { for (const t of __timers) clearTimeout(t); __timers.clear(); };
+  window.addEventListener('beforeunload', __clearAll);
+
+  function ensureKeyframeSheet() {
+    let el = document.getElementById('dyn-keyframes');
+    if (!el) {
+      el = document.createElement('style');
+      el.id = 'dyn-keyframes';
+      document.head.appendChild(el);
+    }
+    // ถ้ายังไม่มี sheet (บางเบราว์เซอร์), สร้างใหม่
+    if (!el.sheet) {
+      const tmp = document.createElement('style');
+      document.head.appendChild(tmp);
+      const sheet = tmp.sheet;
+      document.head.removeChild(tmp);
+      return sheet;
+    }
+    return el.sheet;
+  }
+
   function riverScene(types, recent){
-    // เร่งความเร็ว: ลดช่วงเวลาเคลื่อน
     const DUR_INIT_MIN=12, DUR_INIT_MAX=20;
     const DUR_LOOP_MIN=10, DUR_LOOP_MAX=16;
     const DELAY_MAX=10;
 
-    // สุ่มชุดเริ่มต้นจากฐานข้อมูล
     const shuffled=[...(recent||[])].sort(()=>Math.random()-0.5).slice(0,24);
 
     const typeImg=t=>types?.[t]?.img || Object.values(types||{})[0]?.img || '';
     const makeStyle=(dur,delay,top)=>{
       const name=`drift_${Math.random().toString(36).slice(2)}`;
-      const sheet=document.getElementById('dyn-keyframes').sheet;
-      sheet.insertRule(`@keyframes ${name}{0%{left:-15%;opacity:0}3%{opacity:1}97%{opacity:1}100%{left:115%;opacity:0}}`,sheet.cssRules.length);
-      return `top:${top}%;animation:${name} ${dur}s linear ${delay}s forwards`;
+      const sheet = ensureKeyframeSheet();
+      sheet.insertRule(`@keyframes ${name}{0%{left:-20%;opacity:0}10%{opacity:1}90%{opacity:1}100%{left:120%;opacity:0}}`,sheet.cssRules.length);
+      return `top:${top}%;left:-20%;animation:${name} ${dur}s linear ${delay}s forwards`;
     };
-    const toItem=r=>({
-      id:r.id,
-      clientId:`srv_${r.id}_${Math.random().toString(36).slice(2)}`,
-      img:typeImg(r.type),
-      wish:`${r.nickname} (${r.age}) : ${r.wish}`,
-      style:makeStyle(rnd(DUR_INIT_MIN,DUR_INIT_MAX), rnd(0,DELAY_MAX), rnd(8,88))
-    });
+
+    // เมื่อแอนิเมชันของ item นั้นจบ ให้เอาออกจาก items กัน DOM ค้าง
+    const scheduleRemoval = (vm, clientId, totalMs) => {
+      __schedule(() => {
+        const idx = vm.items.findIndex(x => x.clientId === clientId);
+        if (idx > -1) vm.items.splice(idx, 1);
+      }, totalMs);
+    };
+
+    const toItem=r=>{
+      const dur = rnd(DUR_INIT_MIN,DUR_INIT_MAX);
+      const delay = rnd(0,DELAY_MAX);
+      const top = rnd(8,88);
+      const clientId=`srv_${r.id}_${Math.random().toString(36).slice(2)}`;
+      const style = makeStyle(dur, delay, top);
+      return {
+        id:r.id,
+        clientId,
+        img:typeImg(r.type),
+        wish:`${r.nickname} (${r.age}) : ${r.wish}`,
+        style,
+        __life: (dur+delay)*1000
+      };
+    };
 
     const initial=shuffled.map(toItem);
 
@@ -385,6 +394,9 @@
       items: initial,
       recentPool: recent||[],
       init(){
+        // ตั้งเวลาลบ initial ทิ้งหลังจบแอนิเมชัน
+        this.items.forEach(it => scheduleRemoval(this, it.clientId, it.__life));
+
         // ปล่อยกระทงจากฐานข้อมูลต่อเนื่อง โดย "ไม่ซ้ำกับที่กำลังแสดงอยู่"
         const tick=()=>{
           const pool=this.recentPool;
@@ -396,20 +408,27 @@
               this.spawnFromRecord(r);
             }
           }
-          setTimeout(tick, rnd(3500,6000));
+          __schedule(tick, rnd(3500,6000));
         };
-        setTimeout(tick, 1000);
+        __schedule(tick, 1000);
       },
       spawnFromRecord(r){
+        const dur = rnd(DUR_LOOP_MIN,DUR_LOOP_MAX);
+        const delay = 0;
+        const top = rnd(10,90);
+        const clientId=`cli_${r.id}_${Math.random().toString(36).slice(2)}`;
         const k={
           id:r.id,
-          clientId:`cli_${r.id}_${Math.random().toString(36).slice(2)}`,
+          clientId,
           img:typeImg(r.type),
           wish:`${r.nickname} (${r.age}) : ${r.wish}`,
-          style:makeStyle(rnd(DUR_LOOP_MIN,DUR_LOOP_MAX), 0, rnd(10,90))
+          style:makeStyle(dur, delay, top),
+          __life:(dur+delay)*1000
         };
         this.items.push(k);
         if(this.items.length>80) this.items.splice(0,this.items.length-80);
+        // ลบหลังวิ่งครบ (กันค้าง)
+        scheduleRemoval(this, clientId, k.__life);
       },
       // ใช้หลังบันทึกใหม่สำเร็จ
       spawnNew(p){
@@ -444,6 +463,7 @@
           }
           const data=await res.json();
           this.ok='ลอยแล้ว ✨';
+          // ดันกระทงใหม่เข้า scene ทันที
           const scene=document.querySelector('main [x-data]');
           const api=scene?._x_dataStack?.[0];
           api?.spawnNew?.(data);
@@ -456,7 +476,7 @@
       }
     }
   }
-</script>
+  </script>
 
 </body>
 </html>
