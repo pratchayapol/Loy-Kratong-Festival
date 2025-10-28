@@ -15,15 +15,11 @@
           boxShadow:{glass:'0 25px 80px rgba(0,0,0,0.45)',btn:'0 10px 30px rgba(34,211,238,0.35)'},
           keyframes:{
             floatY:{'0%,100%':{transform:'translateY(0)'},'50%':{transform:'translateY(-6px)'}},
-            waves:{'0%':{transform:'translateX(0)'},'100%':{transform:'translateX(-50%)'}},
-            overlayIn:{'0%':{opacity:0},'100%':{opacity:1}},
-            scaleIn:{'0%':{transform:'scale(.96)',opacity:0},'100%':{transform:'scale(1)',opacity:1}}
+            waves:{'0%':{transform:'translateX(0)'},'100%':{transform:'translateX(-50%)'}}
           },
           animation:{
             floatY:'floatY 3.2s ease-in-out infinite',
-            waves:'waves 18s linear infinite',
-            overlayIn:'overlayIn .15s ease-out',
-            scaleIn:'scaleIn .18s ease-out'
+            waves:'waves 18s linear infinite'
           }
         }
       }
@@ -34,9 +30,9 @@
   <style id="dyn-keyframes"></style>
   <style>[x-cloak]{display:none !important}</style>
 </head>
-<body class="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100 font-display">
+<body x-data="{}" class="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100 font-display">
 
-  <!-- Alpine store กลาง -->
+  <!-- Alpine store -->
   <script>
     document.addEventListener('alpine:init', () => {
       Alpine.store('ui', { open:false });
@@ -65,8 +61,8 @@
                                 radial-gradient(circle at 60% 80%, rgba(255,255,255,.15) 0 1px, transparent 2px);
                 background-size: 160px 160px, 200px 200px, 180px 180px;"></div>
 
-    <!-- คลื่นน้ำ + กระทง -->
-    <div class="absolute inset-0 overflow-hidden" x-data="riverScene(@js($types), @js($recent))" @dblclick="spawnRandom()">
+    <!-- คลื่นน้ำ + กระทง (สุ่มแสดงอัตโนมัติ) -->
+    <div class="absolute inset-0 overflow-hidden" x-data="riverScene(@js($types), @js($recent))">
       <div class="absolute left-0 w-[200%] h-28 top-[12%] opacity-30 blur-2xl bg-[radial-gradient(ellipse_at_center,_white_0%,_transparent_60%)] animate-waves"></div>
       <div class="absolute left-0 w-[200%] h-28 top-[44%] opacity-25 blur-2xl bg-[radial-gradient(ellipse_at_center,_white_0%,_transparent_60%)] animate-[waves_22s_linear_infinite]"></div>
       <div class="absolute left-0 w-[200%] h-28 top-[72%] opacity-20 blur-2xl bg-[radial-gradient(ellipse_at_center,_white_0%,_transparent_60%)] animate-[waves_26s_linear_infinite]"></div>
@@ -80,18 +76,14 @@
 
       <div class="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-slate-950/70 to-transparent"></div>
     </div>
-
-    <div class="absolute right-4 bottom-4 text-slate-300/90 text-sm backdrop-blur-xl bg-glass border border-white/10 px-4 py-2 rounded-xl shadow-glass">
-      ดับเบิลคลิกที่สายน้ำเพื่อปล่อยกระทงสุ่ม
-    </div>
   </main>
 
   <!-- Modal ฟอร์ม -->
   <div x-show="$store.ui.open" x-cloak class="fixed inset-0 z-50" @keydown.escape.window="$store.ui.open=false">
-    <div class="absolute inset-0 bg-slate-950/70 animate-overlayIn" @click="$store.ui.open=false"></div>
+    <div class="absolute inset-0 bg-slate-950/70" @click="$store.ui.open=false"></div>
 
-    <div class="absolute inset-0 grid place-items-center p-4">
-      <div class="w-full max-w-xl animate-scaleIn backdrop-blur-2xl rounded-2xl border border-white/10 bg-glass shadow-glass"
+    <div class="absolute inset-0 grid place-items-center p-4" @click.stop>
+      <div class="w-full max-w-xl animate-[scaleIn_.18s_ease-out] backdrop-blur-2xl rounded-2xl border border-white/10 bg-glass shadow-glass"
            x-data="krathongForm()">
         <div class="flex items-start justify-between p-5 lg:p-6 border-b border-white/10">
           <div>
@@ -172,6 +164,9 @@
     const readCookie = n => decodeURIComponent((document.cookie.split('; ').find(x=>x.startsWith(n+'='))||'').split('=')[1]||'');
 
     function riverScene(types, recent){
+      // สุ่มลำดับเริ่มต้นจากฐานข้อมูล
+      const shuffled = [...(recent||[])].sort(()=>Math.random()-0.5).slice(0, 24);
+
       const typeImg=(t)=>types?.[t]?.img || Object.values(types||{})[0]?.img || '';
       const makeStyle=(dur,delay,top)=>{
         const name=`drift_${Math.random().toString(36).slice(2)}`;
@@ -179,22 +174,42 @@
         sheet.insertRule(`@keyframes ${name}{0%{transform:translateX(-12%)}100%{transform:translateX(112%)}}`,sheet.cssRules.length);
         return `top:${top}%;left:-12%;animation:${name} ${dur}s linear ${delay}s forwards`;
       };
-      const initial=(recent||[]).map(r=>({
-        clientId:`srv_${r.id}`, img:typeImg(r.type), wish:`${r.nickname} (${r.age}) : ${r.wish}`,
-        style:makeStyle(rnd(24,40),rnd(0,20),rnd(8,88)),
-        ttl:Date.now()+1000*(rnd(24,40)+rnd(0,20)+1)
-      }));
+
+      const toItem = (r) => ({
+        clientId:`srv_${r.id}_${Math.random().toString(36).slice(2)}`,
+        img:typeImg(r.type),
+        wish:`${r.nickname} (${r.age}) : ${r.wish}`,
+        style:makeStyle(rnd(22,36), rnd(0,16), rnd(8,88)),
+        ttl:Date.now()+1000*(rnd(22,36)+rnd(0,16)+1)
+      });
+
+      const initial = shuffled.map(toItem);
+
       return {
         items: initial,
-        spawn(p){
-          const k={clientId:`cli_${crypto.randomUUID?.()||Math.random().toString(36).slice(2)}`, img:typeImg(p.type),
-                   wish:`${p.nickname} (${p.age}) : ${p.wish}`, style:makeStyle(rnd(22,34),0,rnd(10,90)),
-                   ttl:Date.now()+1000*(rnd(22,34)+1)};
-          this.items.push(k); if(this.items.length>80) this.items.splice(0,this.items.length-80);
+        recentPool: recent||[],
+        init(){
+          // ปล่อยกระทงสุ่มต่อเนื่องจากฐานข้อมูลทุก 4–7 วินาที
+          const tick = () => {
+            const pool = this.recentPool;
+            if(pool.length){
+              const r = pool[Math.floor(Math.random()*pool.length)];
+              this.spawnFromRecord(r);
+            }
+            setTimeout(tick, rnd(4000,7000));
+          };
+          setTimeout(tick, 1500);
         },
-        spawnRandom(){
-          const keys=Object.keys(types||{}); const type=keys[Math.floor(Math.random()*keys.length)]||'banana';
-          this.spawn({type,nickname:'ผู้ร่วมงาน',age:Math.floor(rnd(10,60)),wish:'สุขภาพแข็งแรง'});
+        spawnFromRecord(r){
+          const k = toItem(r);
+          this.items.push(k);
+          if(this.items.length>80) this.items.splice(0, this.items.length-80);
+        },
+        // ใช้ตอนบันทึกใหม่สำเร็จ
+        spawnNew(p){
+          const r = { id: Date.now(), type:p.type, nickname:p.nickname, age:p.age, wish:p.wish };
+          this.recentPool.push(r);
+          this.spawnFromRecord(r);
         }
       }
     }
@@ -227,13 +242,12 @@
             }
             const data = await res.json();
             this.ok='ลอยแล้ว';
-            // spawn กระทงใหม่ในฉาก
-            document.querySelectorAll('main [x-data]').forEach(el=>{
-              const x = el._x_dataStack?.[0];
-              if(x?.spawn){ x.spawn({ type:data.type, nickname:data.nickname, age:data.age, wish:data.wish }); }
-            });
+            // แจ้งฉากให้ spawn กระทงใหม่ และปิดโมดัล
+            const scene = document.querySelector('main [x-data]');
+            const api = scene?._x_dataStack?.[0];
+            api?.spawnNew?.(data);
             this.form.wish='';
-            Alpine.store('ui').open = false; // ปิดโมดัล
+            Alpine.store('ui').open=false;
           }catch(e){
             this.error=e.message;
           }
