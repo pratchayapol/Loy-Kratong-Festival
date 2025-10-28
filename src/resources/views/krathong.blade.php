@@ -665,13 +665,13 @@
     `;
             };
 
-            const toItem = (r, isInitial = false) => {
-                const dur = isInitial ? rnd(DUR_INIT_MIN, DUR_INIT_MAX) : rnd(DUR_LOOP_MIN, DUR_LOOP_MAX);
-                const delay = isInitial ? rnd(0, 12) : 0;
-                const top = rnd(WATER_TOP + 6, WATER_TOP + WATER_BAND + (isInitial ? 0 : 4));
+            const mkItem = (r, init = false) => {
+                const dur = init ? rnd(DUR_INIT_MIN, DUR_INIT_MAX) : rnd(DUR_LOOP_MIN, DUR_LOOP_MAX);
+                const delay = init ? rnd(0, 12) : 0;
+                const top = rnd(WATER_TOP + 6, WATER_TOP + WATER_BAND + (init ? 0 : 4));
                 return {
                     id: r.id,
-                    clientId: `${isInitial ? 'srv' : 'cli'}_${r.id}_${Math.random().toString(36).slice(2)}`,
+                    clientId: `${init ? 'srv' : 'cli'}_${r.id}_${Math.random().toString(36).slice(2)}`,
                     img: typeImg(r.type),
                     wish: `${r.nickname} (${r.age}) : ${r.wish}`,
                     style: makeStyle(dur, delay, top),
@@ -679,50 +679,68 @@
                 };
             };
 
-            const scheduleRemoval = (vm, clientId, totalMs) => {
+            const scheduleRemoval = (vm, clientId, ms) => {
                 __schedule(() => {
-                    const idx = vm.items.findIndex(x => x.clientId === clientId);
-                    if (idx > -1) vm.items.splice(idx, 1);
-                }, totalMs + 30);
+                    const i = vm.items.findIndex(x => x.clientId === clientId);
+                    if (i > -1) vm.items.splice(i, 1);
+                }, ms + 30);
             };
 
-            // uniq recent by id
-            const uniqRecent = Array.from(new Map((recent || []).map(r => [r.id, r])).values());
+            // จัดแหล่งข้อมูล “ใหม่→เก่า” และกันซ้ำตาม id
+            const base = Array.from(new Map((recent || []).map(r => [r.id, r])).values())
+                .sort((a, b) => b.id - a.id);
 
             return {
                 items: [],
-                seenIds: new Set(), // กันซ้ำทั้งเซสชัน
-                recentPool: uniqRecent.slice(), // แหล่งข้อมูลทั้งหมดที่สุ่มได้
+                // ลำดับวนซ้ำ: ใหม่→เก่า
+                order: base,
+                // ชุดที่แสดงแล้วภายใน “รอบปัจจุบัน”
+                seenInCycle: new Set(),
+                // ตำแหน่งปัจจุบันในรอบ
+                idx: 0,
 
                 init() {
-                    // ยิงชุดแรกแบบ “สุ่มและไม่ซ้ำ”
-                    const pool = this.recentPool.filter(r => !this.seenIds.has(r.id));
-                    const initial = pool.sort(() => Math.random() - 0.5).slice(0, 24);
-                    for (const r of initial) this._spawn(r, true);
+                    // ยิงล็อตแรกให้เต็มจอหน่อย
+                    const initCount = Math.min(24, this.order.length);
+                    for (let k = 0; k < initCount; k++) this._spawnNext(true);
 
-                    // สุ่มเรื่อยๆจากที่ยังไม่เคยแสดง
+                    // วนต่อเนื่อง ไม่มีช่วงว่าง
                     const tick = () => {
-                        const candidates = this.recentPool.filter(r => !this.seenIds.has(r.id));
-                        if (candidates.length) {
-                            const r = candidates[Math.floor(Math.random() * candidates.length)];
-                            this._spawn(r, false);
-                        }
+                        this._spawnNext(false);
                         __schedule(tick, rnd(4500, 7200));
                     };
                     __schedule(tick, 900);
                 },
 
-                _spawn(r, isInitial) {
-                    if (this.seenIds.has(r.id)) return;
-                    this.seenIds.add(r.id);
-                    const k = toItem(r, isInitial);
-                    // ใส่หัวลิสต์ให้เห็นเด่นเมื่อมาใหม่
-                    this.items.unshift(k);
+                _spawnNext(isInitial) {
+                    if (!this.order.length) return;
+                    // ถ้ารอบนี้ใช้ครบแล้ว รีเซ็ตเริ่มใหม่→เก่าอีกครั้ง
+                    if (this.seenInCycle.size >= this.order.length) {
+                        this.seenInCycle.clear();
+                        this.idx = 0;
+                    }
+
+                    // เดินไปหาตัวถัดไปที่ยังไม่ถูกแสดงใน “รอบนี้”
+                    let guard = 0;
+                    while (this.seenInCycle.has(this.order[this.idx]?.id) && guard < this.order.length) {
+                        this.idx = (this.idx + 1) % this.order.length;
+                        guard++;
+                    }
+
+                    const r = this.order[this.idx];
+                    if (!r) return;
+
+                    this.seenInCycle.add(r.id);
+                    // ขยับ index ไปตัวถัดไปแบบใหม่→เก่า
+                    this.idx = (this.idx + 1) % this.order.length;
+
+                    const item = mkItem(r, isInitial);
+                    this.items.unshift(item); // มาใหม่วางหัวลิสต์
                     if (this.items.length > 100) this.items.splice(100);
-                    scheduleRemoval(this, k.clientId, k.__life);
+                    scheduleRemoval(this, item.clientId, item.__life);
                 },
 
-                // เรียกตอนสร้างกระทงใหม่จากฟอร์ม -> โผล่ทันที และถูกกันซ้ำ
+                // เมื่อมีรายการใหม่ เพิ่มเข้า “หัวคิว” และเริ่มรอบใหม่เพื่อให้สิทธิ์ตัวใหม่ก่อน
                 spawnNew(p) {
                     const r = {
                         id: Date.now(),
@@ -731,8 +749,17 @@
                         age: p.age,
                         wish: p.wish
                     };
-                    this.recentPool.unshift(r); // เพิ่มเข้าแหล่งสุ่ม
-                    this._spawn(r, false); // แสดงทันทีหนึ่งครั้ง
+                    // แทรกหัวลิสต์ฐานและลบซ้ำ id เดิมถ้ามี
+                    this.order = [r, ...this.order.filter(x => x.id !== r.id)].sort((a, b) => b.id - a.id);
+                    // รีเซ็ตสถานะรอบเพื่อให้เริ่มนับจากตัวใหม่ก่อน
+                    this.seenInCycle.clear();
+                    this.idx = 0;
+
+                    // โชว์ทันทีหนึ่งลำ
+                    const item = mkItem(r, false);
+                    this.items.unshift(item);
+                    if (this.items.length > 100) this.items.splice(100);
+                    scheduleRemoval(this, item.clientId, item.__life);
                 }
             };
         }
