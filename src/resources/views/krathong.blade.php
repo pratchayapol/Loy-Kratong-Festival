@@ -173,74 +173,99 @@
         </svg>
     </button>
 
-    <!-- ฉากสายน้ำ -->
     <main class="relative min-h-screen">
-        <!-- ท้องฟ้าไล่น้ำเงิน + วินเย็ต -->
-        <div class="absolute inset-0 bg-gradient-to-b from-[#091826] via-[#0c2236] to-[#0b2e4a]"></div>
-        <div
-            class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.06),transparent_60%)] mix-blend-soft-light">
-        </div>
-
-        <!-- พระจันทร์ (เรืองแสงนุ่ม ๆ) -->
-        <div
-            class="absolute top-[8%] right-[10%] w-16 h-16 sm:w-20 sm:h-20 rounded-full 
-                bg-gradient-to-br from-yellow-50 via-yellow-100 to-yellow-200
-                animate-moonGlow pointer-events-none z-10 opacity-90 shadow-[0_0_40px_rgba(255,244,200,0.6)]">
-        </div>
-
-        <!-- ดาวระยิบระยับแบบ dynamic (แทน pattern เดิม) -->
-        <div class="pointer-events-none absolute inset-0" x-data="{ stars: [] }" x-init="const count = Math.round(Math.min(140, 60 + window.innerWidth / 12));
-        for (let i = 0; i < count; i++) {
-            stars.push({
-                left: Math.random() * 100,
-                top: Math.random() * 75,
-                delay: Math.random() * 4,
-                duration: 2 + Math.random() * 3,
-                size: Math.random() > 0.75 ? 2 : 1
-            })
-        }">
-            <template x-for="(s,i) in stars" :key="i">
-                <div class="absolute rounded-full bg-white animate-twinkle"
-                    :style="`left:${s.left}%;top:${s.top}%;width:${s.size}px;height:${s.size}px;animation-delay:${s.delay}s;animation-duration:${s.duration}s;box-shadow:0 0 ${s.size*2}px rgba(255,255,255,0.8)`">
+        <!-- ค่าความสูงท้องฟ้า (เปอร์เซ็นต์ความสูงจอ) -->
+        <!-- sky: บน 42% / water: ล่าง 58% -->
+        <div class="absolute inset-0">
+            <!-- SKY -->
+            <div class="absolute top-0 left-0 right-0 h-[42%]">
+                <!-- ท้องฟ้ามืดขึ้น + วินเย็ต -->
+                <div class="absolute inset-0 bg-gradient-to-b from-[#050a12] via-[#081525] to-[#0b2238]"></div>
+                <div
+                    class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.05),transparent_60%)] mix-blend-soft-light">
                 </div>
-            </template>
-        </div>
 
-        <!-- ผิวน้ำไล่เลเยอร์ + คลื่น -->
-        <div class="absolute inset-0 bg-gradient-to-b from-river1/80 via-river1 to-river2"></div>
-        <div
-            class="absolute left-0 w-[220%] h-28 top-[18%] opacity-30 blur-2xl bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,.9)_0%,_transparent_60%)] animate-waves">
-        </div>
-        <div
-            class="absolute left-0 w-[220%] h-28 top-[46%] opacity-25 blur-2xl bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,.85)_0%,_transparent_60%)] animate-[waves_22s_linear_infinite]">
-        </div>
-        <div
-            class="absolute left-0 w-[220%] h-28 top-[74%] opacity-20 blur-2xl bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,.8)_0%,_transparent_60%)] animate-[waves_26s_linear_infinite]">
-        </div>
+                <!-- พระจันทร์ -->
+                <div
+                    class="absolute top-[18%] right-[10%] w-16 h-16 sm:w-20 sm:h-20 rounded-full 
+                  bg-gradient-to-br from-yellow-50 via-yellow-100 to-yellow-200
+                  animate-moonGlow pointer-events-none z-10 opacity-90 shadow-[0_0_40px_rgba(255,244,200,0.6)]">
+                </div>
 
-        <!-- กระทง -->
-        <div class="absolute inset-0 overflow-hidden" x-data="riverScene(@js($types), @js($recent))" x-init="init()">
-            <template x-for="k in items" :key="k.clientId">
-                <div class="absolute flex flex-col items-center krathong-item will-change-transform"
-                    :style="k.style">
-                    <div class="px-3 py-2 rounded-2xl text-xs sm:text-sm max-w-[220px] sm:max-w-[280px] 
-                      text-cyan-50 bg-slate-900/80 backdrop-blur-xl border border-cyan-400/30 
-                      shadow-lg shadow-cyan-500/20 whitespace-nowrap overflow-hidden text-ellipsis"
-                        x-text="k.wish"></div>
-                    <div class="relative mt-2">
-                        <img :src="k.img" alt="krathong"
-                            class="w-16 h-16 sm:w-20 sm:h-20 drop-shadow-[0_15px_25px_rgba(0,0,0,0.6)]">
-                        <!-- แสงเรืองรอบกระทง -->
-                        <div
-                            class="absolute inset-0 -z-10 blur-xl opacity-50 bg-gradient-radial from-amber-300/50 to-transparent rounded-full">
+                {{-- <!-- ดาวระยิบ -->
+                <div class="pointer-events-none absolute inset-0" x-data="{ stars: [] }" x-init="const count = Math.round(Math.min(140, 70 + window.innerWidth / 10));
+                for (let i = 0; i < count; i++) {
+                    stars.push({
+                        left: Math.random() * 100,
+                        top: Math.random() * 100,
+                        delay: Math.random() * 4,
+                        duration: 4 + Math.random() * 5,
+                        size: Math.random() > 0.8 ? 2 : 1
+                    });
+                }">
+                    <template x-for="(s,i) in stars" :key="i">
+                        <div class="absolute rounded-full bg-white animate-twinkle"
+                            :style="`left:${s.left}%;top:${s.top}%;width:${s.size}px;height:${s.size}px;animation-delay:${s.delay}s;animation-duration:${s.duration}s;box-shadow:0 0 ${s.size*2}px rgba(255,255,255,.85)`">
                         </div>
+                    </template>
+                </div> --}}
+            </div>
+
+            <!-- HORIZON (เส้นแบ่งฟ้า/น้ำ) -->
+            <div class="absolute left-0 right-0 top-[42%] h-px">
+                <div
+                    class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent">
+                </div>
+                <!-- เงาสะท้อนเบา ๆ -->
+                <div
+                    class="absolute -top-1 inset-x-0 h-6 bg-gradient-to-b from-white/10 to-transparent pointer-events-none">
+                </div>
+            </div>
+
+            <!-- WATER -->
+            <div class="absolute left-0 right-0 top-[42%] bottom-0 overflow-hidden">
+                <!-- ผิวน้ำเข้มขึ้น -->
+                <div class="absolute inset-0 bg-gradient-to-b from-[#0b2e4a] via-[#082237] to-[#051827]"></div>
+
+                <!-- คลื่นน้ำ (อยู่เฉพาะโซนน้ำ) -->
+                <div
+                    class="absolute left-0 w-[220%] h-28 top-[10%] opacity-30 blur-2xl
+                  bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,.9)_0%,_transparent_60%)]
+                  animate-[waves_28s_linear_infinite]">
+                </div>
+                <div
+                    class="absolute left-0 w-[220%] h-28 top-[40%] opacity-22 blur-2xl
+                  bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,.85)_0%,_transparent_60%)]
+                  animate-[waves_34s_linear_infinite]">
+                </div>
+                <div
+                    class="absolute left-0 w-[220%] h-28 top-[70%] opacity-18 blur-2xl
+                  bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,.8)_0%,_transparent_60%)]
+                  animate-[waves_40s_linear_infinite]">
+                </div>
+
+                <!-- กระทง (เดิมของคุณ) -->
+                <div class="absolute inset-0" x-data="riverScene(@js($types), @js($recent))" x-init="init()">
+                    <template x-for="k in items" :key="k.clientId">
+                        <div class="absolute flex flex-col items-center krathong-item will-change-transform"
+                            :style="k.style">
+                            <div class="px-3 py-2 rounded-2xl text-xs sm:text-sm max-w-[220px] sm:max-w-[280px] 
+                        text-cyan-50 bg-slate-900/80 backdrop-blur-xl border border-cyan-400/30 
+                        shadow-lg shadow-cyan-500/20 whitespace-nowrap overflow-hidden text-ellipsis"
+                                x-text="k.wish"></div>
+                            <div class="relative mt-2">
+                                <img :src="k.img" alt="krathong"
+                                    class="w-16 h-16 sm:w-20 sm:h-20 drop-shadow-[0_15px_25px_rgba(0,0,0,0.6)]">
+                                <div
+                                    class="absolute inset-0 -z-10 blur-xl opacity-50 bg-gradient-radial from-amber-300/50 to-transparent rounded-full">
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                    <div
+                        class="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-slate-950/80 via-slate-950/40 to-transparent">
                     </div>
                 </div>
-            </template>
-
-            <!-- เงาคลื่นท้ายน้ำ -->
-            <div
-                class="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-slate-950/80 via-slate-950/40 to-transparent">
             </div>
         </div>
     </main>
@@ -484,36 +509,20 @@
         }
 
         function riverScene(types, recent) {
-            const DUR_INIT_MIN = 22,
-                DUR_INIT_MAX = 34; // ความยาวลอยชุดแรก
-            const DUR_LOOP_MIN = 20,
-                DUR_LOOP_MAX = 28; // ความยาวลอยต่อเนื่อง
-            const DELAY_MAX = 16; // หน่วงก่อนเริ่มลอย    
+            const WATER_TOP = 42; // ต้องตรงกับ top ของโซนน้ำ (หน่วย % ของหน้าจอ)
 
-            const shuffled = [...(recent || [])].sort(() => Math.random() - 0.5).slice(0, 24);
+            const DUR_INIT_MIN = 12,
+                DUR_INIT_MAX = 20;
+            const DUR_LOOP_MIN = 10,
+                DUR_LOOP_MAX = 16;
+            const DELAY_MAX = 10;
 
-            const typeImg = t => types?.[t]?.img || Object.values(types || {})[0]?.img || '';
-            const makeStyle = (dur, delay, top) => {
-                const name = `drift_${Math.random().toString(36).slice(2)}`;
-                const sheet = ensureKeyframeSheet();
-                sheet.insertRule(
-                    `@keyframes ${name}{0%{left:-20%;opacity:0}10%{opacity:1}90%{opacity:1}100%{left:120%;opacity:0}}`,
-                    sheet.cssRules.length);
-                return `top:${top}%;left:-20%;animation:${name} ${dur}s linear ${delay}s forwards`;
-            };
-
-            // เมื่อแอนิเมชันของ item นั้นจบ ให้เอาออกจาก items กัน DOM ค้าง
-            const scheduleRemoval = (vm, clientId, totalMs) => {
-                __schedule(() => {
-                    const idx = vm.items.findIndex(x => x.clientId === clientId);
-                    if (idx > -1) vm.items.splice(idx, 1);
-                }, totalMs);
-            };
+            // ...
 
             const toItem = r => {
                 const dur = rnd(DUR_INIT_MIN, DUR_INIT_MAX);
                 const delay = rnd(0, DELAY_MAX);
-                const top = rnd(8, 88);
+                const top = rnd(WATER_TOP + 2, 96); // ลอยเฉพาะในน้ำ
                 const clientId = `srv_${r.id}_${Math.random().toString(36).slice(2)}`;
                 const style = makeStyle(dur, delay, top);
                 return {
@@ -526,60 +535,21 @@
                 };
             };
 
-            const initial = shuffled.map(toItem);
-
-            return {
-                items: initial,
-                recentPool: recent || [],
-                init() {
-                    // ตั้งเวลาลบ initial ทิ้งหลังจบแอนิเมชัน
-                    this.items.forEach(it => scheduleRemoval(this, it.clientId, it.__life));
-
-                    // ปล่อยกระทงจากฐานข้อมูลต่อเนื่อง โดย "ไม่ซ้ำกับที่กำลังแสดงอยู่"
-                    const tick = () => {
-                        const pool = this.recentPool;
-                        if (pool.length) {
-                            const visibleIds = new Set(this.items.map(i => i.id));
-                            const candidates = pool.filter(x => !visibleIds.has(x.id));
-                            if (candidates.length) {
-                                const r = candidates[Math.floor(Math.random() * candidates.length)];
-                                this.spawnFromRecord(r);
-                            }
-                        }
-                        __schedule(tick, rnd(3500, 6000));
-                    };
-                    __schedule(tick, 1000);
-                },
-                spawnFromRecord(r) {
-                    const dur = rnd(DUR_LOOP_MIN, DUR_LOOP_MAX);
-                    const delay = 0;
-                    const top = rnd(10, 90);
-                    const clientId = `cli_${r.id}_${Math.random().toString(36).slice(2)}`;
-                    const k = {
-                        id: r.id,
-                        clientId,
-                        img: typeImg(r.type),
-                        wish: `${r.nickname} (${r.age}) : ${r.wish}`,
-                        style: makeStyle(dur, delay, top),
-                        __life: (dur + delay) * 1000
-                    };
-                    this.items.push(k);
-                    if (this.items.length > 80) this.items.splice(0, this.items.length - 80);
-                    // ลบหลังวิ่งครบ (กันค้าง)
-                    scheduleRemoval(this, clientId, k.__life);
-                },
-                // ใช้หลังบันทึกใหม่สำเร็จ
-                spawnNew(p) {
-                    const r = {
-                        id: Date.now(),
-                        type: p.type,
-                        nickname: p.nickname,
-                        age: p.age,
-                        wish: p.wish
-                    };
-                    this.recentPool.push(r);
-                    this.spawnFromRecord(r);
-                }
+            // ...
+            spawnFromRecord(r) {
+                const dur = rnd(DUR_LOOP_MIN, DUR_LOOP_MAX);
+                const delay = 0;
+                const top = rnd(WATER_TOP + 4, 96); // อยู่ในน้ำ
+                const clientId = `cli_${r.id}_${Math.random().toString(36).slice(2)}`;
+                const k = {
+                    id: r.id,
+                    clientId,
+                    img: typeImg(r.type),
+                    wish: `${r.nickname} (${r.age}) : ${r.wish}`,
+                    style: makeStyle(dur, delay, top),
+                    __life: (dur + delay) * 1000
+                };
+                // ...
             }
         }
 
