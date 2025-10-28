@@ -288,7 +288,8 @@
     // วนลูปใหม่→เก่าเป็นรอบ ๆ ไม่ว่าง ไม่ซ้ำภายในรอบเดียว และแสดงใหม่ทันที
     function riverScene(types, recent) {
       const WATER_TOP = 58; // เริ่มน้ำที่ 58% ของจอ
-      const WATER_BAND = 30;
+      const WATER_BAND = 24; // ลดช่วงแนวตั้งของคลองลง
+      const SAFE_BOTTOM = 10; // กันไม่ให้ชนขอบล่าง (เป็น % ของจอ)
       const DUR_INIT_MIN = 14, DUR_INIT_MAX = 24;
       const DUR_LOOP_MIN = 12, DUR_LOOP_MAX = 20;
 
@@ -304,8 +305,13 @@
       const mkItem = (r, init=false) => {
         const dur = init ? rnd(DUR_INIT_MIN, DUR_INIT_MAX) : rnd(DUR_LOOP_MIN, DUR_LOOP_MAX);
         const delay = init ? rnd(0, 12) : 0;
-        const top = rnd(WATER_TOP + 6, WATER_TOP + WATER_BAND + (init ? 0 : 4));
+        // คำนวณช่วง top โดยกันขอบล่างไว้ SAFE_BOTTOM%
+        const extra = init ? 0 : 2; // ให้ลำใหม่ลงมาลึกนิดหน่อย
+        const tMin = WATER_TOP + 6;
+        const tMax = Math.min(WATER_TOP + WATER_BAND + extra, 100 - SAFE_BOTTOM);
+        const top = rnd(tMin, tMax);
         return { id:r.id, clientId:`${init?'srv':'cli'}_${r.id}_${Math.random().toString(36).slice(2)}`, img:typeImg(r.type), wish:`${r.nickname} (${r.age}) : ${r.wish}`, style:makeStyle(dur, delay, top), __life:(dur+delay)*1000 };
+      };
       };
 
       const scheduleRemoval = (vm, clientId, ms) => { __schedule(() => { const i = vm.items.findIndex(x => x.clientId === clientId); if (i > -1) vm.items.splice(i, 1); }, ms + 30); };
