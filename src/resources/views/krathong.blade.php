@@ -18,7 +18,7 @@
             waves:{'0%':{transform:'translateX(0)'},'100%':{transform:'translateX(-50%)'}},
             sway:{'0%,100%':{transform:'translateX(0) rotate(0deg)'},'25%':{transform:'translateX(-10px) rotate(-2deg)'},'75%':{transform:'translateX(10px) rotate(2deg)'}},
             twinkle:{'0%,100%':{opacity:'0.3',transform:'scale(1)'},'50%':{opacity:'1',transform:'scale(1.2)'}},
-            moonGlow:{'0%,100%':{boxShadow:'0 0 40px rgba(255,244,179,0.4), 0 0 80px rgba(255,244,179,0.2)'},'50%':{boxShadow:'0 0 60px rgba(255,244,179,0.6), 0 0 120px rgba(255,244,179,0.3)'}}
+            moonGlow:{'0%,100%':{boxShadow:'0 0 50px rgba(255,244,200,0.5), 0 0 90px rgba(255,244,200,0.25)'},'50%':{boxShadow:'0 0 70px rgba(255,244,200,0.7), 0 0 130px rgba(255,244,200,0.35)'}}
           },
           animation:{
             floatY:'floatY 3.2s ease-in-out infinite',
@@ -94,33 +94,34 @@
     <div class="absolute inset-0 bg-gradient-to-b from-river1 to-river2"></div>
 
     <!-- พระจันทร์ -->
-    <div class="absolute top-8 right-12 w-20 h-20 sm:w-24 sm:h-24 rounded-full 
-                bg-gradient-radial from-yellow-100 via-yellow-200 to-yellow-300/80
-                animate-moonGlow pointer-events-none z-10"></div>
+    <div class="absolute top-[8%] right-[10%] w-16 h-16 sm:w-20 sm:h-20 rounded-full 
+                bg-gradient-to-br from-yellow-50 via-yellow-100 to-yellow-200
+                animate-moonGlow pointer-events-none z-10 opacity-90"></div>
 
-    <!-- ดาวระยิบระยับ (แบบ Alpine) -->
-    <div class="pointer-events-none absolute inset-0" x-data="{stars:[]}" x-init="
-      for(let i=0;i<80;i++){
-        stars.push({
-          left:Math.random()*100,
-          top:Math.random()*70,
-          delay:Math.random()*3,
-          duration:2+Math.random()*2
-        })
-      }
-    ">
-      <template x-for="(s,i) in stars" :key="i">
-        <div class="star animate-twinkle" 
-             :style="`left:${s.left}%;top:${s.top}%;animation-delay:${s.delay}s;animation-duration:${s.duration}s`">
-        </div>
-      </template>
-    </div>
+    <!-- ดาวระยิบระยับ (pattern แบบเดิม) -->
+    <div class="pointer-events-none absolute inset-0 opacity-40"
+         style="background-image: radial-gradient(circle at 15% 8%, rgba(255,255,255,.25) 0 1.5px, transparent 2px),
+                                radial-gradient(circle at 35% 15%, rgba(255,255,255,.18) 0 1px, transparent 2px),
+                                radial-gradient(circle at 75% 12%, rgba(255,255,255,.22) 0 1.5px, transparent 2px),
+                                radial-gradient(circle at 85% 25%, rgba(255,255,255,.15) 0 1px, transparent 2px),
+                                radial-gradient(circle at 25% 30%, rgba(255,255,255,.2) 0 1px, transparent 2px),
+                                radial-gradient(circle at 60% 8%, rgba(255,255,255,.17) 0 1px, transparent 2px),
+                                radial-gradient(circle at 90% 40%, rgba(255,255,255,.19) 0 1px, transparent 2px),
+                                radial-gradient(circle at 45% 35%, rgba(255,255,255,.16) 0 1px, transparent 2px),
+                                radial-gradient(circle at 10% 45%, rgba(255,255,255,.21) 0 1.5px, transparent 2px),
+                                radial-gradient(circle at 55% 50%, rgba(255,255,255,.14) 0 1px, transparent 2px),
+                                radial-gradient(circle at 70% 55%, rgba(255,255,255,.18) 0 1px, transparent 2px),
+                                radial-gradient(circle at 20% 60%, rgba(255,255,255,.2) 0 1px, transparent 2px),
+                                radial-gradient(circle at 95% 65%, rgba(255,255,255,.16) 0 1px, transparent 2px),
+                                radial-gradient(circle at 40% 70%, rgba(255,255,255,.19) 0 1.5px, transparent 2px);
+                background-size: 100% 100%;"></div>
 
     <!-- คลื่นน้ำ + กระทง (สุ่มแสดงอัตโนมัติ) -->
     <div class="absolute inset-0 overflow-hidden" x-data="riverScene(@js($types), @js($recent))">
-      <div class="absolute left-0 w-[200%] h-28 top-[12%] opacity-30 blur-2xl bg-[radial-gradient(ellipse_at_center,_rgba(34,211,238,0.4)_0%,_transparent_60%)] animate-waves"></div>
-      <div class="absolute left-0 w-[200%] h-28 top-[44%] opacity-25 blur-2xl bg-[radial-gradient(ellipse_at_center,_rgba(59,130,246,0.3)_0%,_transparent_60%)] animate-[waves_22s_linear_infinite]"></div>
-      <div class="absolute left-0 w-[200%] h-28 top-[72%] opacity-20 blur-2xl bg-[radial-gradient(ellipse_at_center,_rgba(34,211,238,0.25)_0%,_transparent_60%)] animate-[waves_26s_linear_infinite]"></div>
+      <!-- คลื่นน้ำ -->
+      <div class="absolute left-0 w-[200%] h-28 top-[12%] opacity-30 blur-2xl bg-[radial-gradient(ellipse_at_center,_white_0%,_transparent_60%)] animate-waves"></div>
+      <div class="absolute left-0 w-[200%] h-28 top-[44%] opacity-25 blur-2xl bg-[radial-gradient(ellipse_at_center,_white_0%,_transparent_60%)] animate-[waves_22s_linear_infinite]"></div>
+      <div class="absolute left-0 w-[200%] h-28 top-[72%] opacity-20 blur-2xl bg-[radial-gradient(ellipse_at_center,_white_0%,_transparent_60%)] animate-[waves_26s_linear_infinite]"></div>
 
       <template x-for="k in items" :key="k.clientId">
         <div class="absolute flex flex-col items-center krathong-item will-change-transform" :style="k.style">
@@ -259,8 +260,8 @@
     const makeStyle=(dur,delay,top)=>{
       const name=`drift_${Math.random().toString(36).slice(2)}`;
       const sheet=document.getElementById('dyn-keyframes').sheet;
-      sheet.insertRule(`@keyframes ${name}{0%{transform:translateX(-12%)}100%{transform:translateX(112%)}}`,sheet.cssRules.length);
-      return `top:${top}%;left:-12%;animation:${name} ${dur}s linear ${delay}s forwards`;
+      sheet.insertRule(`@keyframes ${name}{0%{left:-15%;opacity:0}3%{opacity:1}97%{opacity:1}100%{left:115%;opacity:0}}`,sheet.cssRules.length);
+      return `top:${top}%;animation:${name} ${dur}s linear ${delay}s forwards`;
     };
     const toItem=r=>({
       id:r.id,
