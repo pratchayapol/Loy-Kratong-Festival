@@ -8,7 +8,7 @@ return new class extends Migration {
     public function up(): void {
         Schema::create('krathongs', function (Blueprint $table) {
             $table->id();
-            $table->string('type', 50);           // ชนิดกระทง
+            $table->string('type', 50);
             $table->string('nickname', 50);
             $table->unsignedTinyInteger('age');
             $table->string('wish', 200);
