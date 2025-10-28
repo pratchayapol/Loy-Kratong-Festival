@@ -246,7 +246,7 @@
               </div>
               <div class="flex-1">
                 <div class="text-xs text-slate-400 mb-0.5">นักพัฒนา</div>
-                <div class="font-semibold text-white">นายปรัชญาพล จำปาลาด</div>
+                <div class="font-semibold text-white">ปรัชญาพล จำปาลาด</div>
               </div>
             </div>
 
@@ -256,13 +256,13 @@
               </div>
               <div class="flex-1">
                 <div class="text-xs text-slate-400 mb-0.5">เวอร์ชัน</div>
-                <div class="font-semibold text-white">1.0.1</div>
+                <div class="font-semibold text-white">1.0.1 29 ตุลาคม 2568</div>
               </div>
             </div>
           </div>
 
           <div class="text-center pt-2">
-            <p class="text-xs text-slate-400">© 2024 สงวนลิขสิทธิ์</p>
+            <p class="text-xs text-slate-400">© 2025 สงวนลิขสิทธิ์ PCNONE GROUP </p>
           </div>
         </div>
       </div>
