@@ -135,77 +135,90 @@
 
   <!-- ฉากฟ้า/น้ำ แบ่งโซนชัด -->
   <main class="relative min-h-screen">
-    <!-- SKY (บน 42%) -->
+ <!-- SKY (บน 42%) -->
     <div class="absolute top-0 left-0 right-0 h-[42%]">
-      <div class="absolute inset-0 bg-gradient-to-b from-[#050a12] via-[#081525] to-[#0b2238]"></div>
-      <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.05),transparent_60%)] mix-blend-soft-light"></div>
+      <!-- ท้องฟ้าไล่เฉดสีลึก -->
+      <div class="absolute inset-0 bg-gradient-to-b from-[#020510] via-[#0a1628] to-[#0e2845]"></div>
+      
+      <!-- เมฆบางๆ เคลื่อนไหว -->
+      <div class="absolute inset-0 opacity-15">
+        <div class="absolute top-[20%] left-0 w-[400%] h-32 bg-gradient-to-r from-transparent via-slate-300/20 to-transparent blur-3xl animate-[waves_65s_linear_infinite]"></div>
+        <div class="absolute top-[35%] left-[-50%] w-[400%] h-24 bg-gradient-to-r from-transparent via-slate-400/15 to-transparent blur-3xl animate-[waves_85s_linear_infinite]"></div>
+      </div>
+      
+      <!-- แสงส่องจากขอบฟ้า -->
+      <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_70%_40%,rgba(100,150,255,0.12),transparent_50%)] mix-blend-screen"></div>
+      <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_50%,rgba(180,140,255,0.08),transparent_45%)] mix-blend-soft-light"></div>
 
-      <!-- พระจันทร์ -->
-      <div class="absolute top-[18%] right-[10%] w-16 h-16 sm:w-20 sm:h-20 rounded-full 
-                  bg-gradient-to-br from-yellow-50 via-yellow-100 to-yellow-200
-                  animate-moonGlow pointer-events-none z-10 opacity-90 shadow-[0_0_40px_rgba(255,244,200,0.6)]"></div>
+      <!-- พระจันทร์ที่สวยงาม -->
+      <div class="absolute top-[18%] right-[10%] w-16 h-16 sm:w-24 sm:h-24 rounded-full 
+                  bg-gradient-to-br from-[#fffef0] via-[#fff8dc] to-[#ffe4b5]
+                  animate-moonGlow pointer-events-none z-10 opacity-95 
+                  shadow-[0_0_60px_rgba(255,248,220,0.8),0_0_120px_rgba(255,248,220,0.4),inset_0_0_20px_rgba(255,255,255,0.3)]">
+        <!-- รอยบนพระจันทร์ -->
+        <div class="absolute inset-0 rounded-full overflow-hidden opacity-20">
+          <div class="absolute top-[30%] left-[20%] w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-slate-400/40 blur-sm"></div>
+          <div class="absolute top-[55%] right-[25%] w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-slate-400/30 blur-sm"></div>
+          <div class="absolute bottom-[35%] left-[40%] w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-slate-400/35 blur-sm"></div>
+        </div>
+      </div>
+      
+      <!-- แสงจันทร์ส่องลงน้ำ (beam) -->
+      <div class="absolute top-[18%] right-[10%] w-1 sm:w-1.5 h-[50vh] opacity-8 
+                  bg-gradient-to-b from-yellow-100/30 via-yellow-50/10 to-transparent 
+                  blur-xl transform rotate-[8deg] pointer-events-none"></div>
 
-      <!-- ดาวระยิบ (dynamic) -->
+      <!-- ดาวระยิบหลายขนาด (dynamic) -->
       <div class="pointer-events-none absolute inset-0" x-data="{stars:[]}" x-init="
-        const count = Math.round(Math.min(140, 70 + window.innerWidth/10));
+        const count = Math.round(Math.min(180, 90 + window.innerWidth/8));
         for(let i=0;i<count;i++){
-          stars.push({ left:Math.random()*100, top:Math.random()*100,
-            delay:Math.random()*4, duration:4+Math.random()*5, size:Math.random()>0.8?2:1 });
+          const sizeRand = Math.random();
+          stars.push({ 
+            left:Math.random()*100, 
+            top:Math.random()*100,
+            delay:Math.random()*5, 
+            duration:3+Math.random()*6, 
+            size: sizeRand > 0.92 ? 2.5 : (sizeRand > 0.75 ? 1.5 : 1),
+            opacity: sizeRand > 0.85 ? 1 : 0.7
+          });
         }">
         <template x-for="(s,i) in stars" :key="i">
           <div class="absolute rounded-full bg-white animate-twinkle"
-               :style="`left:${s.left}%;top:${s.top}%;width:${s.size}px;height:${s.size}px;animation-delay:${s.delay}s;animation-duration:${s.duration}s;box-shadow:0 0 ${s.size*2}px rgba(255,255,255,.85)`">
+               :style="`left:${s.left}%;top:${s.top}%;width:${s.size}px;height:${s.size}px;
+                        animation-delay:${s.delay}s;animation-duration:${s.duration}s;
+                        opacity:${s.opacity};
+                        box-shadow:0 0 ${s.size*3}px rgba(255,255,255,${s.opacity*0.9}),
+                                   0 0 ${s.size*6}px rgba(200,220,255,${s.opacity*0.5})`">
           </div>
         </template>
       </div>
-    </div>
-
-    <!-- HORIZON (เส้นแบ่งฟ้า/น้ำ) -->
-    <div class="absolute left-0 right-0 top-[42%] h-px">
-      <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
-      <div class="absolute -top-1 inset-x-0 h-6 bg-gradient-to-b from-white/10 to-transparent pointer-events-none"></div>
-    </div>
-
-    <!-- WATER (ล่าง 58%) -->
-    <div class="absolute left-0 right-0 top-[42%] bottom-0 overflow-hidden">
-      <div class="absolute inset-0 bg-gradient-to-b from-[#0b2e4a] via-[#082237] to-[#051827]"></div>
-
-      <!-- คลื่นพื้นผิว -->
-      <div class="absolute left-0 w-[220%] h-28 top-[10%] opacity-28 blur-2xl bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,.9)_0%,_transparent_60%)] animate-[waves_28s_linear_infinite]"></div>
-      <div class="absolute left-0 w-[220%] h-28 top-[40%] opacity-20 blur-2xl bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,.85)_0%,_transparent_60%)] animate-[waves_34s_linear_infinite]"></div>
-      <div class="absolute left-0 w-[220%] h-28 top-[70%] opacity-16 blur-2xl bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,.8)_0%,_transparent_60%)] animate-[waves_40s_linear_infinite]"></div>
-
-      <!-- กระทง -->
-      <div class="absolute inset-0 overflow-hidden" x-data="riverScene(@js($types), @js($recent))" x-init="init()">
-        <template x-for="k in items" :key="k.clientId">
-          <div class="absolute flex flex-col items-center will-change-transform krathong-item"
-               :style="k.style">
-            <!-- ข้อความอธิษฐาน -->
-            <div class="px-3 py-2 rounded-2xl text-xs sm:text-sm max-w-[240px] sm:max-w-[300px] 
-                        text-cyan-50 bg-slate-900/80 backdrop-blur-xl border border-cyan-400/30 
-                        shadow-lg shadow-cyan-500/20 whitespace-nowrap overflow-hidden text-ellipsis" 
-                 x-text="k.wish"></div>
-
-            <!-- ตัวกระทง + glow -->
-            <div class="relative mt-2">
-              <!-- ripple & wake (น้ำกระเพื่อมรอบกระทง) -->
-              <div class="ripple" :style="`--rippleDur:${k.rippleDur}s`">
-                <span class="ring r1"></span>
-                <span class="ring r2"></span>
-              </div>
-              <div class="wake" :style="`--wakeDur:${k.wakeDur}s`"></div>
-
-              <img :src="k.img" alt="krathong"
-                   class="w-16 h-16 sm:w-20 sm:h-20 drop-shadow-[0_15px_25px_rgba(0,0,0,0.6)] relative z-10">
-              <div class="absolute inset-0 -z-10 blur-xl opacity-50 bg-gradient-radial from-amber-300/50 to-transparent rounded-full"></div>
-            </div>
+      
+      <!-- ดาวพุ่ง (shooting stars) -->
+      <div class="pointer-events-none absolute inset-0" x-data="{shooting:[]}" x-init="
+        const addStar = () => {
+          const id = Date.now() + Math.random();
+          shooting.push({
+            id,
+            top: Math.random() * 40,
+            left: 20 + Math.random() * 60,
+            duration: 1.5 + Math.random() * 1
+          });
+          setTimeout(() => {
+            shooting = shooting.filter(s => s.id !== id);
+          }, 3000);
+          setTimeout(addStar, 8000 + Math.random() * 15000);
+        };
+        setTimeout(addStar, 3000);
+      ">
+        <template x-for="s in shooting" :key="s.id">
+          <div class="absolute w-1 h-1 bg-white rounded-full"
+               :style="`top:${s.top}%;left:${s.left}%;
+                        animation: shootingStar ${s.duration}s ease-out forwards;
+                        box-shadow: 0 0 8px rgba(255,255,255,0.9), 0 0 16px rgba(200,220,255,0.6)`">
           </div>
         </template>
-
-        <!-- เงามืดขอบล่าง -->
-        <div class="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-slate-950/80 via-slate-950/40 to-transparent"></div>
       </div>
-    </div>
+    </div>  
   </main>
 
   <!-- Modal ฟอร์ม -->
