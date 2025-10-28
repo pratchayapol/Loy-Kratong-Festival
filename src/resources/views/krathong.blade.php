@@ -288,7 +288,7 @@
     // วนลูปใหม่→เก่าเป็นรอบ ๆ ไม่ว่าง ไม่ซ้ำภายในรอบเดียว และแสดงใหม่ทันที
     function riverScene(types, recent) {
       const WATER_TOP = 35; // เริ่มน้ำที่ 58% ของจอ
-      const WATER_BAND = 42;
+      const WATER_BAND = 30;
       const DUR_INIT_MIN = 14, DUR_INIT_MAX = 24;
       const DUR_LOOP_MIN = 12, DUR_LOOP_MAX = 20;
 
