@@ -14,24 +14,28 @@
         extend: {
           fontFamily:{display:['Inter','ui-sans-serif','system-ui']},
           colors:{river1:'#0e3a5f',river2:'#0b2e4a',glass:'rgba(255,255,255,0.08)'},
-          boxShadow:{glass:'0 25px 80px rgba(0,0,0,0.45)',btn:'0 10px 40px rgba(34,211,238,0.45)'},
+          boxShadow:{
+            glass:'0 25px 80px rgba(0,0,0,0.45)',
+            btn:'0 10px 40px rgba(34,211,238,0.45)'
+          },
           keyframes:{
-            floatY:{'0%,100%':{transform:'translateY(0)'},'50%':{transform:'translateY(-6px)'}},
-            waves:{'0%':{transform:'translateX(0)'},'100%':{transform:'translateX(-50%)'}},
-            sway:{'0%,100%':{transform:'translateX(0) rotate(0deg)'},
-                  '25%':{transform:'translateX(-10px) rotate(-2deg)'},
-                  '75%':{transform:'translateX(10px) rotate(2deg)'}},
-            twinkle:{'0%,100%':{opacity:'0.3',transform:'scale(1)'},
-                     '50%':{opacity:'1',transform:'scale(1.2)'}},
-            moonGlow:{'0%,100%':{boxShadow:'0 0 50px rgba(255,244,200,0.5), 0 0 90px rgba(255,244,200,0.25)'},
-                      '50%':{boxShadow:'0 0 70px rgba(255,244,200,0.7), 0 0 130px rgba(255,244,200,0.35)'}}
+            floatY:{ '0%,100%':{ transform:'translateY(0)' }, '50%':{ transform:'translateY(-6px)' } },
+            sway:{ '0%,100%':{ transform:'rotate(0deg)' }, '25%':{ transform:'rotate(-1.5deg)' }, '75%':{ transform:'rotate(1.5deg)' } },
+            waves:{ '0%':{ transform:'translateX(0)' }, '100%':{ transform:'translateX(-50%)' } },
+            twinkle:{ '0%,100%':{ opacity:'0.35', transform:'scale(1)' }, '50%':{ opacity:'1', transform:'scale(1.15)' } },
+            moonGlow:{ '0%,100%':{ boxShadow:'0 0 50px rgba(255,244,200,0.5), 0 0 90px rgba(255,244,200,0.25)' }, '50%':{ boxShadow:'0 0 70px rgba(255,244,200,0.7), 0 0 130px rgba(255,244,200,0.35)' } },
+            ripplePulse:{ '0%':{ transform:'translate(-50%,-50%) scale(0.6)', opacity:.35 }, '100%':{ transform:'translate(-50%,-50%) scale(2.2)', opacity:0 } },
+            wakeDrift:{ '0%':{ transform:'translateX(-10%)', opacity:.25 }, '100%':{ transform:'translateX(110%)', opacity:0 } }
           },
           animation:{
-            floatY:'floatY 3.2s ease-in-out infinite',
+            // durations จะถูก override รายชิ้นด้วย CSS var
+            floatY:'floatY var(--floatDur,3.2s) ease-in-out infinite',
+            sway:'sway var(--swayDur,5s) ease-in-out infinite',
             waves:'waves 18s linear infinite',
-            sway:'sway 5s ease-in-out infinite',
-            twinkle:'twinkle 3s ease-in-out infinite',
-            moonGlow:'moonGlow 4s ease-in-out infinite'
+            twinkle:'twinkle 3.4s ease-in-out infinite',
+            moonGlow:'moonGlow 4s ease-in-out infinite',
+            ripplePulse:'ripplePulse var(--rippleDur,3.6s) ease-out infinite',
+            wakeDrift:'wakeDrift var(--wakeDur,5s) linear infinite'
           }
         }
       }
@@ -39,14 +43,55 @@
   </script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-  <script>const rnd=(min,max)=>Math.random()*(max-min)+min;</script>
+  <script>
+    const rnd=(min,max)=>Math.random()*(max-min)+min;
+  </script>
   <style id="dyn-keyframes"></style>
 
   <style>
     [x-cloak]{display:none !important}
-    .star{position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;box-shadow:0 0 3px rgba(255,255,255,.8)}
-    .krathong-item{animation:floatY 3.2s ease-in-out infinite, sway 5s ease-in-out infinite}
-    @keyframes slideUp{from{opacity:0;transform:translateY(30px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+    /* ให้กำหนดความเร็วต่อชิ้นด้วยตัวแปร */
+    .krathong-item{
+      animation:
+        floatY var(--floatDur,3.2s) ease-in-out infinite,
+        sway var(--swayDur,5s) ease-in-out infinite;
+      will-change: transform;
+    }
+
+    /* วงน้ำกระเพื่อม */
+    .ripple{
+      position:absolute; left:50%; top:100%;
+      width:110px; height:110px; pointer-events:none;
+      transform: translate(-50%,-55%);
+      filter: blur(0.2px);
+    }
+    .ripple .ring{
+      position:absolute; left:50%; top:50%;
+      width:60px; height:60px; border-radius:9999px;
+      background: radial-gradient(ellipse at center, rgba(255,255,255,0.35) 0 1px, rgba(255,255,255,0.18) 3px, transparent 55%);
+      transform: translate(-50%,-50%);
+      animation: ripplePulse var(--rippleDur,3.6s) ease-out infinite;
+    }
+    .ripple .ring.r2{ animation-delay: calc(var(--rippleDur,3.6s)/2); opacity:.25 }
+
+    /* เงาสะท้อน/ตีน้ำ */
+    .wake{
+      position:absolute; left:50%; top:100%;
+      width:140px; height:28px; transform: translate(-50%,-80%);
+      background: radial-gradient(ellipse at center, rgba(255,255,255,0.22) 0, rgba(255,255,255,0.12) 35%, rgba(255,255,255,0.0) 70%);
+      filter: blur(6px);
+      opacity:.25;
+      animation: wakeDrift var(--wakeDur,5s) linear infinite;
+      mask-image: radial-gradient(ellipse at center, black 0 60%, transparent 100%);
+      -webkit-mask-image: radial-gradient(ellipse at center, black 0 60%, transparent 100%);
+      pointer-events:none;
+    }
+
+    @keyframes slideUp{
+      from{opacity:0; transform:translateY(30px) scale(.95)}
+      to{opacity:1; transform:translateY(0) scale(1)}
+    }
     .modal-enter{animation:slideUp .3s ease-out}
   </style>
 </head>
@@ -125,25 +170,39 @@
     <div class="absolute left-0 right-0 top-[42%] bottom-0 overflow-hidden">
       <div class="absolute inset-0 bg-gradient-to-b from-[#0b2e4a] via-[#082237] to-[#051827]"></div>
 
-      <!-- คลื่น -->
-      <div class="absolute left-0 w-[220%] h-28 top-[10%] opacity-30 blur-2xl bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,.9)_0%,_transparent_60%)] animate-[waves_28s_linear_infinite]"></div>
+      <!-- คลื่นพื้นผิว -->
+      <div class="absolute left-0 w-[220%] h-28 top-[10%] opacity-28 blur-2xl bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,.9)_0%,_transparent_60%)] animate-[waves_28s_linear_infinite]"></div>
       <div class="absolute left-0 w-[220%] h-28 top-[40%] opacity-20 blur-2xl bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,.85)_0%,_transparent_60%)] animate-[waves_34s_linear_infinite]"></div>
-      <div class="absolute left-0 w-[220%] h-28 top-[70%] opacity-18 blur-2xl bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,.8)_0%,_transparent_60%)] animate-[waves_40s_linear_infinite]"></div>
+      <div class="absolute left-0 w-[220%] h-28 top-[70%] opacity-16 blur-2xl bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,.8)_0%,_transparent_60%)] animate-[waves_40s_linear_infinite]"></div>
 
       <!-- กระทง -->
       <div class="absolute inset-0 overflow-hidden" x-data="riverScene(@js($types), @js($recent))" x-init="init()">
         <template x-for="k in items" :key="k.clientId">
-          <div class="absolute flex flex-col items-center krathong-item will-change-transform" :style="k.style">
-            <div class="px-3 py-2 rounded-2xl text-xs sm:text-sm max-w-[220px] sm:max-w-[280px] 
+          <div class="absolute flex flex-col items-center will-change-transform krathong-item"
+               :style="k.style">
+            <!-- ข้อความอธิษฐาน -->
+            <div class="px-3 py-2 rounded-2xl text-xs sm:text-sm max-w-[240px] sm:max-w-[300px] 
                         text-cyan-50 bg-slate-900/80 backdrop-blur-xl border border-cyan-400/30 
                         shadow-lg shadow-cyan-500/20 whitespace-nowrap overflow-hidden text-ellipsis" 
                  x-text="k.wish"></div>
+
+            <!-- ตัวกระทง + glow -->
             <div class="relative mt-2">
-              <img :src="k.img" alt="krathong" class="w-16 h-16 sm:w-20 sm:h-20 drop-shadow-[0_15px_25px_rgba(0,0,0,0.6)]">
+              <!-- ripple & wake (น้ำกระเพื่อมรอบกระทง) -->
+              <div class="ripple" :style="`--rippleDur:${k.rippleDur}s`">
+                <span class="ring r1"></span>
+                <span class="ring r2"></span>
+              </div>
+              <div class="wake" :style="`--wakeDur:${k.wakeDur}s`"></div>
+
+              <img :src="k.img" alt="krathong"
+                   class="w-16 h-16 sm:w-20 sm:h-20 drop-shadow-[0_15px_25px_rgba(0,0,0,0.6)] relative z-10">
               <div class="absolute inset-0 -z-10 blur-xl opacity-50 bg-gradient-radial from-amber-300/50 to-transparent rounded-full"></div>
             </div>
           </div>
         </template>
+
+        <!-- เงามืดขอบล่าง -->
         <div class="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-slate-950/80 via-slate-950/40 to-transparent"></div>
       </div>
     </div>
@@ -339,35 +398,64 @@
   }
 
   function riverScene(types, recent){
-    const WATER_TOP = 42; // ต้องตรงกับ top ของโซนน้ำ (%)
-    const DUR_INIT_MIN=12, DUR_INIT_MAX=20;
-    const DUR_LOOP_MIN=10, DUR_LOOP_MAX=16;
-    const DELAY_MAX=10;
+    const WATER_TOP = 42;          // จุดเริ่มน้ำ (%)
+    const WATER_BAND = 30;         // ช่วงบนของผิวน้ำให้ลอยดูเป็นธรรมชาติ
+
+    // ความเร็วลอยตามธรรมชาติ (ยืดหยุ่นหน่อย)
+    const DUR_INIT_MIN=14, DUR_INIT_MAX=24;
+    const DUR_LOOP_MIN=12, DUR_LOOP_MAX=20;
+    const DELAY_MAX=12;
 
     const shuffled=[...(recent||[])].sort(()=>Math.random()-0.5).slice(0,24);
 
     const typeImg=t=>types?.[t]?.img || Object.values(types||{})[0]?.img || '';
-    const makeStyle=(dur,delay,top)=>{
+    const makeStyle=(dur,delay,top,opts)=>{
       const name=`drift_${Math.random().toString(36).slice(2)}`;
       const sheet=ensureKeyframeSheet();
+      // เส้นทาง: ซ้าย -> ขวา ด้วย fade-in/out
       sheet.insertRule(`@keyframes ${name}{0%{left:-20%;opacity:0}10%{opacity:1}90%{opacity:1}100%{left:120%;opacity:0}}`,sheet.cssRules.length);
-      return `top:${top}%;left:-20%;animation:${name} ${dur}s linear ${delay}s forwards`;
+      // inject ความต่างเฉพาะชิ้นด้วย CSS vars
+      return `
+        top:${top}%;
+        left:-20%;
+        --floatDur:${opts.floatDur}s;
+        --swayDur:${opts.swayDur}s;
+        --rippleDur:${opts.rippleDur}s;
+        --wakeDur:${opts.wakeDur}s;
+        animation:${name} ${dur}s linear ${delay}s forwards, var(--_dummy,0s);
+      `;
     };
 
+    // ตั้งเวลา remove item หลังครบรอบแอนิเมชัน (กันค้าง)
     const scheduleRemoval = (vm, clientId, totalMs) => {
       __schedule(() => {
         const idx = vm.items.findIndex(x => x.clientId === clientId);
         if (idx > -1) vm.items.splice(idx, 1);
-      }, totalMs);
+      }, totalMs + 30); // buffer เล็กน้อย
     };
 
     const toItem=r=>{
       const dur=rnd(DUR_INIT_MIN,DUR_INIT_MAX);
       const delay=rnd(0,DELAY_MAX);
-      const top=rnd(WATER_TOP+2,96);
+      const top=rnd(WATER_TOP + 6, WATER_TOP + WATER_BAND); // ช่วงบนของน้ำ
+      const opts={
+        floatDur: rnd(2.8, 4.4),        // ยก/ยุบคลื่น
+        swayDur:  rnd(4.5, 6.5),        // เอียงซ้าย/ขวาเบา ๆ
+        rippleDur:rnd(3.2, 4.6),        // ระยะเวลาวงน้ำกระเพื่อม
+        wakeDur:  rnd(4.5, 6.5)         // ความเร็ว wake ใต้น้ำ
+      };
       const clientId=`srv_${r.id}_${Math.random().toString(36).slice(2)}`;
-      const style=makeStyle(dur,delay,top);
-      return { id:r.id, clientId, img:typeImg(r.type), wish:`${r.nickname} (${r.age}) : ${r.wish}`, style, __life:(dur+delay)*1000 };
+      const style=makeStyle(dur,delay,top,opts);
+      return {
+        id:r.id,
+        clientId,
+        img:typeImg(r.type),
+        wish:`${r.nickname} (${r.age}) : ${r.wish}`,
+        style,
+        rippleDur: opts.rippleDur,
+        wakeDur: opts.wakeDur,
+        __life:(dur+delay)*1000
+      };
     };
 
     const initial=shuffled.map(toItem);
@@ -376,7 +464,10 @@
       items: initial,
       recentPool: recent||[],
       init(){
+        // ลบ initial หลังวิ่งครบ
         this.items.forEach(it => scheduleRemoval(this, it.clientId, it.__life));
+
+        // spawn ต่อเนื่องแบบไม่ชนกัน
         const tick=()=>{
           const pool=this.recentPool;
           if(pool.length){
@@ -387,17 +478,32 @@
               this.spawnFromRecord(r);
             }
           }
-          __schedule(tick, rnd(3500,6000));
+          __schedule(tick, rnd(4500,7200)); // เวลาห่างระหว่างลำ
         };
-        __schedule(tick, 1000);
+        __schedule(tick, 900);
       },
       spawnFromRecord(r){
         const dur=rnd(DUR_LOOP_MIN,DUR_LOOP_MAX);
-        const top=rnd(WATER_TOP+4,96);
+        const top=rnd(WATER_TOP + 8, WATER_TOP + WATER_BAND + 4);
+        const opts={
+          floatDur: rnd(3.0, 4.6),
+          swayDur:  rnd(4.2, 6.2),
+          rippleDur:rnd(3.0, 4.8),
+          wakeDur:  rnd(4.3, 6.3)
+        };
         const clientId=`cli_${r.id}_${Math.random().toString(36).slice(2)}`;
-        const k={ id:r.id, clientId, img:typeImg(r.type), wish:`${r.nickname} (${r.age}) : ${r.wish}`, style:makeStyle(dur,0,top), __life:dur*1000 };
+        const k={
+          id:r.id,
+          clientId,
+          img:typeImg(r.type),
+          wish:`${r.nickname} (${r.age}) : ${r.wish}`,
+          style:makeStyle(dur, 0, top, opts),
+          rippleDur: opts.rippleDur,
+          wakeDur: opts.wakeDur,
+          __life: dur*1000
+        };
         this.items.push(k);
-        if(this.items.length>80) this.items.splice(0,this.items.length-80);
+        if(this.items.length>100) this.items.splice(0,this.items.length-100);
         scheduleRemoval(this, clientId, k.__life);
       },
       spawnNew(p){
