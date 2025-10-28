@@ -4,49 +4,52 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ลอยกระทงออนไลน์</title>
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
           fontFamily:{display:['Inter','ui-sans-serif','system-ui']},
-          colors:{
-            sky1:'#0a1828',
-            sky2:'#1a2332',
-            river1:'#0d2847',
-            river2:'#051424'
-          },
-          boxShadow:{
-            glass:'0 25px 80px rgba(0,0,0,0.45)',
-            btn:'0 10px 40px rgba(34,211,238,0.45)',
-            moonGlow:'0 0 80px rgba(255,244,200,0.4), 0 0 120px rgba(255,244,200,0.2)'
-          },
+          colors:{river1:'#0e3a5f',river2:'#0b2e4a',glass:'rgba(255,255,255,0.08)'},
+          boxShadow:{glass:'0 25px 80px rgba(0,0,0,0.45)',btn:'0 10px 40px rgba(34,211,238,0.45)'},
           keyframes:{
-            floatY:{'0%,100%':{transform:'translateY(0)'},'50%':{transform:'translateY(-8px)'}},
-            sway:{'0%,100%':{transform:'translateX(0) rotate(0deg)'},'25%':{transform:'translateX(-12px) rotate(-2deg)'},'75%':{transform:'translateX(12px) rotate(2deg)'}},
-            twinkle:{'0%,100%':{opacity:'0.2',transform:'scale(0.8)'},'50%':{opacity:'1',transform:'scale(1.3)'}},
-            moonGlow:{'0%,100%':{opacity:'0.95',transform:'scale(1)'},'50%':{opacity:'1',transform:'scale(1.05)'}},
-            ripple:{'0%':{transform:'scale(0.8)',opacity:'0.8'},'100%':{transform:'scale(2)',opacity:'0'}}
+            floatY:{'0%,100%':{transform:'translateY(0)'},'50%':{transform:'translateY(-6px)'}},
+            waves:{'0%':{transform:'translateX(0)'},'100%':{transform:'translateX(-50%)'}},
+            sway:{'0%,100%':{transform:'translateX(0) rotate(0deg)'},'25%':{transform:'translateX(-10px) rotate(-2deg)'},'75%':{transform:'translateX(10px) rotate(2deg)'}},
+            twinkle:{'0%,100%':{opacity:'0.3',transform:'scale(1)'},'50%':{opacity:'1',transform:'scale(1.2)'}},
+            moonGlow:{'0%,100%':{boxShadow:'0 0 50px rgba(255,244,200,0.5), 0 0 90px rgba(255,244,200,0.25)'},'50%':{boxShadow:'0 0 70px rgba(255,244,200,0.7), 0 0 130px rgba(255,244,200,0.35)'}}
           },
           animation:{
-            floatY:'floatY 3.5s ease-in-out infinite',
-            sway:'sway 6s ease-in-out infinite',
+            floatY:'floatY 3.2s ease-in-out infinite',
+            waves:'waves 18s linear infinite',
+            sway:'sway 5s ease-in-out infinite',
             twinkle:'twinkle 3s ease-in-out infinite',
-            moonGlow:'moonGlow 5s ease-in-out infinite',
-            ripple:'ripple 4s ease-out infinite'
+            moonGlow:'moonGlow 4s ease-in-out infinite'
           }
         }
       }
     }
   </script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script>const rnd=(min,max)=>Math.random()*(max-min)+min;</script>
   <style id="dyn-keyframes"></style>
   
   <style>
+    
     [x-cloak]{display:none !important}
     
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: white;
+      border-radius: 50%;
+      box-shadow: 0 0 3px rgba(255,255,255,0.8);
+    }
+    
     .krathong-item {
-      animation: floatY 3.5s ease-in-out infinite, sway 6s ease-in-out infinite;
+      animation: floatY 3.2s ease-in-out infinite, sway 5s ease-in-out infinite;
     }
     
     @keyframes slideUp {
@@ -63,28 +66,11 @@
     .modal-enter {
       animation: slideUp 0.3s ease-out;
     }
-
-    /* คลื่นน้ำที่เคลื่อนไหว */
-    @keyframes wave {
-      0%, 100% { transform: translateX(0) translateY(0); }
-      25% { transform: translateX(-5%) translateY(-2%); }
-      50% { transform: translateX(-10%) translateY(0); }
-      75% { transform: translateX(-5%) translateY(2%); }
-    }
-
-    .water-wave {
-      animation: wave 8s ease-in-out infinite;
-    }
-
-    /* เมฆบางๆ */
-    @keyframes cloud-drift {
-      from { transform: translateX(-100%); }
-      to { transform: translateX(100vw); }
-    }
   </style>
 </head>
-<body x-data="{}" class="min-h-screen bg-gradient-to-b from-sky1 via-sky2 to-river1 text-slate-100 font-display overflow-hidden">
+<body x-data="{}" class="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100 font-display overflow-hidden">
 
+  <!-- Alpine store -->
   <script>
     document.addEventListener('alpine:init', () => {
       Alpine.store('ui', { open:false, aboutOpen:false });
@@ -105,7 +91,7 @@
     <span class="sm:hidden">ลอย</span>
   </button>
 
-  <!-- ปุ่มเกี่ยวกับ -->
+  <!-- ปุ่มเกี่ยวกับ (ล่างขวา) -->
   <button @click="$store.ui.aboutOpen=true"
           class="fixed right-4 bottom-4 z-40 w-12 h-12 rounded-full
                  bg-gradient-to-br from-purple-500 to-pink-600 
@@ -120,86 +106,74 @@
     </svg>
   </button>
 
+  <!-- ฉากสายน้ำ -->
   <main class="relative min-h-screen">
-    <!-- พื้นหลังท้องฟ้ากลางคืน -->
-    <div class="absolute inset-0 bg-gradient-to-b from-sky1 via-sky2 to-river1"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-river1 to-river2"></div>
 
     <!-- พระจันทร์ -->
-    <div class="absolute top-[12%] right-[15%] w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full 
-                bg-gradient-to-br from-yellow-50 via-yellow-100 to-amber-200
-                shadow-moonGlow animate-moonGlow pointer-events-none z-20">
-      <!-- รอยบนดวงจันทร์ -->
-      <div class="absolute top-[20%] left-[25%] w-3 h-3 rounded-full bg-yellow-200/40"></div>
-      <div class="absolute top-[45%] right-[30%] w-4 h-4 rounded-full bg-yellow-200/30"></div>
-      <div class="absolute bottom-[30%] left-[40%] w-2 h-2 rounded-full bg-yellow-200/35"></div>
-    </div>
+    <div class="absolute top-[8%] right-[10%] w-16 h-16 sm:w-20 sm:h-20 rounded-full 
+                bg-gradient-to-br from-yellow-50 via-yellow-100 to-yellow-200
+                animate-moonGlow pointer-events-none z-10 opacity-90"></div>
 
-    <!-- ดาวระยิบระยับ (Alpine.js) -->
-    <div class="pointer-events-none absolute inset-0 z-10" x-data="{stars:[]}" x-init="
-      for(let i=0;i<150;i++){
+    <!-- ดาวระยิบระยับ (pattern แบบเดิม) -->
+    <div class="pointer-events-none absolute inset-0 opacity-40"
+         style="background-image: radial-gradient(circle at 15% 8%, rgba(255,255,255,.25) 0 1.5px, transparent 2px),
+                                radial-gradient(circle at 35% 15%, rgba(255,255,255,.18) 0 1px, transparent 2px),
+                                radial-gradient(circle at 75% 12%, rgba(255,255,255,.22) 0 1.5px, transparent 2px),
+                                radial-gradient(circle at 85% 25%, rgba(255,255,255,.15) 0 1px, transparent 2px),
+                                radial-gradient(circle at 25% 30%, rgba(255,255,255,.2) 0 1px, transparent 2px),
+                                radial-gradient(circle at 60% 8%, rgba(255,255,255,.17) 0 1px, transparent 2px),
+                                radial-gradient(circle at 90% 40%, rgba(255,255,255,.19) 0 1px, transparent 2px),
+                                radial-gradient(circle at 45% 35%, rgba(255,255,255,.16) 0 1px, transparent 2px),
+                                radial-gradient(circle at 10% 45%, rgba(255,255,255,.21) 0 1.5px, transparent 2px),
+                                radial-gradient(circle at 55% 50%, rgba(255,255,255,.14) 0 1px, transparent 2px),
+                                radial-gradient(circle at 70% 55%, rgba(255,255,255,.18) 0 1px, transparent 2px),
+                                radial-gradient(circle at 20% 60%, rgba(255,255,255,.2) 0 1px, transparent 2px),
+                                radial-gradient(circle at 95% 65%, rgba(255,255,255,.16) 0 1px, transparent 2px),
+                                radial-gradient(circle at 40% 70%, rgba(255,255,255,.19) 0 1.5px, transparent 2px);
+                background-size: 100% 100%;"></div>
+
+    <!-- ดาวระยิบระยับแบบ animated -->
+    <div class="pointer-events-none absolute inset-0" x-data="{stars:[]}" x-init="
+      for(let i=0;i<120;i++){
         stars.push({
           left:Math.random()*100,
-          top:Math.random()*70,
-          delay:Math.random()*5,
-          duration:2+Math.random()*4,
-          size:Math.random()>0.7?(Math.random()>0.5?3:2):1
+          top:Math.random()*75,
+          delay:Math.random()*4,
+          duration:2+Math.random()*3,
+          size:Math.random()>0.7?2:1
         })
       }
     ">
       <template x-for="(s,i) in stars" :key="i">
         <div class="absolute rounded-full bg-white animate-twinkle" 
-             :style="`left:${s.left}%;top:${s.top}%;width:${s.size}px;height:${s.size}px;animation-delay:${s.delay}s;animation-duration:${s.duration}s;box-shadow:0 0 ${s.size*3}px rgba(255,255,255,0.9)`">
+             :style="`left:${s.left}%;top:${s.top}%;width:${s.size}px;height:${s.size}px;animation-delay:${s.delay}s;animation-duration:${s.duration}s;box-shadow:0 0 ${s.size*2}px rgba(255,255,255,0.8)`">
         </div>
       </template>
     </div>
 
-    <!-- เมฆบางๆ -->
-    <div class="absolute inset-0 opacity-20 pointer-events-none z-5">
-      <div class="absolute top-[15%] left-0 w-64 h-16 bg-gradient-to-r from-transparent via-white/10 to-transparent blur-2xl rounded-full"
-           style="animation: cloud-drift 60s linear infinite;"></div>
-      <div class="absolute top-[25%] left-0 w-48 h-12 bg-gradient-to-r from-transparent via-white/8 to-transparent blur-2xl rounded-full"
-           style="animation: cloud-drift 80s linear infinite; animation-delay: -20s;"></div>
-    </div>
-
-    <!-- คลองน้ำ (ครึ่งล่าง) -->
-    <div class="absolute inset-x-0 bottom-0 h-[45%] bg-gradient-to-b from-river1 to-river2 overflow-hidden">
-      <!-- เงาสะท้อนดวงจันทร์บนน้ำ -->
-      <div class="absolute top-[15%] right-[15%] w-16 h-32 sm:w-20 sm:h-40 
-                  bg-gradient-to-b from-yellow-200/30 via-yellow-200/20 to-transparent 
-                  blur-2xl opacity-60 water-wave rounded-full"></div>
-      
+    <!-- คลื่นน้ำ + กระทง (สุ่มแสดงอัตโนมัติ) -->
+    <div class="absolute inset-0 overflow-hidden" x-data="riverScene(@js($types), @js($recent))">
       <!-- คลื่นน้ำ -->
-      <div class="absolute inset-0 opacity-20">
-        <div class="absolute top-[20%] left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-300/40 to-transparent water-wave"></div>
-        <div class="absolute top-[40%] left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-300/30 to-transparent water-wave" style="animation-delay: -2s; animation-duration: 10s;"></div>
-        <div class="absolute top-[60%] left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-300/25 to-transparent water-wave" style="animation-delay: -4s; animation-duration: 12s;"></div>
-      </div>
+      <div class="absolute left-0 w-[200%] h-28 top-[12%] opacity-30 blur-2xl bg-[radial-gradient(ellipse_at_center,_white_0%,_transparent_60%)] animate-waves"></div>
+      <div class="absolute left-0 w-[200%] h-28 top-[44%] opacity-25 blur-2xl bg-[radial-gradient(ellipse_at_center,_white_0%,_transparent_60%)] animate-[waves_22s_linear_infinite]"></div>
+      <div class="absolute left-0 w-[200%] h-28 top-[72%] opacity-20 blur-2xl bg-[radial-gradient(ellipse_at_center,_white_0%,_transparent_60%)] animate-[waves_26s_linear_infinite]"></div>
 
-      <!-- ระลอกคลื่นวงกลม -->
-      <div class="absolute top-[30%] left-[20%] w-32 h-32 rounded-full border border-cyan-400/20 animate-ripple"></div>
-      <div class="absolute top-[50%] right-[30%] w-24 h-24 rounded-full border border-cyan-400/15 animate-ripple" style="animation-delay: -2s;"></div>
-      
-      <!-- Gradient overlay ด้านล่าง -->
-      <div class="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-slate-950/60 to-transparent"></div>
-    </div>
-
-    <!-- พื้นที่แสดงกระทง -->
-    <div class="absolute inset-x-0 bottom-0 h-[45%] overflow-hidden z-15" x-data="riverScene(mockTypes, mockRecent)">
       <template x-for="k in items" :key="k.clientId">
         <div class="absolute flex flex-col items-center krathong-item will-change-transform" :style="k.style">
-          <!-- คำอธิษฐาน -->
           <div class="px-3 py-2 rounded-2xl text-xs sm:text-sm max-w-[220px] sm:max-w-[280px] 
                       text-cyan-50 bg-slate-900/80 backdrop-blur-xl border border-cyan-400/30 
                       shadow-lg shadow-cyan-500/20 whitespace-nowrap overflow-hidden text-ellipsis" 
                x-text="k.wish"></div>
-          <!-- กระทง -->
           <div class="relative mt-2">
-            <img :src="k.img" alt="krathong" class="w-16 h-16 sm:w-20 sm:h-20 drop-shadow-[0_15px_30px_rgba(0,0,0,0.7)]">
-            <!-- แสงเทียน -->
-            <div class="absolute top-1 left-1/2 -translate-x-1/2 w-8 h-8 bg-amber-300/40 rounded-full blur-lg animate-pulse"></div>
+            <img :src="k.img" alt="krathong" class="w-16 h-16 sm:w-20 sm:h-20 drop-shadow-[0_15px_25px_rgba(0,0,0,0.6)]">
+            <!-- แสงเรืองรอบกระทง -->
+            <div class="absolute inset-0 -z-10 blur-xl opacity-50 bg-gradient-radial from-amber-300/50 to-transparent rounded-full"></div>
           </div>
         </div>
       </template>
+
+      <div class="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-slate-950/80 via-slate-950/40 to-transparent"></div>
     </div>
   </main>
 
@@ -327,6 +301,7 @@
         </div>
 
         <div class="p-6 space-y-6">
+          <!-- ชื่อโปรเจค -->
           <div class="text-center space-y-3">
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-purple-600 shadow-lg mb-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="size-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -339,6 +314,7 @@
 
           <div class="h-px bg-gradient-to-r from-transparent via-purple-400/30 to-transparent"></div>
 
+          <!-- ข้อมูลนักพัฒนา -->
           <div class="space-y-4">
             <div class="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
               <div class="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg">
@@ -377,16 +353,16 @@
   </div>
 
   <script>
-  const rnd=(min,max)=>Math.random()*(max-min)+min;
+  const readCookie = n => decodeURIComponent((document.cookie.split('; ').find(x=>x.startsWith(n+'='))||'').split('=')[1]||'');
 
   function riverScene(types, recent){
+    // เร่งความเร็ว: ลดช่วงเวลาเคลื่อน
     const DUR_INIT_MIN=12, DUR_INIT_MAX=20;
     const DUR_LOOP_MIN=10, DUR_LOOP_MAX=16;
     const DELAY_MAX=10;
 
-    // เรียงจากใหม่ไปเก่า แล้วสุ่ม 24 รายการ
-    const sorted = [...(recent||[])].sort((a,b)=>b.id-a.id);
-    const shuffled = sorted.slice(0,24).sort(()=>Math.random()-0.5);
+    // สุ่มชุดเริ่มต้นจากฐานข้อมูล
+    const shuffled=[...(recent||[])].sort(()=>Math.random()-0.5).slice(0,24);
 
     const typeImg=t=>types?.[t]?.img || Object.values(types||{})[0]?.img || '';
     const makeStyle=(dur,delay,top)=>{
@@ -407,8 +383,9 @@
 
     return{
       items: initial,
-      recentPool: sorted,
+      recentPool: recent||[],
       init(){
+        // ปล่อยกระทงจากฐานข้อมูลต่อเนื่อง โดย "ไม่ซ้ำกับที่กำลังแสดงอยู่"
         const tick=()=>{
           const pool=this.recentPool;
           if(pool.length){
@@ -434,35 +411,42 @@
         this.items.push(k);
         if(this.items.length>80) this.items.splice(0,this.items.length-80);
       },
+      // ใช้หลังบันทึกใหม่สำเร็จ
       spawnNew(p){
         const r={ id:Date.now(), type:p.type, nickname:p.nickname, age:p.age, wish:p.wish };
-        this.recentPool.unshift(r);
+        this.recentPool.push(r);
         this.spawnFromRecord(r);
       }
     }
   }
 
   function krathongForm(){
-    const types = {
-      banana: {label:'กระทงใบตอง', img:'https://img.icons8.com/color/96/lotus.png'},
-      bread: {label:'กระทงขนมปัง', img:'https://img.icons8.com/color/96/bread.png'},
-      flower: {label:'กระทงดอกไม้', img:'https://img.icons8.com/color/96/flower-bouquet.png'},
-      ice: {label:'กระทงน้ำแข็ง', img:'https://img.icons8.com/color/96/snowflake.png'}
-    };
-
     return {
-      types: Object.entries(types).map(([key,val])=>({key,...val})),
       form:{ type:'banana', nickname:'', age:'', wish:'' },
       error:'', ok:'',
       async submit(){
         this.error=''; this.ok='';
         try{
-          // จำลองการบันทึก
-          await new Promise(resolve=>setTimeout(resolve,500));
+          const meta=document.querySelector('meta[name="csrf-token"]').content;
+          const xsrf=readCookie('XSRF-TOKEN');
+          const res=await fetch('/krathongs',{
+            method:'POST',
+            headers:{
+              'Content-Type':'application/json','Accept':'application/json',
+              'X-CSRF-TOKEN':meta,'X-XSRF-TOKEN':xsrf,'X-Requested-With':'XMLHttpRequest'
+            },
+            credentials:'same-origin',
+            body:JSON.stringify(this.form)
+          });
+          if(!res.ok){
+            let msg=`HTTP ${res.status}`; try{const j=await res.json(); msg=j.message||msg;}catch(_){}
+            throw new Error(msg);
+          }
+          const data=await res.json();
           this.ok='ลอยแล้ว ✨';
           const scene=document.querySelector('main [x-data]');
           const api=scene?._x_dataStack?.[0];
-          api?.spawnNew?.(this.form);
+          api?.spawnNew?.(data);
           this.form.wish='';
           setTimeout(()=>{
             Alpine.store('ui').open=false;
@@ -472,19 +456,7 @@
       }
     }
   }
+</script>
 
-  // ข้อมูลจำลอง
-  const mockTypes = {
-    banana: {label:'กระทงใบตอง', img:'https://img.icons8.com/color/96/lotus.png'},
-    bread: {label:'กระทงขนมปัง', img:'https://img.icons8.com/color/96/bread.png'},
-    flower: {label:'กระทงดอกไม้', img:'https://img.icons8.com/color/96/flower-bouquet.png'},
-    ice: {label:'กระทงน้ำแข็ง', img:'https://img.icons8.com/color/96/snowflake.png'}
-  };
-
-  const mockRecent = [
-    {id:1,type:'banana',nickname:'สมชาย',age:25,wish:'ขอให้โชคดีตลอดปี'},
-    {id:2,type:'flower',nickname:'สมหญิง',age:22,wish:'ขอให้ครอบครัวมีความสุข'},
-    {id:3,type:'bread',nickname:'นิด',age:30,wish:'ขอให้งานราบรื่น'},
-    {id:4,type:'ice',nickname:'แอน',age:28,wish:'ขอให้สุขภาพแข็งแรง'},
-    {id:5,type:'banana',nickname:'บอล',age:35,wish:'ขอให้ธุรกิจเจริญรุ่งเรือง'}
-  ]
+</body>
+</html>
