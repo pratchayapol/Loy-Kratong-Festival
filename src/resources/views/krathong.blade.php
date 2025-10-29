@@ -210,11 +210,7 @@
 </head>
 
 <body class="min-h-screen bg-slate-950 text-slate-100 font-sans overflow-hidden" x-data="{}">
-    {{-- <div class="ribbon-black">
-        <img src="https://roietonline.net/images/black-ribbon.png" alt="โบว์แสดงความอาลัย"
-            title="ปวงพสกนิกรชาวไทยน้อมสำนึกในพระมหากรุณาธิคุณตราบนิจนิรันดร์" class="img-responsive" loading="lazy"
-            decoding="async">
-    </div> --}}
+   
     <!-- ป้ายเชิญด้านบนตรงกลาง -->
     <div class="fixed top-4 left-1/2 -translate-x-1/2 z-40 select-none">
         <div
