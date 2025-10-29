@@ -321,7 +321,7 @@
     // ฉากแม่น้ำลอยกระทง — เว้นแถวชัด ไม่ถี่ ระยะห่างสม่ำเสมอ
     function riverScene(types, recent) {
         const WATER_TOP = 25;
-        const WATER_BAND = 28;
+        const WATER_BAND = 40;
         const DUR = 50; // เพิ่มเวลาให้ช้าลง ลอยนานขึ้น
         const MAX_ITEMS = window.innerWidth < 640 ? 15 : 35;
         const typeImg = t => types?.[t]?.img || Object.values(types || {})[0]?.img || '';
