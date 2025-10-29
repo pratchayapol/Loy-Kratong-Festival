@@ -492,28 +492,19 @@
                         </div>
 
                         <script>
-                            // === ปรับค่าให้ตรงของคุณ ===
-                            const STATUS_SLUG = "loykratong";
                             const MONITOR_ID = "34";
-                            const ENDPOINT = `/kuma/heartbeat/${STATUS_SLUG}`;
-
-                            // ช่วง Recent 30 นาที
-                            const RECENT_MS = 30 * 60 * 1000;
-
-                            // ล็อกสเกล Y กันเด้ง
-                            const Y_MIN = 0;
-                            const Y_MAX = 1000;
-
+                            const ENDPOINT = `/kuma/heartbeat/loykratong`;
+                            const Y_MIN = 0,
+                                Y_MAX = 1000;
                             let pingChart;
-                            let loadedOnceForAbout = false; // กันโหลดซ้ำถ้าอยู่ในโมดัล
 
                             function toDate(t) {
                                 if (typeof t === 'number') return new Date((t < 2e10 ? t * 1000 : t));
-                                if (typeof t === 'string') return new Date(t.replace(' ', 'T')); // "YYYY-MM-DD HH:mm:ss" -> local time
+                                if (typeof t === 'string') return new Date(t.replace(' ', 'T'));
                                 return new Date(t);
                             }
 
-                            async function loadPingRecent() {
+                            async function loadPingExact() {
                                 const errEl = document.getElementById('pingErr');
                                 errEl.textContent = '';
                                 try {
@@ -523,26 +514,19 @@
                                     if (!res.ok) throw new Error(`HTTP ${res.status}`);
                                     const data = await res.json();
 
-                                    const all = (data.heartbeatList?.[MONITOR_ID] || [])
-                                        .filter(h => Number.isFinite(h.ping) && h.ping > 0 && h.ping < 60000)
+                                    const raw = data.heartbeatList?.[MONITOR_ID] ?? [];
+                                    const series = raw
+                                        .filter(h => Number.isFinite(h.ping) && h.ping > 0 && h.ping < 60000 && h.time)
                                         .map(h => ({
                                             x: toDate(h.time),
-                                            y: h.ping
-                                        }));
+                                            y: Math.min(h.ping, Y_MAX)
+                                        }))
+                                        .sort((a, b) => a.x - b.x);
 
-                                    const now = Date.now();
-                                    let recent = all.filter(p => p.x.getTime() >= now - RECENT_MS);
+                                    if (series.length === 0) throw new Error('no data');
 
-                                    // ถ้าเงียบเกิน 30 นาที ให้ fallback เป็นจุดล่าสุดจำนวนหนึ่ง (เช่น 60 จุด)
-                                    if (recent.length === 0 && all.length) {
-                                        recent = all.slice(-60);
-                                    }
-
-                                    // clamp กันหลุดสเกล
-                                    const series = recent.map(p => ({
-                                        x: p.x,
-                                        y: Math.min(p.y, Y_MAX)
-                                    }));
+                                    const xmin = series[0].x.getTime();
+                                    const xmax = series[series.length - 1].x.getTime();
 
                                     const ctx = document.getElementById('pingChart');
                                     if (pingChart) pingChart.destroy();
@@ -554,7 +538,7 @@
                                                 label: 'Ping',
                                                 data: series,
                                                 pointRadius: 0,
-                                                spanGaps: true
+                                                spanGaps: false
                                             }]
                                         },
                                         options: {
@@ -575,7 +559,13 @@
                                             },
                                             scales: {
                                                 x: {
-                                                    type: 'time'
+                                                    type: 'time',
+                                                    bounds: 'data',
+                                                    min: xmin,
+                                                    max: xmax,
+                                                    time: {
+                                                        tooltipFormat: 'HH:mm:ss'
+                                                    }
                                                 },
                                                 y: {
                                                     min: Y_MIN,
@@ -602,33 +592,29 @@
                                 }
                             }
 
-                            // ใช้นอกโมดัล (โหลดทันที)
-                            if (!window.Alpine) {
-                                document.addEventListener('DOMContentLoaded', () => {
-                                    loadPingRecent();
-                                });
-                            }
+                            // เรียกใช้
+                            document.addEventListener('DOMContentLoaded', loadPingExact);
 
-                            // ถ้าอยู่ในโมดัล "เกี่ยวกับ" ให้โหลดครั้งเดียวตอนเปิด
+                            // ถ้าโหลดตอนเปิดโมดัล "เกี่ยวกับ"
                             document.addEventListener('alpine:init', () => {
+                                let once = false;
                                 Alpine.effect(() => {
                                     const open = Alpine.store('ui')?.aboutOpen;
-                                    if (open && !loadedOnceForAbout) {
-                                        loadedOnceForAbout = true;
+                                    if (open && !once) {
+                                        once = true;
                                         setTimeout(() => {
-                                            loadPingRecent().then(() => {
+                                            loadPingExact().then(() => {
                                                 try {
                                                     pingChart?.resize();
                                                 } catch {}
                                             });
                                         }, 150);
                                     }
-                                    if (!open && loadedOnceForAbout) {
-                                        loadedOnceForAbout = false; // ปิดแล้วเปิดใหม่ค่อยโหลดอีกครั้ง
-                                    }
+                                    if (!open) once = false;
                                 });
                             });
                         </script>
+
 
                     </div>
 
