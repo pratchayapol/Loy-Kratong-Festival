@@ -596,6 +596,9 @@
             </div>
         </div>
     </div>
+
+
+    <!-- Ping -->
     <script>
         // === Config ===
         const STATUS_SLUG = "loykratong";
@@ -803,6 +806,9 @@
             });
         });
     </script>
+
+
+
     {{-- หิ่งห้อยกระพริบ --}}
     <script>
         function fireflies() {
@@ -889,10 +895,13 @@
         }
     </script>
 
-    <!-- Logic ลอยกระทง -->
     <script>
-        const readCookie = n => decodeURIComponent((document.cookie.split('; ').find(x => x.startsWith(n + '=')) || '')
-            .split('=')[1] || '');
+        // Utils
+        const readCookie = n =>
+            decodeURIComponent((document.cookie.split('; ').find(x => x.startsWith(n + '=')) || '').split('=')[1] || '');
+        const rnd = (min, max) => Math.random() * (max - min) + min;
+
+        // Timer pool
         const __timers = new Set();
         const __schedule = (fn, ms) => {
             const t = setTimeout(fn, ms);
@@ -905,6 +914,7 @@
         };
         window.addEventListener('beforeunload', __clearAll);
 
+        // Keyframe sheet
         function ensureKeyframeSheet() {
             let el = document.getElementById('dyn-keyframes');
             if (!el) {
@@ -922,46 +932,83 @@
             return el.sheet;
         }
 
-        // วนลูปใหม่→เก่าเป็นรอบ ๆ ไม่ว่าง ไม่ซ้ำภายในรอบเดียว และแสดงใหม่ทันที
+        // Common keyframes: bob = ลอยขึ้นลง, zig = ฟันปลา
+        function ensureCommonKeyframes() {
+            const sheet = ensureKeyframeSheet();
+            if (!window.__KF_INIT__) {
+                sheet.insertRule(
+                    `@keyframes bob{0%{margin-top:calc(var(--bobAmp,8px)*-1)}50%{margin-top:calc(var(--bobAmp,8px))}100%{margin-top:calc(var(--bobAmp,8px)*-1)}}`,
+                    sheet.cssRules.length
+                );
+                sheet.insertRule(
+                    `@keyframes zig{0%{transform:translateX(calc(var(--zigAmp,10px)*-1))}49%{transform:translateX(calc(var(--zigAmp,10px)*-1))}50%{transform:translateX(var(--zigAmp,10px))}100%{transform:translateX(var(--zigAmp,10px))}}`,
+                    sheet.cssRules.length
+                );
+                window.__KF_INIT__ = true;
+            }
+            return sheet;
+        }
+
+        // ฉากแม่น้ำ: ล่าสุดก่อน ลอยขึ้นลง ฟันปลา ปล่อยเว้นช่วง
         function riverScene(types, recent) {
-            const WATER_TOP = 25; // เริ่มน้ำที่ 60% ของจอในมือถือ
+            const WATER_TOP = 25;
             const WATER_BAND = 28;
             const DUR_INIT_MIN = 22,
-                DUR_INIT_MAX = 34; // ชุดแรก
+                DUR_INIT_MAX = 34;
             const DUR_LOOP_MIN = 18,
-                DUR_LOOP_MAX = 28; // รอบต่อไป
+                DUR_LOOP_MAX = 28;
 
-            const MAX_ITEMS = window.innerWidth < 640 ? 40 : 100; // จำกัดจำนวนบนมือถือ
+            const GAP_MOBILE_MIN = 6500,
+                GAP_MOBILE_MAX = 9000;
+            const GAP_DESK_MIN = 4500,
+                GAP_DESK_MAX = 7200;
+
+            const MAX_ITEMS = window.innerWidth < 640 ? 40 : 100;
             const typeImg = t => types?.[t]?.img || Object.values(types || {})[0]?.img || '';
 
             const makeStyle = (dur, delay, top) => {
                 const name = `drift_${Math.random().toString(36).slice(2)}`;
-                const sheet = ensureKeyframeSheet();
+                const sheet = ensureCommonKeyframes();
                 sheet.insertRule(
                     `@keyframes ${name}{0%{left:-20%;opacity:0}10%{opacity:1}90%{opacity:1}100%{left:120%;opacity:0}}`,
-                    sheet.cssRules.length);
-                return `top:${top}%;left:-20%;--floatDur:${rnd(2.8,4.4)}s;--swayDur:${rnd(4.5,6.5)}s;animation:${name} ${dur}s linear ${delay}s forwards,var(--_dummy,0s);`;
+                    sheet.cssRules.length
+                );
+                const floatDur = rnd(2.8, 4.4);
+                const swayDur = rnd(4.5, 6.5);
+                const bobAmp = `${Math.round(rnd(6, 12))}px`;
+                const zigAmp = `${Math.round(rnd(6, 14))}px`;
+                return [
+                    `top:${top}%;left:-20%`,
+                    `--floatDur:${floatDur}s`,
+                    `--swayDur:${swayDur}s`,
+                    `--bobAmp:${bobAmp}`,
+                    `--zigAmp:${zigAmp}`,
+                    `animation:${name} ${dur}s linear ${delay}s forwards,`,
+                    `bob var(--floatDur) ease-in-out ${Math.random()<0.5?0:0.6}s infinite,`,
+                    `zig var(--swayDur) steps(2,jump-none) 0s infinite`
+                ].join(';') + ';';
             };
 
             const mkItem = (r, init = false) => {
                 const dur = init ? rnd(DUR_INIT_MIN, DUR_INIT_MAX) : rnd(DUR_LOOP_MIN, DUR_LOOP_MAX);
-                const delay = init ? rnd(0, 12) : 0;
+                const delay = init ? rnd(0, 6) : 0;
                 const top = rnd(WATER_TOP + 6, WATER_TOP + WATER_BAND + (init ? 0 : 4));
                 return {
                     id: r.id,
-                    clientId: `${init?'srv':'cli'}_${r.id}_${Math.random().toString(36).slice(2)}`,
+                    clientId: `${init ? 'srv' : 'cli'}_${r.id}_${Math.random().toString(36).slice(2)}`,
                     img: typeImg(r.type),
                     wish: `${r.nickname} : ${r.wish}`,
                     style: makeStyle(dur, delay, top),
                     show: false,
                     paused: false,
                     __life: (dur + delay) * 1000,
-                    __deadline: Date.now() + (dur + delay) * 1000
+                    __deadline: Date.now() + (dur + delay) * 1000,
+                    __tid: null,
+                    __remain: 0
                 };
             };
 
             const scheduleRemoval = (vm, item, ms) => {
-                // เคลียร์ตัวเดิม
                 if (item.__tid) {
                     clearTimeout(item.__tid);
                     __timers.delete(item.__tid);
@@ -973,6 +1020,7 @@
                     if (i > -1) vm.items.splice(i, 1);
                 }, ms + 30);
             };
+
             const base = Array.from(new Map((recent || []).map(r => [r.id, r])).values()).sort((a, b) => b.id - a.id);
 
             return {
@@ -984,7 +1032,6 @@
                 pause(k) {
                     if (!k || k.paused) return;
                     k.paused = true;
-                    // คงเหลือเท่าไร
                     k.__remain = Math.max(3000, (k.__deadline || 0) - Date.now());
                     if (k.__tid) {
                         clearTimeout(k.__tid);
@@ -992,26 +1039,26 @@
                         k.__tid = null;
                     }
                 },
+
                 resume(k) {
                     if (!k || !k.paused) return;
                     k.paused = false;
-                    // ยืดเวลาอ่านอีกหน่อย
                     const extra = 8000;
                     const ms = (k.__remain || 0) + extra;
                     scheduleRemoval(this, k, ms);
                 },
-                order: base,
-                seenInCycle: new Set(),
-                idx: 0,
+
                 init() {
-                    const initCount = Math.min(24, this.order.length);
-                    for (let k = 0; k < initCount; k++) this._spawnNext(true);
+                    this._spawnNext(true);
                     const tick = () => {
                         this._spawnNext(false);
-                        __schedule(tick, window.innerWidth < 400 ? rnd(6500, 9000) : rnd(4500, 7200));
+                        const gap = window.innerWidth < 400 ? rnd(GAP_MOBILE_MIN, GAP_MOBILE_MAX) :
+                            rnd(GAP_DESK_MIN, GAP_DESK_MAX);
+                        __schedule(tick, gap);
                     };
-                    __schedule(tick, 900);
+                    __schedule(tick, rnd(1000, 1600));
                 },
+
                 _spawnNext(isInitial) {
                     if (!this.order.length) return;
                     if (this.seenInCycle.size >= this.order.length) {
@@ -1027,11 +1074,13 @@
                     if (!r) return;
                     this.seenInCycle.add(r.id);
                     this.idx = (this.idx + 1) % this.order.length;
+
                     const item = mkItem(r, isInitial);
                     this.items.unshift(item);
                     if (this.items.length > MAX_ITEMS) this.items.splice(MAX_ITEMS);
                     scheduleRemoval(this, item, item.__life);
                 },
+
                 spawnFromRecord(r) {
                     this.order = [r, ...this.order.filter(x => x.id !== r.id)].sort((a, b) => b.id - a.id);
                     this.seenInCycle.clear();
@@ -1041,6 +1090,7 @@
                     if (this.items.length > MAX_ITEMS) this.items.splice(MAX_ITEMS);
                     scheduleRemoval(this, item, item.__life);
                 },
+
                 spawnNew(p) {
                     const r = {
                         id: p.id ?? Date.now(),
@@ -1051,9 +1101,10 @@
                     };
                     this.spawnFromRecord(r);
                 }
-            }
+            };
         }
 
+        // ฟอร์มส่งกระทง
         function krathongForm() {
             return {
                 form: {
@@ -1103,9 +1154,10 @@
                         this.error = e.message;
                     }
                 }
-            }
+            };
         }
     </script>
+
 
     <!-- keyframes ดาวพุ่ง -->
     <style>
