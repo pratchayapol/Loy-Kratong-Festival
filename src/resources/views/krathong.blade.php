@@ -2,29 +2,62 @@
 
 
 @section('content')
-    <canvas id="fwCanvas" aria-hidden="true"></canvas>
     <!-- ป้ายเชิญด้านบนตรงกลาง -->
     <div class="fixed top-4 left-1/2 -translate-x-1/2 z-40 select-none">
+        <!-- กรอบไล่สีรอบนอก -->
         <div
-            class="px-8 sm:px-10 py-4 sm:py-5 rounded-3xl border border-white/20 bg-white/10 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.45)] text-center">
+            class="relative p-[1px] rounded-3xl bg-gradient-to-r from-cyan-400/40 via-blue-400/40 to-purple-400/40 shadow-[0_20px_50px_rgba(0,0,0,0.45)]">
+            <!-- กล่องด้านในแบบแก้ว -->
             <div
-                class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-wide bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-transparent">
-                ลอยกระทงออนไลน์
-            </div>
-            <div class="mt-1 text-base sm:text-lg md:text-xl text-slate-200/90">
-                ตั้งจิตอธิษฐาน แล้วปล่อยความกังวลให้ลอยไปกับสายน้ำ
-            </div>
+                class="px-6 sm:px-8 py-4 sm:py-5 rounded-[calc(theme(borderRadius.3xl)-1px)] border border-white/15 bg-white/10 backdrop-blur-xl text-center">
 
-            <div class="px-4 py-2 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl text-center">
-                <span class="text-slate-200/90">จำนวนกระทงทั้งหมด</span>
-                <span id="totalCount" class="ml-2 text-2xl font-extrabold text-white">
-                    {{ number_format($total ?? 0) }}
-                </span>
-            </div>
+                <!-- หัวเรื่อง -->
+                <div
+                    class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-wide bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-transparent">
+                    ลอยกระทงออนไลน์
+                </div>
 
+                <!-- คำโปรย -->
+                <div class="mt-1 text-base sm:text-lg md:text-xl text-slate-200/90">
+                    ตั้งจิตอธิษฐาน แล้วปล่อยความกังวลให้ลอยไปกับสายน้ำ
+                </div>
+
+                <!-- แถวสถิติ -->
+                <div class="mt-3 sm:mt-4 flex items-center justify-center gap-3 sm:gap-4">
+
+                    <!-- ป้ายจำนวนกระทงทั้งหมด -->
+                    <div
+                        class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-slate-900/40 px-3.5 py-1.5 backdrop-blur-md shadow-[0_8px_24px_rgba(0,0,0,0.35)]">
+                        <!-- ไอคอนหยดน้ำ -->
+                        <svg class="h-4 w-4 sm:h-5 sm:w-5 opacity-90" viewBox="0 0 24 24" fill="currentColor"
+                            aria-hidden="true">
+                            <path
+                                d="M12 2.5c4.2 5.1 6.3 8.6 6.3 11.3 0 3.5-2.8 6.3-6.3 6.3s-6.3-2.8-6.3-6.3C5.7 11.1 7.8 7.6 12 2.5z" />
+                        </svg>
+                        <span class="text-slate-200/90">จำนวนกระทงทั้งหมด</span>
+                        <span class="mx-1 h-1 w-1 rounded-full bg-white/30"></span>
+                        <span id="totalCount" class="text-xl sm:text-2xl font-extrabold text-white font-mono tabular-nums"
+                            aria-live="polite">
+                            {{ number_format($total ?? 0) }}
+                        </span>
+                    </div>
+
+                    <!-- แถบสถานะอัปเดตล่าสุด -->
+                    <div
+                        class="hidden sm:inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-200/80">
+                        <span class="relative flex h-2 w-2">
+                            <span
+                                class="absolute inline-flex h-full w-full rounded-full bg-emerald-300/60 animate-ping"></span>
+                            <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-300"></span>
+                        </span>
+                        <span>กำลังอัปเดตอัตโนมัติ</span>
+                    </div>
+
+                </div>
+            </div>
         </div>
-
     </div>
+
 
 
 
