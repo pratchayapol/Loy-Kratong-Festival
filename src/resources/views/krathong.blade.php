@@ -12,15 +12,20 @@
     <link rel="manifest" href="{{ secure_asset('site.webmanifest') }}" />
     <meta name="theme-color" content="#0b2e4a" />
 
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@200;300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
     <!-- Tailwind config BEFORE CDN -->
     <script>
         tailwind = {
             config: {
                 theme: {
                     extend: {
-                        fontFamily: {
-                            display: ['Inter', 'ui-sans-serif', 'system-ui']
-                        },
+                        sans: ['"Sarabun"', 'ui-sans-serif', 'system-ui'],
+                        display: ['"Sarabun"', 'ui-sans-serif', 'system-ui'],
                         keyframes: {
                             floatY: {
                                 '0%,100%': {
@@ -201,7 +206,7 @@
     </style>
 </head>
 
-<body x-data="{}" class="min-h-screen bg-slate-950 text-slate-100 font-display overflow-hidden">
+<body x-data="{}" class="font-sans min-h-screen bg-slate-950 text-slate-100 font-display overflow-hidden">
     <div class="ribbon-black">
         <img src="https://roietonline.net/images/black-ribbon.png" alt="โบว์แสดงความอาลัย"
             title="ปวงพสกนิกรชาวไทยน้อมสำนึกในพระมหากรุณาธิคุณตราบนิจนิรันดร์" class="img-responsive" loading="lazy"
