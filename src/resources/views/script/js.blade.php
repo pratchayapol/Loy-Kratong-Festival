@@ -320,54 +320,60 @@
 
     // ฉากแม่น้ำลอยกระทง — เว้นแถวชัด ไม่ถี่ ระยะห่างสม่ำเสมอ
     function riverScene(types, recent) {
-        const WATER_TOP = 25;
-        const WATER_BAND = 28;
-        const DUR = 50; // เพิ่มเวลาให้ช้าลง ลอยนานขึ้น
+        const WATER_TOP = 25; // จุดเริ่มเปอร์เซ็นต์แนวตั้งของแถบน้ำ
+        const WATER_BAND = 28; // ความสูงแถบน้ำเป็นเปอร์เซ็นต์
+        const DUR = 50;
         const MAX_ITEMS = window.innerWidth < 640 ? 15 : 35;
         const typeImg = t => types?.[t]?.img || Object.values(types || {})[0]?.img || '';
 
-        // ลดจำนวนเลน และเว้นระยะห่างระหว่างแถวให้ชัดเจน
+        // เลน
         const TOTAL_LANES = window.innerWidth < 640 ? 1 : 2;
-        const VERTICAL_SPACING = (WATER_BAND - 20) / Math.max(1, TOTAL_LANES - 1);
-        const laneTops = Array.from({
-                length: TOTAL_LANES
-            }, (_, i) =>
-            WATER_TOP + 12 + (i * VERTICAL_SPACING)
-        );
 
-        // เพิ่มระยะห่างแนวนอนให้มากขึ้น
+        // เพิ่มระยะขอบบน–ล่างของแถวนานๆ เข้าไปเลย
+        const TOP_PAD = window.innerWidth < 640 ? 14 : 12; // ยิ่งเยอะ ยิ่งห่างขอบบน
+        const BOTTOM_PAD = window.innerWidth < 640 ? 14 : 12; // ยิ่งเยอะ ยิ่งห่างขอบล่าง
+
+        // คำนวณพื้นที่ที่เหลือให้วางเลน
+        const AVAILABLE = Math.max(0, WATER_BAND - TOP_PAD - BOTTOM_PAD);
+
+        // ตำแหน่ง top ของแต่ละเลน
+        const laneTops = Array.from({
+            length: TOTAL_LANES
+        }, (_, i) => {
+            if (TOTAL_LANES === 1) {
+                // วางกลางพื้นที่ AVAILABLE
+                return WATER_TOP + TOP_PAD + AVAILABLE / 2;
+            }
+            // กระจายเต็มช่วง AVAILABLE โดยมีขอบบน–ล่างตาม PAD
+            const step = AVAILABLE / (TOTAL_LANES - 1);
+            return WATER_TOP + TOP_PAD + i * step;
+        });
+
+        // ระยะห่างแนวนอนเดิม
         const TRACK_WIDTH = 140;
         const KRATHONG_WIDTH_PCT = window.innerWidth < 640 ? 40 : 15;
-        const SAFE_GAP_PCT = KRATHONG_WIDTH_PCT * 2; // เว้นระยะ 2 เท่า!
+        const SAFE_GAP_PCT = KRATHONG_WIDTH_PCT * 2;
         const TIME_GAP_MS = (SAFE_GAP_PCT / TRACK_WIDTH) * DUR * 1300;
 
         console.log(
-            `Config: ${TOTAL_LANES} lanes, vertical: ${VERTICAL_SPACING.toFixed(1)}%, gap: ${(TIME_GAP_MS/1000).toFixed(1)}s`
-            );
+            `Config: ${TOTAL_LANES} lanes, padTop:${TOP_PAD}%, padBot:${BOTTOM_PAD}%, avail:${AVAILABLE.toFixed(1)}%, gap:${(TIME_GAP_MS/1000).toFixed(1)}s`
+        );
 
-        // ติดตามเวลาของแต่ละเลน
         const laneNextTime = new Array(TOTAL_LANES).fill(0);
-
-        // เลือกเลนแบบหมุนเวียน
         let currentLaneIndex = 0;
 
         function pickLane() {
             const now = performance.now();
-
-            // ลองทุกเลนตามลำดับ
             for (let attempt = 0; attempt < TOTAL_LANES; attempt++) {
                 const laneIdx = (currentLaneIndex + attempt) % TOTAL_LANES;
-
                 if (laneNextTime[laneIdx] <= now) {
                     laneNextTime[laneIdx] = now + TIME_GAP_MS;
                     currentLaneIndex = (laneIdx + 1) % TOTAL_LANES;
                     return laneIdx;
                 }
             }
-
             return -1;
         }
-
         // สร้าง animation ที่นุ่มนวล
         const makeStyle = (topPct, laneIdx) => {
             const name = `drift_${Math.random().toString(36).slice(2)}`;
