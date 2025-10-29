@@ -1155,7 +1155,7 @@
                     });
                 }
             }
-        }ด
+        }
 
         function krathongForm() {
             return {
