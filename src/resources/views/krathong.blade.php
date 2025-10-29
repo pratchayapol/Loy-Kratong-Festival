@@ -484,7 +484,7 @@
 
                         <!-- ==== Ping Chart (Recent Only) ==== -->
                         <div id="recent-ping" class="ping-chart-wrapper select-none">
-                            <div class="mb-2 text-sm text-slate-300">Recent (last 30 min)</div>
+                            <div class="mb-2 text-sm text-slate-300">Ping ล่าสุด</div>
                             <div class="chart-wrapper relative" style="position:relative;height:250px;">
                                 <canvas id="pingChart"></canvas>
                             </div>
@@ -577,7 +577,7 @@
                                                     max: xmax,
                                                     title: {
                                                         display: true,
-                                                        text: 'เวลา (UTC+7, 24 ชม.)'
+                                                        text: 'เวลา'
                                                     },
                                                     ticks: {
                                                         source: 'data',
