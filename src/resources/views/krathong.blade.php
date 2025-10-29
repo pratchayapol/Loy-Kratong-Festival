@@ -380,7 +380,7 @@
         </div>
     </div>
 @endsection
-@extends('js.js')
+
 @push('scripts')
-    @vite('resources/js/custom.js')
+   @extend('resources/js/custom.js')
 @endpush
