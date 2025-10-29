@@ -1,60 +1,135 @@
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Loy Kratong Festival</title>
-  <meta name="csrf-token" content="{{ csrf_token() }}" />
-  <!-- Favicon / Manifest (กัน mixed content) -->
-  <link rel="icon" href="{{ secure_asset('favicon.ico') }}" />
-  <link rel="icon" type="image/png" sizes="32x32" href="{{ secure_asset('favicon-32x32.png') }}" />
-  <link rel="icon" type="image/png" sizes="16x16" href="{{ secure_asset('favicon-16x16.png') }}" />
-  <link rel="apple-touch-icon" sizes="180x180" href="{{ secure_asset('apple-touch-icon.png') }}" />
-  <link rel="manifest" href="{{ secure_asset('site.webmanifest') }}" />
-  <meta name="theme-color" content="#0b2e4a" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Loy Kratong Festival</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <!-- Favicon / Manifest (กัน mixed content) -->
+    <link rel="icon" href="{{ secure_asset('favicon.ico') }}" />
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ secure_asset('favicon-32x32.png') }}" />
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ secure_asset('favicon-16x16.png') }}" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ secure_asset('apple-touch-icon.png') }}" />
+    <link rel="manifest" href="{{ secure_asset('site.webmanifest') }}" />
+    <meta name="theme-color" content="#0b2e4a" />
 
-  <!-- Tailwind, Alpine, Chart.js, Time adapter -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
-  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Tailwind, Alpine, Chart.js, Time adapter -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-  <!-- Tailwind config (short & sweet) -->
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { display: ['Inter','ui-sans-serif','system-ui'] },
-          keyframes: {
-            floatY:{'0%,100%':{transform:'translateY(0)'},'50%':{transform:'translateY(-6px)'}},
-            sway:{'0%,100%':{transform:'rotate(0deg)'},'25%':{transform:'rotate(-1.5deg)'},'75%':{transform:'rotate(1.5deg)'}},
-            waves:{'0%':{transform:'translateX(0)'},'100%':{transform:'translateX(-50%)'}},
-            twinkle:{'0%,100%':{opacity:'0.35',transform:'scale(1)'},'50%':{opacity:'1',transform:'scale(1.15)'}}
-          },
-          animation: {
-            floatY:'floatY 3.2s ease-in-out infinite',
-            sway:'sway 5s ease-in-out infinite',
-            waves:'waves 18s linear infinite',
-            twinkle:'twinkle 3.4s ease-in-out infinite'
-          }
+    <!-- Tailwind config (short & sweet) -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        display: ['Inter', 'ui-sans-serif', 'system-ui']
+                    },
+                    keyframes: {
+                        floatY: {
+                            '0%,100%': {
+                                transform: 'translateY(0)'
+                            },
+                            '50%': {
+                                transform: 'translateY(-6px)'
+                            }
+                        },
+                        sway: {
+                            '0%,100%': {
+                                transform: 'rotate(0deg)'
+                            },
+                            '25%': {
+                                transform: 'rotate(-1.5deg)'
+                            },
+                            '75%': {
+                                transform: 'rotate(1.5deg)'
+                            }
+                        },
+                        waves: {
+                            '0%': {
+                                transform: 'translateX(0)'
+                            },
+                            '100%': {
+                                transform: 'translateX(-50%)'
+                            }
+                        },
+                        twinkle: {
+                            '0%,100%': {
+                                opacity: '0.35',
+                                transform: 'scale(1)'
+                            },
+                            '50%': {
+                                opacity: '1',
+                                transform: 'scale(1.15)'
+                            }
+                        }
+                    },
+                    animation: {
+                        floatY: 'floatY 3.2s ease-in-out infinite',
+                        sway: 'sway 5s ease-in-out infinite',
+                        waves: 'waves 18s linear infinite',
+                        twinkle: 'twinkle 3.4s ease-in-out infinite'
+                    }
+                }
+            }
         }
-      }
-    }
-  </script>
+    </script>
 
-  <!-- Base styles for layout & chart -->
-  <style>
-    .ribbon-black{position:fixed;right:0;top:0;z-index:2568}
-    [x-cloak]{display:none!important}
-    .krathong-item{animation:floatY var(--floatDur,3.2s) ease-in-out infinite, sway var(--swayDur,5s) ease-in-out infinite;will-change:transform}
-    .modal-enter{animation:slideUp .3s ease-out}
-    @keyframes slideUp{from{opacity:0;transform:translateY(30px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
-    .wrap{max-width:900px;margin:0.75rem auto}
-    .ping-chart-wrapper{max-width:900px;margin:0.5rem auto}
-    #pingChart{width:100%;height:250px}
-  </style>
+    <!-- Base styles for layout & chart -->
+    <style>
+        .ribbon-black {
+            position: fixed;
+            right: 0;
+            top: 0;
+            z-index: 2568
+        }
 
-  <!-- helpers -->
-  <script>const rnd=(min,max)=>Math.random()*(max-min)+min;</script>
-  <style id="dyn-keyframes"></style>
+        [x-cloak] {
+            display: none !important
+        }
+
+        .krathong-item {
+            animation: floatY var(--floatDur, 3.2s) ease-in-out infinite, sway var(--swayDur, 5s) ease-in-out infinite;
+            will-change: transform
+        }
+
+        .modal-enter {
+            animation: slideUp .3s ease-out
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(.95)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1)
+            }
+        }
+
+        .wrap {
+            max-width: 900px;
+            margin: 0.75rem auto
+        }
+
+        .ping-chart-wrapper {
+            max-width: 900px;
+            margin: 0.5rem auto
+        }
+
+        #pingChart {
+            width: 100%;
+            height: 250px
+        }
+    </style>
+
+    <!-- helpers -->
+    <script>
+        const rnd = (min, max) => Math.random() * (max - min) + min;
+    </script>
+    <style id="dyn-keyframes"></style>
 </head>
 
 
@@ -443,156 +518,121 @@
                         </div>
 
                         <script>
-                            // === Config ของคุณ ===
+                            // === ปรับค่าให้ตรงของคุณ ===
                             const STATUS_SLUG = "loykratong";
-                            const MONITOR_ID = "34"; // แก้ให้ตรงของจริง
+                            const MONITOR_ID = "34";
                             const ENDPOINT = `/kuma/heartbeat/${STATUS_SLUG}`;
-                            const Y_MIN = 0,
-                                Y_MAX = 1000; // ล็อกเพดานแกน Y กันเด้ง
 
-                            // Cache ดิบไว้ render หลายช่วงเวลาไม่ต้องดึงซ้ำ
-                            let __pingRaw = null;
-                            let __pingChart = null;
+                            // แสดงช่วง Recent เท่านั้น (30 นาทีล่าสุด)
+                            const RECENT_MS = 30 * 60 * 1000;
 
-                            function pingChartUI() {
-                                return {
-                                    open: false,
-                                    periods: [{
-                                            key: 'recent',
-                                            label: 'Recent',
-                                            ms: null
-                                        }, // ใช้ทั้งหมดที่ได้มา
-                                        {
-                                            key: '3h',
-                                            label: '3h',
-                                            ms: 3 * 60 * 60 * 1000
-                                        },
-                                        {
-                                            key: '6h',
-                                            label: '6h',
-                                            ms: 6 * 60 * 60 * 1000
-                                        },
-                                        {
-                                            key: '24h',
-                                            label: '24h',
-                                            ms: 24 * 60 * 60 * 1000
-                                        },
-                                        {
-                                            key: '1w',
-                                            label: '1w',
-                                            ms: 7 * 24 * 60 * 60 * 1000
-                                        },
-                                    ],
-                                    active: 0,
+                            // ล็อกสเกลกันเด้ง
+                            const Y_MIN = 0;
+                            const Y_MAX = 1000;
 
-                                    async init() {
-                                        await this.fetchOnce();
-                                        this.render(); // เริ่มด้วยช่วง Recent
-                                        // ถ้าใช้ในโมดัล ให้หน่วง resize นิดหน่อย
-                                        setTimeout(() => {
-                                            try {
-                                                __pingChart?.resize();
-                                            } catch {}
-                                        }, 200);
-                                    },
+                            let pingChart;
 
-                                    async fetchOnce() {
-                                        if (__pingRaw) return;
-                                        const errEl = document.getElementById('pingErr');
-                                        errEl.textContent = '';
-                                        try {
-                                            const res = await fetch(ENDPOINT, {
-                                                credentials: 'same-origin'
-                                            });
-                                            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                                            const data = await res.json();
-                                            const toDate = t => typeof t === 'number' ? new Date((t < 2e10 ? t * 1000 : t)) : new Date(t);
+                            function toDate(t) {
+                                // รองรับทั้งตัวเลข epoch และสตริง "YYYY-MM-DD HH:mm:ss.SSS"
+                                if (typeof t === 'number') return new Date((t < 2e10 ? t * 1000 : t));
+                                if (typeof t === 'string') return new Date(t.replace(' ', 'T'));
+                                return new Date(t);
+                            }
 
-                                            __pingRaw = (data.heartbeatList?.[MONITOR_ID] || [])
-                                                .filter(h => Number.isFinite(h.ping) && h.ping > 0 && h.ping < 60000)
-                                                .map(h => ({
-                                                    x: toDate(h.time),
-                                                    y: h.ping
-                                                }));
-                                        } catch (e) {
-                                            errEl.textContent = `โหลดกราฟไม่สำเร็จ: ${e.message}`;
-                                            console.error(e);
-                                        }
-                                    },
+                            async function loadPingRecent() {
+                                const errEl = document.getElementById('pingErr');
+                                errEl.textContent = '';
+                                try {
+                                    const res = await fetch(ENDPOINT, {
+                                        credentials: 'same-origin'
+                                    });
+                                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                                    const data = await res.json();
 
-                                    setPeriod(i) {
-                                        this.active = i;
-                                        this.open = false;
-                                        this.render();
-                                    },
-
-                                    render() {
-                                        if (!__pingRaw) return;
-                                        const now = Date.now();
-                                        const ms = this.periods[this.active].ms;
-                                        const data = ms ? __pingRaw.filter(p => p.x.getTime() >= now - ms) : __pingRaw;
-
-                                        // clamp กันหลุดสเกล/โอเวอร์ชูต
-                                        const clamped = data.map(p => ({
+                                    // ดึง ping ปกติ ๆ แล้วกรองให้เหลือแค่ช่วง RECENT_MS
+                                    const now = Date.now();
+                                    const raw = (data.heartbeatList?.[MONITOR_ID] || [])
+                                        .filter(h => Number.isFinite(h.ping) && h.ping > 0 && h.ping < 60000)
+                                        .map(h => ({
+                                            x: toDate(h.time),
+                                            y: h.ping
+                                        }))
+                                        .filter(p => p.x.getTime() >= now - RECENT_MS)
+                                        .map(p => ({
                                             x: p.x,
                                             y: Math.min(p.y, Y_MAX)
-                                        }));
+                                        })); // clamp กันหลุดสเกล
 
-                                        const ctx = document.getElementById('pingChart');
-                                        if (__pingChart) __pingChart.destroy();
-                                        __pingChart = new Chart(ctx, {
-                                            type: 'line',
-                                            data: {
-                                                datasets: [{
-                                                    label: 'Ping',
-                                                    data: clamped,
-                                                    pointRadius: 0,
-                                                    spanGaps: true
-                                                }]
+                                    const ctx = document.getElementById('pingChart');
+                                    if (pingChart) pingChart.destroy();
+
+                                    pingChart = new Chart(ctx, {
+                                        type: 'line',
+                                        data: {
+                                            datasets: [{
+                                                label: 'Ping',
+                                                data: raw,
+                                                pointRadius: 0,
+                                                spanGaps: true
+                                            }]
+                                        },
+                                        options: {
+                                            responsive: true,
+                                            maintainAspectRatio: false,
+                                            parsing: false,
+                                            animation: false,
+                                            normalized: true,
+                                            datasets: {
+                                                line: {
+                                                    tension: 0,
+                                                    cubicInterpolationMode: 'monotone'
+                                                }
                                             },
-                                            options: {
-                                                responsive: true,
-                                                maintainAspectRatio: false,
-                                                parsing: false,
-                                                animation: false,
-                                                normalized: true,
-                                                datasets: {
-                                                    line: {
-                                                        tension: 0,
-                                                        cubicInterpolationMode: 'monotone'
-                                                    }
+                                            interaction: {
+                                                mode: 'index',
+                                                intersect: false
+                                            },
+                                            scales: {
+                                                x: {
+                                                    type: 'time'
                                                 },
-                                                interaction: {
-                                                    mode: 'index',
-                                                    intersect: false
-                                                },
-                                                scales: {
-                                                    x: {
-                                                        type: 'time'
+                                                y: {
+                                                    min: Y_MIN,
+                                                    max: Y_MAX,
+                                                    ticks: {
+                                                        precision: 0
                                                     },
-                                                    y: {
-                                                        min: Y_MIN,
-                                                        max: Y_MAX,
-                                                        ticks: {
-                                                            precision: 0
-                                                        },
-                                                        title: {
-                                                            display: true,
-                                                            text: 'ms'
-                                                        }
-                                                    }
-                                                },
-                                                plugins: {
-                                                    legend: {
-                                                        display: false
+                                                    title: {
+                                                        display: true,
+                                                        text: 'ms'
                                                     }
                                                 }
+                                            },
+                                            plugins: {
+                                                legend: {
+                                                    display: false
+                                                }
                                             }
-                                        });
-                                    }
+                                        }
+                                    });
+                                } catch (e) {
+                                    errEl.textContent = `โหลดกราฟไม่สำเร็จ: ${e.message}`;
+                                    console.error(e);
                                 }
                             }
+
+                            // ถ้าอยู่ในโมดัล ให้เรียกตอนเปิด
+                            document.addEventListener('alpine:init', () => {
+                                Alpine.effect(() => {
+                                    if (Alpine.store('ui')?.aboutOpen) {
+                                        setTimeout(() => {
+                                            loadPingRecent();
+                                        }, 150);
+                                    }
+                                });
+                            });
                         </script>
+
 
 
                     </div>
