@@ -502,9 +502,17 @@
 
                             let pingChart;
 
-                            function toDate(t) {
-                                if (typeof t === 'number') return new Date((t < 2e10 ? t * 1000 : t));
-                                if (typeof t === 'string') return new Date(t.replace(' ', 'T'));
+                            // Parse เป็น UTC เสมอ แล้วค่อย format เป็น Asia/Bangkok ตอนแสดง
+                            function toUTCDate(t) {
+                                if (typeof t === 'number') {
+                                    // epoch seconds/millis -> UTC
+                                    const ms = (t < 2e10 ? t * 1000 : t);
+                                    return new Date(ms); // Date เก็บเป็น UTC ภายในอยู่แล้ว
+                                }
+                                if (typeof t === 'string') {
+                                    // "YYYY-MM-DD HH:mm:ss[.SSS]" -> UTC ด้วยการเติม 'Z'
+                                    return new Date(t.replace(' ', 'T') + 'Z');
+                                }
                                 return new Date(t);
                             }
 
@@ -522,7 +530,7 @@
                                     const series = raw
                                         .filter(h => Number.isFinite(h.ping) && h.ping > 0 && h.ping < 60000 && h.time)
                                         .map(h => ({
-                                            x: toDate(h.time),
+                                            x: toUTCDate(h.time),
                                             y: Math.min(h.ping, Y_MAX)
                                         }))
                                         .sort((a, b) => a.x - b.x);
@@ -572,6 +580,7 @@
                                                         text: 'เวลา (UTC+7, 24 ชม.)'
                                                     },
                                                     ticks: {
+                                                        source: 'data',
                                                         callback: (v) =>
                                                             new Date(v).toLocaleString('th-TH', {
                                                                 timeZone: TZ,
@@ -635,10 +644,8 @@
                                 }
                             }
 
-                            // โหลดเมื่อหน้า ready
                             document.addEventListener('DOMContentLoaded', loadPingExact);
 
-                            // โหลดเมื่อเปิดโมดัล "เกี่ยวกับ" ครั้งแรกหลังเปิด
                             document.addEventListener('alpine:init', () => {
                                 let once = false;
                                 Alpine.effect(() => {
