@@ -208,14 +208,16 @@
             decoding="async">
     </div>
     <!-- ป้ายเชิญด้านบนตรงกลาง -->
-    <div class="fixed top-3 left-1/2 -translate-x-1/2 z-40 select-none">
+    <div class="fixed top-4 left-1/2 -translate-x-1/2 z-40 select-none">
         <div
-            class="px-5 sm:px-7 py-2.5 sm:py-3 rounded-2xl border border-white/15 bg-white/10 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.35)] text-center">
+            class="px-8 sm:px-10 py-4 sm:py-5 rounded-3xl border border-white/20 bg-white/10 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.45)] text-center">
             <div
-                class="text-sm sm:text-base font-extrabold tracking-wide bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-transparent">
-                ลอยกระทงออนไลน์</div>
-            <div class="mt-0.5 text-[11px] sm:text-xs text-slate-200/80">ตั้งจิตอธิษฐาน
-                แล้วปล่อยความกังวลให้ลอยไปกับสายน้ำ</div>
+                class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-wide bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-transparent">
+                ลอยกระทงออนไลน์
+            </div>
+            <div class="mt-1 text-base sm:text-lg md:text-xl text-slate-200/90">
+                ตั้งจิตอธิษฐาน แล้วปล่อยความกังวลให้ลอยไปกับสายน้ำ
+            </div>
         </div>
     </div>
 
@@ -513,20 +515,19 @@
                 </div>
 
                 <div class="p-6 space-y-6">
-                    <div class="text-center space-y-5">
+                    <div class="text-center space-y-3">
                         <div
-                            class="inline-flex items-center justify-center w-32 h-32 md:w-40 md:h-40 rounded-3xl bg-gradient-to-br from-cyan-500 to-purple-600 shadow-xl mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 md:w-20 md:h-20 text-white"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-purple-600 shadow-lg mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-8 text-white" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M4.5 12a7.5 7.5 0 0015 0m-15 0a7.5 7.5 0 0115 0M12 3v9" />
                             </svg>
                         </div>
-
-                        <h1 class="text-4xl md:text-5xl font-bold text-white leading-tight">ลอยกระทงออนไลน์</h1>
-                        <h3 class="text-lg md:text-xl text-slate-300">ระบบลอยกระทงออนไลน์
-                            เพื่อส่งต่อความปรารถนาดีในวันลอยกระทง</h3>
+                        <h3 class="text-xl font-bold text-white">ลอยกระทงออนไลน์</h3>
+                        <p class="text-sm text-slate-300">ระบบลอยกระทงออนไลน์ เพื่อส่งต่อความปรารถนาดีในวันลอยกระทง</p>
                     </div>
+
                     <div class="h-px bg-gradient-to-r from-transparent via-purple-400/30 to-transparent"></div>
 
                     <div class="space-y-4">
