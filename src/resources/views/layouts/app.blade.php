@@ -173,18 +173,6 @@
         }
     </style>
 
-    <!-- helpers + mobile vh fix + safe area -->
-    <script>
-        const rnd = (min, max) => Math.random() * (max - min) + min;
-        const setVH = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
-        window.addEventListener('resize', setVH, {
-            passive: true
-        });
-        window.addEventListener('orientationchange', setVH, {
-            passive: true
-        });
-        document.addEventListener('DOMContentLoaded', setVH);
-    </script>
     <style id="dyn-keyframes"></style>
     <style>
         .pb-safe {
@@ -206,5 +194,20 @@
         body {
             touch-action: manipulation
         }
+  
+        /* ดาวตก */
+        
+        @keyframes shootingStar {
+            0% {
+                transform: translate(0, 0);
+                opacity: 1
+            }
+
+            100% {
+                transform: translate(-200px, 200px);
+                opacity: 0
+            }
+        }
     </style>
+
 </head>
