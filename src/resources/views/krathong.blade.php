@@ -493,35 +493,13 @@
                         </div>
 
                         <script>
-                            // === Config ===
-                            const STATUS_SLUG = "loykratong";
-                            const MONITOR_ID = "34";
-                            const ENDPOINT = `/kuma/heartbeat/${STATUS_SLUG}`;
-                            const Y_MIN = 0,
-                                Y_MAX = 300;
-                            const TZ = 'Asia/Bangkok'; // UTC+7
-                            const POLL_MS = 10_000;
+                            // ... โค้ดเดิมด้านบนคงไว้ ...
 
                             let pingChart;
-                            let pollTimer = null;
-                            let inFlight = false;
+                            let refreshId = null;
 
-                            // Parse เป็น UTC เสมอ แล้วค่อย format เป็น Asia/Bangkok ตอนแสดง
-                            function toUTCDate(t) {
-                                if (typeof t === 'number') {
-                                    const ms = (t < 2e10 ? t * 1000 : t);
-                                    return new Date(ms);
-                                }
-                                if (typeof t === 'string') {
-                                    return new Date(t.replace(' ', 'T') + 'Z');
-                                }
-                                return new Date(t);
-                            }
-
-                            async function fetchAndRender() {
+                            async function loadPingExact() {
                                 const errEl = document.getElementById('pingErr');
-                                if (inFlight) return; // กันซ้อน
-                                inFlight = true;
                                 errEl.textContent = '';
                                 try {
                                     const res = await fetch(ENDPOINT, {
@@ -547,7 +525,13 @@
 
                                     const ctx = document.getElementById('pingChart');
 
-                                    if (!pingChart) {
+                                    // อัปเดตแทนการทำลายแล้วสร้างใหม่
+                                    if (pingChart) {
+                                        pingChart.data.datasets[0].data = series;
+                                        pingChart.options.scales.x.min = xmin;
+                                        pingChart.options.scales.x.max = xmax;
+                                        pingChart.update('none'); // ไม่ต้องแอนิเมชัน
+                                    } else {
                                         pingChart = new Chart(ctx, {
                                             type: 'line',
                                             data: {
@@ -586,14 +570,13 @@
                                                         },
                                                         ticks: {
                                                             source: 'data',
-                                                            callback: (v) =>
-                                                                new Date(v).toLocaleString('th-TH', {
-                                                                    timeZone: TZ,
-                                                                    hour12: false,
-                                                                    hour: '2-digit',
-                                                                    minute: '2-digit',
-                                                                    second: '2-digit'
-                                                                })
+                                                            callback: (v) => new Date(v).toLocaleString('th-TH', {
+                                                                timeZone: TZ,
+                                                                hour12: false,
+                                                                hour: '2-digit',
+                                                                minute: '2-digit',
+                                                                second: '2-digit'
+                                                            })
                                                         },
                                                         time: {
                                                             displayFormats: {
@@ -643,41 +626,33 @@
                                                 }
                                             }
                                         });
-                                    } else {
-                                        // อัปเดตข้อมูลและช่วงเวลาแบบไม่กระพริบ
-                                        pingChart.options.scales.x.min = xmin;
-                                        pingChart.options.scales.x.max = xmax;
-                                        pingChart.data.datasets[0].data = series;
-                                        pingChart.update('none');
                                     }
                                 } catch (e) {
-                                    const errEl = document.getElementById('pingErr');
                                     errEl.textContent = `โหลดกราฟไม่สำเร็จ: ${e.message}`;
                                     console.error(e);
-                                } finally {
-                                    inFlight = false;
                                 }
                             }
 
-                            function startPolling() {
-                                stopPolling();
-                                pollTimer = setInterval(fetchAndRender, POLL_MS);
-                            }
-
-                            function stopPolling() {
-                                if (pollTimer) {
-                                    clearInterval(pollTimer);
-                                    pollTimer = null;
-                                }
-                            }
-
-                            // เริ่มทำงานเมื่อหน้า ready
+                            // เริ่มโหลดและตั้ง interval 10 วินาที
                             document.addEventListener('DOMContentLoaded', () => {
-                                fetchAndRender();
-                                startPolling();
+                                loadPingExact();
+                                refreshId = setInterval(loadPingExact, 10000);
                             });
 
-                            // โหลดเมื่อเปิดโมดัล "เกี่ยวกับ" ครั้งแรกหลังเปิด แล้ว resize
+                            // พัก-เล่นต่อเมื่อสลับแท็บ ลดภาระ
+                            document.addEventListener('visibilitychange', () => {
+                                if (document.hidden) {
+                                    if (refreshId) {
+                                        clearInterval(refreshId);
+                                        refreshId = null;
+                                    }
+                                } else {
+                                    loadPingExact();
+                                    if (!refreshId) refreshId = setInterval(loadPingExact, 10000);
+                                }
+                            });
+
+                            // alpine เดิมคงไว้ได้
                             document.addEventListener('alpine:init', () => {
                                 let once = false;
                                 Alpine.effect(() => {
@@ -685,7 +660,7 @@
                                     if (open && !once) {
                                         once = true;
                                         setTimeout(() => {
-                                            fetchAndRender().then(() => {
+                                            loadPingExact().then(() => {
                                                 try {
                                                     pingChart?.resize();
                                                 } catch {}
@@ -695,18 +670,6 @@
                                     if (!open) once = false;
                                 });
                             });
-
-                            // ประหยัดทรัพยากร: หยุดดึงเมื่อแท็บถูกซ่อน
-                            document.addEventListener('visibilitychange', () => {
-                                if (document.hidden) stopPolling();
-                                else {
-                                    fetchAndRender();
-                                    startPolling();
-                                }
-                            });
-
-                            // เคลียร์ interval ตอนออก
-                            window.addEventListener('beforeunload', stopPolling);
                         </script>
 
 
