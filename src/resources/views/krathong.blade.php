@@ -1,137 +1,62 @@
-<!doctype html>
-<html lang="th">
-
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Loy Kratong Festival</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <!-- Favicon -->
-    <link rel="icon" href="/favicon.ico">
-    <link rel="icon" sizes="any" type="image/x-icon" href="{{ asset('favicon.ico') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
-    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
-    <meta name="theme-color" content="#0b2e4a">
-    <!-- Tailwind & Alpine -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .ribbon-black {
-            position: fixed;
-            right: 0;
-            top: 0;
-            z-index: 2568;
-        }
-    </style>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        display: ['Inter', 'ui-sans-serif', 'system-ui']
-                    },
-                    colors: {
-                        river1: '#0e3a5f',
-                        river2: '#0b2e4a',
-                        glass: 'rgba(255,255,255,0.08)'
-                    },
-                    boxShadow: {
-                        glass: '0 25px 80px rgba(0,0,0,0.45)',
-                        btn: '0 10px 40px rgba(34,211,238,0.45)'
-                    },
-                    keyframes: {
-                        floatY: {
-                            '0%,100%': {
-                                transform: 'translateY(0)'
-                            },
-                            '50%': {
-                                transform: 'translateY(-6px)'
-                            }
-                        },
-                        sway: {
-                            '0%,100%': {
-                                transform: 'rotate(0deg)'
-                            },
-                            '25%': {
-                                transform: 'rotate(-1.5deg)'
-                            },
-                            '75%': {
-                                transform: 'rotate(1.5deg)'
-                            }
-                        },
-                        waves: {
-                            '0%': {
-                                transform: 'translateX(0)'
-                            },
-                            '100%': {
-                                transform: 'translateX(-50%)'
-                            }
-                        },
-                        twinkle: {
-                            '0%,100%': {
-                                opacity: '0.35',
-                                transform: 'scale(1)'
-                            },
-                            '50%': {
-                                opacity: '1',
-                                transform: 'scale(1.15)'
-                            }
-                        },
-                        moonGlow: {
-                            '0%,100%': {
-                                boxShadow: '0 0 50px rgba(255,244,200,0.5), 0 0 90px rgba(255,244,200,0.25)'
-                            },
-                            '50%': {
-                                boxShadow: '0 0 70px rgba(255,244,200,0.7), 0 0 130px rgba(255,244,200,0.35)'
-                            }
-                        }
-                    },
-                    animation: {
-                        floatY: 'floatY var(--floatDur,3.2s) ease-in-out infinite',
-                        sway: 'sway var(--swayDur,5s) ease-in-out infinite',
-                        waves: 'waves 18s linear infinite',
-                        twinkle: 'twinkle 3.4s ease-in-out infinite',
-                        moonGlow: 'moonGlow 4s ease-in-out infinite'
-                    }
-                }
-            }
-        }
-    </script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Loy Kratong Festival</title>
+  <meta name="csrf-token" content="{{ csrf_token() }}" />
+  <!-- Favicon / Manifest (กัน mixed content) -->
+  <link rel="icon" href="{{ secure_asset('favicon.ico') }}" />
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ secure_asset('favicon-32x32.png') }}" />
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ secure_asset('favicon-16x16.png') }}" />
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ secure_asset('apple-touch-icon.png') }}" />
+  <link rel="manifest" href="{{ secure_asset('site.webmanifest') }}" />
+  <meta name="theme-color" content="#0b2e4a" />
 
-    <script>
-        const rnd = (min, max) => Math.random() * (max - min) + min;
-    </script>
-    <style id="dyn-keyframes"></style>
+  <!-- Tailwind, Alpine, Chart.js, Time adapter -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-    <style>
-        [x-cloak] {
-            display: none !important
+  <!-- Tailwind config (short & sweet) -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { display: ['Inter','ui-sans-serif','system-ui'] },
+          keyframes: {
+            floatY:{'0%,100%':{transform:'translateY(0)'},'50%':{transform:'translateY(-6px)'}},
+            sway:{'0%,100%':{transform:'rotate(0deg)'},'25%':{transform:'rotate(-1.5deg)'},'75%':{transform:'rotate(1.5deg)'}},
+            waves:{'0%':{transform:'translateX(0)'},'100%':{transform:'translateX(-50%)'}},
+            twinkle:{'0%,100%':{opacity:'0.35',transform:'scale(1)'},'50%':{opacity:'1',transform:'scale(1.15)'}}
+          },
+          animation: {
+            floatY:'floatY 3.2s ease-in-out infinite',
+            sway:'sway 5s ease-in-out infinite',
+            waves:'waves 18s linear infinite',
+            twinkle:'twinkle 3.4s ease-in-out infinite'
+          }
         }
+      }
+    }
+  </script>
 
-        .krathong-item {
-            animation: floatY var(--floatDur, 3.2s) ease-in-out infinite, sway var(--swayDur, 5s) ease-in-out infinite;
-            will-change: transform
-        }
+  <!-- Base styles for layout & chart -->
+  <style>
+    .ribbon-black{position:fixed;right:0;top:0;z-index:2568}
+    [x-cloak]{display:none!important}
+    .krathong-item{animation:floatY var(--floatDur,3.2s) ease-in-out infinite, sway var(--swayDur,5s) ease-in-out infinite;will-change:transform}
+    .modal-enter{animation:slideUp .3s ease-out}
+    @keyframes slideUp{from{opacity:0;transform:translateY(30px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+    .wrap{max-width:900px;margin:0.75rem auto}
+    .ping-chart-wrapper{max-width:900px;margin:0.5rem auto}
+    #pingChart{width:100%;height:250px}
+  </style>
 
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px) scale(.95)
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1)
-            }
-        }
-
-        .modal-enter {
-            animation: slideUp .3s ease-out
-        }
-    </style>
+  <!-- helpers -->
+  <script>const rnd=(min,max)=>Math.random()*(max-min)+min;</script>
+  <style id="dyn-keyframes"></style>
 </head>
+
 
 <body x-data="{}" class="min-h-screen bg-slate-950 text-slate-100 font-display overflow-hidden">
     <div class="ribbon-black">
@@ -482,7 +407,194 @@
                             </div>
                         </div>
 
-                        <img src="https://kuma.pcnone.com/api/badge/34/ping/1" alt="Ping" class="h-6">
+                        <!-- ==== Ping Chart (Period Dropdown) ==== -->
+                        <div x-data="pingChartUI()" x-init="init()" class="ping-chart-wrapper select-none">
+                            <!-- Period dropdown -->
+                            <div class="relative inline-block text-left mb-2">
+                                <button @click="open=!open"
+                                    class="btn btn-light dropdown-toggle btn-period-toggle inline-flex items-center gap-1 px-3 py-1.5 rounded border border-white/15 bg-white/10 hover:bg-white/15">
+                                    <span x-text="periods[active].label"></span>
+                                    <svg class="w-4 h-4 opacity-80" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                                <div x-show="open" @click.outside="open=false" x-transition
+                                    class="dropdown-menu dropdown-menu-end absolute z-20 mt-1 min-w-[8rem] rounded-lg border border-white/10 bg-slate-900/95 backdrop-blur p-1">
+                                    <template x-for="(p, i) in periods" :key="p.key">
+                                        <a href="#" @click.prevent="setPeriod(i)"
+                                            class="dropdown-item flex items-center justify-between px-3 py-1.5 rounded hover:bg-white/10"
+                                            :class="i === active && 'bg-white/10 font-semibold'">
+                                            <span x-text="p.label"></span>
+                                            <span x-show="i===active">✓</span>
+                                        </a>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Chart -->
+                            <div class="chart-wrapper relative" style="position:relative;height:250px;">
+                                <canvas id="pingChart"></canvas>
+                            </div>
+
+                            <!-- Error -->
+                            <p id="pingErr" class="text-xs text-rose-400 mt-1"></p>
+                        </div>
+
+                        <script>
+                            // === Config ของคุณ ===
+                            const STATUS_SLUG = "loykratong";
+                            const MONITOR_ID = "34"; // แก้ให้ตรงของจริง
+                            const ENDPOINT = `/kuma/heartbeat/${STATUS_SLUG}`;
+                            const Y_MIN = 0,
+                                Y_MAX = 1000; // ล็อกเพดานแกน Y กันเด้ง
+
+                            // Cache ดิบไว้ render หลายช่วงเวลาไม่ต้องดึงซ้ำ
+                            let __pingRaw = null;
+                            let __pingChart = null;
+
+                            function pingChartUI() {
+                                return {
+                                    open: false,
+                                    periods: [{
+                                            key: 'recent',
+                                            label: 'Recent',
+                                            ms: null
+                                        }, // ใช้ทั้งหมดที่ได้มา
+                                        {
+                                            key: '3h',
+                                            label: '3h',
+                                            ms: 3 * 60 * 60 * 1000
+                                        },
+                                        {
+                                            key: '6h',
+                                            label: '6h',
+                                            ms: 6 * 60 * 60 * 1000
+                                        },
+                                        {
+                                            key: '24h',
+                                            label: '24h',
+                                            ms: 24 * 60 * 60 * 1000
+                                        },
+                                        {
+                                            key: '1w',
+                                            label: '1w',
+                                            ms: 7 * 24 * 60 * 60 * 1000
+                                        },
+                                    ],
+                                    active: 0,
+
+                                    async init() {
+                                        await this.fetchOnce();
+                                        this.render(); // เริ่มด้วยช่วง Recent
+                                        // ถ้าใช้ในโมดัล ให้หน่วง resize นิดหน่อย
+                                        setTimeout(() => {
+                                            try {
+                                                __pingChart?.resize();
+                                            } catch {}
+                                        }, 200);
+                                    },
+
+                                    async fetchOnce() {
+                                        if (__pingRaw) return;
+                                        const errEl = document.getElementById('pingErr');
+                                        errEl.textContent = '';
+                                        try {
+                                            const res = await fetch(ENDPOINT, {
+                                                credentials: 'same-origin'
+                                            });
+                                            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                                            const data = await res.json();
+                                            const toDate = t => typeof t === 'number' ? new Date((t < 2e10 ? t * 1000 : t)) : new Date(t);
+
+                                            __pingRaw = (data.heartbeatList?.[MONITOR_ID] || [])
+                                                .filter(h => Number.isFinite(h.ping) && h.ping > 0 && h.ping < 60000)
+                                                .map(h => ({
+                                                    x: toDate(h.time),
+                                                    y: h.ping
+                                                }));
+                                        } catch (e) {
+                                            errEl.textContent = `โหลดกราฟไม่สำเร็จ: ${e.message}`;
+                                            console.error(e);
+                                        }
+                                    },
+
+                                    setPeriod(i) {
+                                        this.active = i;
+                                        this.open = false;
+                                        this.render();
+                                    },
+
+                                    render() {
+                                        if (!__pingRaw) return;
+                                        const now = Date.now();
+                                        const ms = this.periods[this.active].ms;
+                                        const data = ms ? __pingRaw.filter(p => p.x.getTime() >= now - ms) : __pingRaw;
+
+                                        // clamp กันหลุดสเกล/โอเวอร์ชูต
+                                        const clamped = data.map(p => ({
+                                            x: p.x,
+                                            y: Math.min(p.y, Y_MAX)
+                                        }));
+
+                                        const ctx = document.getElementById('pingChart');
+                                        if (__pingChart) __pingChart.destroy();
+                                        __pingChart = new Chart(ctx, {
+                                            type: 'line',
+                                            data: {
+                                                datasets: [{
+                                                    label: 'Ping',
+                                                    data: clamped,
+                                                    pointRadius: 0,
+                                                    spanGaps: true
+                                                }]
+                                            },
+                                            options: {
+                                                responsive: true,
+                                                maintainAspectRatio: false,
+                                                parsing: false,
+                                                animation: false,
+                                                normalized: true,
+                                                datasets: {
+                                                    line: {
+                                                        tension: 0,
+                                                        cubicInterpolationMode: 'monotone'
+                                                    }
+                                                },
+                                                interaction: {
+                                                    mode: 'index',
+                                                    intersect: false
+                                                },
+                                                scales: {
+                                                    x: {
+                                                        type: 'time'
+                                                    },
+                                                    y: {
+                                                        min: Y_MIN,
+                                                        max: Y_MAX,
+                                                        ticks: {
+                                                            precision: 0
+                                                        },
+                                                        title: {
+                                                            display: true,
+                                                            text: 'ms'
+                                                        }
+                                                    }
+                                                },
+                                                plugins: {
+                                                    legend: {
+                                                        display: false
+                                                    }
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            }
+                        </script>
+
+
                     </div>
 
                     <div class="text-center pt-2">
