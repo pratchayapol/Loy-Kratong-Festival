@@ -328,7 +328,7 @@
 
         // ลดจำนวนเลน และเว้นระยะห่างระหว่างแถวให้ชัดเจน
         const TOTAL_LANES = window.innerWidth < 640 ? 3 : 5;
-        const VERTICAL_SPACING = (WATER_BAND - 14) / Math.max(1, TOTAL_LANES - 1);
+        const VERTICAL_SPACING = (WATER_BAND - 20) / Math.max(1, TOTAL_LANES - 1);
         const laneTops = Array.from({
                 length: TOTAL_LANES
             }, (_, i) =>
