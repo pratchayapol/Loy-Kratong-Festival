@@ -321,18 +321,18 @@
     // ฉากแม่น้ำลอยกระทง — เว้นแถวชัด ไม่ถี่ ระยะห่างสม่ำเสมอ
     function riverScene(types, recent) {
         const WATER_TOP = 25;
-        const WATER_BAND = 40;
+        const WATER_BAND = 28;
         const DUR = 50; // เพิ่มเวลาให้ช้าลง ลอยนานขึ้น
         const MAX_ITEMS = window.innerWidth < 640 ? 15 : 35;
         const typeImg = t => types?.[t]?.img || Object.values(types || {})[0]?.img || '';
 
         // ลดจำนวนเลน และเว้นระยะห่างระหว่างแถวให้ชัดเจน
-        const TOTAL_LANES = window.innerWidth < 640 ? 3 : 5;
+        const TOTAL_LANES = window.innerWidth < 640 ? 1 : 2;
         const VERTICAL_SPACING = (WATER_BAND - 20) / Math.max(1, TOTAL_LANES - 1);
         const laneTops = Array.from({
                 length: TOTAL_LANES
             }, (_, i) =>
-            WATER_TOP + 20 + (i * VERTICAL_SPACING)
+            WATER_TOP + 12 + (i * VERTICAL_SPACING)
         );
 
         // เพิ่มระยะห่างแนวนอนให้มากขึ้น
