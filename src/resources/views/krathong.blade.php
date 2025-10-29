@@ -2,6 +2,7 @@
 
 
 @section('content')
+    <canvas id="fwCanvas" aria-hidden="true"></canvas>
     <!-- ป้ายเชิญด้านบนตรงกลาง -->
     <div class="fixed top-4 left-1/2 -translate-x-1/2 z-40 select-none">
         <div
