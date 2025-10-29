@@ -337,7 +337,7 @@
 
         // เพิ่มระยะห่างแนวนอนให้มากขึ้น
         const TRACK_WIDTH = 140;
-        const KRATHONG_WIDTH_PCT = window.innerWidth < 640 ? 20 : 15;
+        const KRATHONG_WIDTH_PCT = window.innerWidth < 640 ? 40 : 15;
         const SAFE_GAP_PCT = KRATHONG_WIDTH_PCT * 2; // เว้นระยะ 2 เท่า!
         const TIME_GAP_MS = (SAFE_GAP_PCT / TRACK_WIDTH) * DUR * 1000;
 
