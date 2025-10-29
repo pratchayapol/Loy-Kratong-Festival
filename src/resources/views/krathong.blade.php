@@ -500,29 +500,33 @@
                             const Y_MIN = 0,
                                 Y_MAX = 300;
                             const TZ = 'Asia/Bangkok'; // UTC+7
+                            const POLL_MS = 10_000;
 
                             let pingChart;
+                            let pollTimer = null;
+                            let inFlight = false;
 
                             // Parse เป็น UTC เสมอ แล้วค่อย format เป็น Asia/Bangkok ตอนแสดง
                             function toUTCDate(t) {
                                 if (typeof t === 'number') {
-                                    // epoch seconds/millis -> UTC
                                     const ms = (t < 2e10 ? t * 1000 : t);
-                                    return new Date(ms); // Date เก็บเป็น UTC ภายในอยู่แล้ว
+                                    return new Date(ms);
                                 }
                                 if (typeof t === 'string') {
-                                    // "YYYY-MM-DD HH:mm:ss[.SSS]" -> UTC ด้วยการเติม 'Z'
                                     return new Date(t.replace(' ', 'T') + 'Z');
                                 }
                                 return new Date(t);
                             }
 
-                            async function loadPingExact() {
+                            async function fetchAndRender() {
                                 const errEl = document.getElementById('pingErr');
+                                if (inFlight) return; // กันซ้อน
+                                inFlight = true;
                                 errEl.textContent = '';
                                 try {
                                     const res = await fetch(ENDPOINT, {
-                                        credentials: 'same-origin'
+                                        credentials: 'same-origin',
+                                        cache: 'no-store'
                                     });
                                     if (!res.ok) throw new Error(`HTTP ${res.status}`);
                                     const data = await res.json();
@@ -542,111 +546,138 @@
                                     const xmax = series[series.length - 1].x.getTime();
 
                                     const ctx = document.getElementById('pingChart');
-                                    if (pingChart) pingChart.destroy();
 
-                                    pingChart = new Chart(ctx, {
-                                        type: 'line',
-                                        data: {
-                                            datasets: [{
-                                                label: 'Ping',
-                                                data: series,
-                                                pointRadius: 0,
-                                                spanGaps: false
-                                            }]
-                                        },
-                                        options: {
-                                            responsive: true,
-                                            maintainAspectRatio: false,
-                                            parsing: false,
-                                            animation: false,
-                                            normalized: true,
-                                            datasets: {
-                                                line: {
-                                                    tension: 0,
-                                                    cubicInterpolationMode: 'monotone'
-                                                }
+                                    if (!pingChart) {
+                                        pingChart = new Chart(ctx, {
+                                            type: 'line',
+                                            data: {
+                                                datasets: [{
+                                                    label: 'Ping',
+                                                    data: series,
+                                                    pointRadius: 0,
+                                                    spanGaps: false
+                                                }]
                                             },
-                                            interaction: {
-                                                mode: 'index',
-                                                intersect: false
-                                            },
-                                            scales: {
-                                                x: {
-                                                    type: 'time',
-                                                    bounds: 'data',
-                                                    min: xmin,
-                                                    max: xmax,
-                                                    title: {
-                                                        display: true,
-                                                        text: 'เวลา'
-                                                    },
-                                                    ticks: {
-                                                        source: 'data',
-                                                        callback: (v) =>
-                                                            new Date(v).toLocaleString('th-TH', {
-                                                                timeZone: TZ,
-                                                                hour12: false,
-                                                                hour: '2-digit',
-                                                                minute: '2-digit',
-                                                                second: '2-digit'
-                                                            })
-                                                    },
-                                                    time: {
-                                                        displayFormats: {
-                                                            millisecond: 'HH:mm:ss',
-                                                            second: 'HH:mm:ss',
-                                                            minute: 'HH:mm',
-                                                            hour: 'HH:mm',
-                                                            day: 'dd/MM HH:mm'
-                                                        },
-                                                        tooltipFormat: 'HH:mm:ss'
+                                            options: {
+                                                responsive: true,
+                                                maintainAspectRatio: false,
+                                                parsing: false,
+                                                animation: false,
+                                                normalized: true,
+                                                datasets: {
+                                                    line: {
+                                                        tension: 0,
+                                                        cubicInterpolationMode: 'monotone'
                                                     }
                                                 },
-                                                y: {
-                                                    min: Y_MIN,
-                                                    max: Y_MAX,
-                                                    ticks: {
-                                                        precision: 0
-                                                    },
-                                                    title: {
-                                                        display: true,
-                                                        text: 'ms'
-                                                    }
-                                                }
-                                            },
-                                            plugins: {
-                                                legend: {
-                                                    display: false
+                                                interaction: {
+                                                    mode: 'index',
+                                                    intersect: false
                                                 },
-                                                tooltip: {
-                                                    callbacks: {
-                                                        title: (items) => {
-                                                            const ts = items?.[0]?.parsed?.x;
-                                                            return new Date(ts).toLocaleString('th-TH', {
-                                                                timeZone: TZ,
-                                                                hour12: false,
-                                                                year: 'numeric',
-                                                                month: '2-digit',
-                                                                day: '2-digit',
-                                                                hour: '2-digit',
-                                                                minute: '2-digit',
-                                                                second: '2-digit'
-                                                            }) + ' (UTC+7)';
+                                                scales: {
+                                                    x: {
+                                                        type: 'time',
+                                                        bounds: 'data',
+                                                        min: xmin,
+                                                        max: xmax,
+                                                        title: {
+                                                            display: true,
+                                                            text: 'เวลา'
                                                         },
-                                                        label: (ctx) => `Ping: ${ctx.parsed.y} ms`
+                                                        ticks: {
+                                                            source: 'data',
+                                                            callback: (v) =>
+                                                                new Date(v).toLocaleString('th-TH', {
+                                                                    timeZone: TZ,
+                                                                    hour12: false,
+                                                                    hour: '2-digit',
+                                                                    minute: '2-digit',
+                                                                    second: '2-digit'
+                                                                })
+                                                        },
+                                                        time: {
+                                                            displayFormats: {
+                                                                millisecond: 'HH:mm:ss',
+                                                                second: 'HH:mm:ss',
+                                                                minute: 'HH:mm',
+                                                                hour: 'HH:mm',
+                                                                day: 'dd/MM HH:mm'
+                                                            },
+                                                            tooltipFormat: 'HH:mm:ss'
+                                                        }
+                                                    },
+                                                    y: {
+                                                        min: Y_MIN,
+                                                        max: Y_MAX,
+                                                        ticks: {
+                                                            precision: 0
+                                                        },
+                                                        title: {
+                                                            display: true,
+                                                            text: 'ms'
+                                                        }
+                                                    }
+                                                },
+                                                plugins: {
+                                                    legend: {
+                                                        display: false
+                                                    },
+                                                    tooltip: {
+                                                        callbacks: {
+                                                            title: (items) => {
+                                                                const ts = items?.[0]?.parsed?.x;
+                                                                return new Date(ts).toLocaleString('th-TH', {
+                                                                    timeZone: TZ,
+                                                                    hour12: false,
+                                                                    year: 'numeric',
+                                                                    month: '2-digit',
+                                                                    day: '2-digit',
+                                                                    hour: '2-digit',
+                                                                    minute: '2-digit',
+                                                                    second: '2-digit'
+                                                                }) + ' (UTC+7)';
+                                                            },
+                                                            label: (ctx) => `Ping: ${ctx.parsed.y} ms`
+                                                        }
                                                     }
                                                 }
                                             }
-                                        }
-                                    });
+                                        });
+                                    } else {
+                                        // อัปเดตข้อมูลและช่วงเวลาแบบไม่กระพริบ
+                                        pingChart.options.scales.x.min = xmin;
+                                        pingChart.options.scales.x.max = xmax;
+                                        pingChart.data.datasets[0].data = series;
+                                        pingChart.update('none');
+                                    }
                                 } catch (e) {
+                                    const errEl = document.getElementById('pingErr');
                                     errEl.textContent = `โหลดกราฟไม่สำเร็จ: ${e.message}`;
                                     console.error(e);
+                                } finally {
+                                    inFlight = false;
                                 }
                             }
 
-                            document.addEventListener('DOMContentLoaded', loadPingExact);
+                            function startPolling() {
+                                stopPolling();
+                                pollTimer = setInterval(fetchAndRender, POLL_MS);
+                            }
 
+                            function stopPolling() {
+                                if (pollTimer) {
+                                    clearInterval(pollTimer);
+                                    pollTimer = null;
+                                }
+                            }
+
+                            // เริ่มทำงานเมื่อหน้า ready
+                            document.addEventListener('DOMContentLoaded', () => {
+                                fetchAndRender();
+                                startPolling();
+                            });
+
+                            // โหลดเมื่อเปิดโมดัล "เกี่ยวกับ" ครั้งแรกหลังเปิด แล้ว resize
                             document.addEventListener('alpine:init', () => {
                                 let once = false;
                                 Alpine.effect(() => {
@@ -654,7 +685,7 @@
                                     if (open && !once) {
                                         once = true;
                                         setTimeout(() => {
-                                            loadPingExact().then(() => {
+                                            fetchAndRender().then(() => {
                                                 try {
                                                     pingChart?.resize();
                                                 } catch {}
@@ -664,6 +695,18 @@
                                     if (!open) once = false;
                                 });
                             });
+
+                            // ประหยัดทรัพยากร: หยุดดึงเมื่อแท็บถูกซ่อน
+                            document.addEventListener('visibilitychange', () => {
+                                if (document.hidden) stopPolling();
+                                else {
+                                    fetchAndRender();
+                                    startPolling();
+                                }
+                            });
+
+                            // เคลียร์ interval ตอนออก
+                            window.addEventListener('beforeunload', stopPolling);
                         </script>
 
 
