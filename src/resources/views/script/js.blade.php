@@ -673,8 +673,8 @@
             /* เงียบไว้พอ */ }
     }
 
-    // ดึงทุก 1 วินาที และตอนโฟกัสกลับมา
-    let timer = setInterval(() => refreshCount(), 1000);
+    // ดึงทุก 5 วินาที และตอนโฟกัสกลับมา
+    let timer = setInterval(() => refreshCount(), 5000);
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) refreshCount();
     });
