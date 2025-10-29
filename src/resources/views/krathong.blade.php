@@ -490,20 +490,31 @@
     <!-- Modal เกี่ยวกับ -->
     <div x-show="$store.ui.aboutOpen" x-cloak class="fixed inset-0 z-50"
         @keydown.escape.window="$store.ui.aboutOpen=false">
-        <div class="absolute inset-0 bg-slate-950/85 backdrop-blur-md transition-opacity"
-            @click="$store.ui.aboutOpen=false"></div>
+        <div class="absolute inset-0 bg-slate-950/85 backdrop-blur-md" @click="$store.ui.aboutOpen=false"></div>
 
-        <div class="absolute inset-0 flex items-center justify-center p-4" @click.stop>
-            <div
-                class="w-full max-w-md modal-enter backdrop-blur-2xl rounded-3xl border border-purple-400/30 bg-gradient-to-br from-slate-900/80 to-purple-900/30 shadow-glass">
-                <div class="flex items-start justify-between p-6 border-b border-white/10">
-                    <div>
-                        <h2
-                            class="text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-500 bg-clip-text text-transparent">
-                            เกี่ยวกับ</h2>
-                    </div>
-                    <button @click="$store.ui.aboutOpen=false"
-                        class="rounded-xl p-2 hover:bg-white/10 transition-colors">
+        <!-- bottom sheet -->
+        <div x-data="sheet()" class="fixed inset-x-0 bottom-0 z-50 flex justify-center p-2 sm:p-4"
+            @pointermove.window="move($event)" @pointerup.window="up()" @touchmove.passive="move($event)"
+            @touchend.window="up()">
+
+            <div class="w-full max-w-md rounded-t-3xl border border-purple-400/30
+                bg-gradient-to-br from-slate-900/80 to-purple-900/30 shadow-glass
+                backdrop-blur-2xl"
+                :style="`height:${h}vh`">
+
+                <!-- handle สำหรับลาก -->
+                <div class="p-3 flex justify-center select-none" @pointerdown="down($event)"
+                    @touchstart.passive="down($event)">
+                    <div class="h-1.5 w-12 rounded-full bg-white/30"></div>
+                </div>
+
+                <!-- header -->
+                <div class="flex items-start justify-between px-6 pb-4 border-b border-white/10">
+                    <h2
+                        class="text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-500 bg-clip-text text-transparent">
+                        เกี่ยวกับ
+                    </h2>
+                    <button @click="$store.ui.aboutOpen=false" class="rounded-xl p-2 hover:bg-white/10">
                         <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -512,7 +523,7 @@
                     </button>
                 </div>
 
-                <div class="p-6 space-y-6">
+                <div class="px-6 pt-4 pb-safe overflow-y-auto h-[calc(100%-5.5rem)]">
                     <div class="text-center space-y-3">
                         <div
                             class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-purple-600 shadow-lg mb-2">
@@ -578,271 +589,9 @@
                         </div>
                         <div class="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10 w-full">
                             <h1>CPU %</h1>
-                            <img src="https://proxmox_khonkean.pcnone.com/api2/png/nodes/pve/lxc/101/rrd?ds=cpu&timeframe=hour" />
+                            <img
+                                src="https://proxmox_khonkean.pcnone.com/api2/png/nodes/pve/lxc/101/rrd?ds=cpu&timeframe=hour" />
                         </div>
-
-                        <script>
-                            // ดึง node และ vmid จาก URL /ct/{node}/{vmid}
-                            const parts = location.pathname.split('/').filter(Boolean);
-                            const node = parts[1];
-                            const vmid = parts[2];
-
-                            async function render() {
-                                const r = await fetch(
-                                    `/metrics/${encodeURIComponent(node)}/${encodeURIComponent(vmid)}/cpu.json?timeframe=day&type=lxc`);
-                                const {
-                                    points
-                                } = await r.json();
-
-                                const ctx = document.getElementById('cpuChart');
-                                new Chart(ctx, {
-                                    type: 'line',
-                                    data: {
-                                        labels: points.map(p => new Date(p.t)),
-                                        datasets: [{
-                                            label: 'CPU %',
-                                            data: points.map(p => p.cpuPct),
-                                            fill: false,
-                                            tension: 0.2
-                                        }]
-                                    },
-                                    options: {
-                                        animation: false,
-                                        parsing: false,
-                                        scales: {
-                                            x: {
-                                                type: 'time',
-                                                time: {
-                                                    unit: 'hour'
-                                                }
-                                            },
-                                            y: {
-                                                min: 0,
-                                                max: 100,
-                                                title: {
-                                                    display: true,
-                                                    text: 'Percent'
-                                                }
-                                            }
-                                        },
-                                        plugins: {
-                                            legend: {
-                                                display: true
-                                            }
-                                        }
-                                    }
-                                });
-                            }
-                            render();
-                        </script>
-
-                        <script>
-                            // === Config ===
-                            const STATUS_SLUG = "loykratong";
-                            const MONITOR_ID = "34";
-                            const ENDPOINT = `/kuma/heartbeat/${STATUS_SLUG}`;
-                            const Y_MIN = 0,
-                                Y_MAX = 300;
-                            const TZ = 'Asia/Bangkok';
-                            const POLL_MS = 10_000;
-
-                            let pingChart;
-                            let pollTimer = null;
-                            let inflight = null;
-
-                            function toUTCDate(t) {
-                                if (typeof t === 'number') {
-                                    const ms = (t < 2e10 ? t * 1000 : t);
-                                    return new Date(ms);
-                                }
-                                if (typeof t === 'string') {
-                                    return new Date(t.replace(' ', 'T') + 'Z');
-                                }
-                                return new Date(t);
-                            }
-
-                            function upsertChart(series) {
-                                if (window.innerWidth < 640) return; // skip on small screens
-                                const xmin = series[0].x.getTime();
-                                const xmax = series[series.length - 1].x.getTime();
-                                const ctx = document.getElementById('pingChart');
-                                if (!ctx) return;
-
-                                if (!pingChart) {
-                                    pingChart = new Chart(ctx, {
-                                        type: 'line',
-                                        data: {
-                                            datasets: [{
-                                                label: 'Ping',
-                                                data: series,
-                                                pointRadius: 0,
-                                                spanGaps: false
-                                            }]
-                                        },
-                                        options: {
-                                            responsive: true,
-                                            maintainAspectRatio: false,
-                                            parsing: false,
-                                            animation: false,
-                                            normalized: true,
-                                            datasets: {
-                                                line: {
-                                                    tension: 0,
-                                                    cubicInterpolationMode: 'monotone'
-                                                }
-                                            },
-                                            interaction: {
-                                                mode: 'index',
-                                                intersect: false
-                                            },
-                                            scales: {
-                                                x: {
-                                                    type: 'time',
-                                                    bounds: 'data',
-                                                    min: xmin,
-                                                    max: xmax,
-                                                    title: {
-                                                        display: true,
-                                                        text: 'เวลา'
-                                                    },
-                                                    ticks: {
-                                                        source: 'data',
-                                                        callback: (v) => new Date(v).toLocaleString('th-TH', {
-                                                            timeZone: TZ,
-                                                            hour12: false,
-                                                            hour: '2-digit',
-                                                            minute: '2-digit',
-                                                            second: '2-digit'
-                                                        })
-                                                    },
-                                                    time: {
-                                                        displayFormats: {
-                                                            millisecond: 'HH:mm:ss',
-                                                            second: 'HH:mm:ss',
-                                                            minute: 'HH:mm',
-                                                            hour: 'HH:mm',
-                                                            day: 'dd/MM HH:mm'
-                                                        },
-                                                        tooltipFormat: 'HH:mm:ss'
-                                                    }
-                                                },
-                                                y: {
-                                                    min: Y_MIN,
-                                                    max: Y_MAX,
-                                                    ticks: {
-                                                        precision: 0
-                                                    },
-                                                    title: {
-                                                        display: true,
-                                                        text: 'ms'
-                                                    }
-                                                }
-                                            },
-                                            plugins: {
-                                                legend: {
-                                                    display: false
-                                                },
-                                                tooltip: {
-                                                    callbacks: {
-                                                        title: (items) => {
-                                                            const ts = items?.[0]?.parsed?.x;
-                                                            return new Date(ts).toLocaleString('th-TH', {
-                                                                timeZone: TZ,
-                                                                hour12: false,
-                                                                year: 'numeric',
-                                                                month: '2-digit',
-                                                                day: '2-digit',
-                                                                hour: '2-digit',
-                                                                minute: '2-digit',
-                                                                second: '2-digit'
-                                                            }) + ' (UTC+7)';
-                                                        },
-                                                        label: (ctx) => `Ping: ${ctx.parsed.y} ms`
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    });
-                                } else {
-                                    pingChart.data.datasets[0].data = series;
-                                    pingChart.options.scales.x.min = xmin;
-                                    pingChart.options.scales.x.max = xmax;
-                                    pingChart.update('none');
-                                }
-                            }
-
-                            async function loadPingExact() {
-                                const errEl = document.getElementById('pingErr');
-                                if (errEl) errEl.textContent = '';
-                                inflight?.abort?.();
-                                const controller = new AbortController();
-                                inflight = controller;
-                                try {
-                                    const res = await fetch(ENDPOINT, {
-                                        credentials: 'same-origin',
-                                        signal: controller.signal
-                                    });
-                                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                                    const data = await res.json();
-                                    const raw = data.heartbeatList?.[MONITOR_ID] ?? [];
-                                    const series = raw
-                                        .filter(h => Number.isFinite(h.ping) && h.ping > 0 && h.ping < 60000 && h.time)
-                                        .map(h => ({
-                                            x: toUTCDate(h.time),
-                                            y: Math.min(h.ping, Y_MAX)
-                                        }))
-                                        .sort((a, b) => a.x - b.x);
-                                    if (series.length === 0) throw new Error('no data');
-                                    upsertChart(series);
-                                } catch (e) {
-                                    if (e.name !== 'AbortError' && errEl) {
-                                        errEl.textContent = `โหลดกราฟไม่สำเร็จ: ${e.message}`;
-                                        console.error(e);
-                                    }
-                                } finally {
-                                    if (inflight === controller) inflight = null;
-                                }
-                            }
-
-                            function startPolling() {
-                                if (pollTimer) return;
-                                pollTimer = setInterval(() => {
-                                    if (document.hidden) return;
-                                    loadPingExact();
-                                }, POLL_MS);
-                            }
-
-                            function stopPolling() {
-                                clearInterval(pollTimer);
-                                pollTimer = null;
-                            }
-
-                            document.addEventListener('visibilitychange', () => {
-                                if (document.hidden) return;
-                                loadPingExact();
-                            });
-                            document.addEventListener('DOMContentLoaded', () => {
-                                loadPingExact();
-                                startPolling();
-                            });
-
-                            document.addEventListener('alpine:init', () => {
-                                let once = false;
-                                Alpine.effect(() => {
-                                    const open = Alpine.store('ui')?.aboutOpen;
-                                    if (open && !once) {
-                                        once = true;
-                                        setTimeout(() => {
-                                            loadPingExact();
-                                            try {
-                                                pingChart?.resize();
-                                            } catch {}
-                                        }, 150);
-                                    }
-                                    if (!open) once = false;
-                                });
-                            });
-                        </script>
                     </div>
 
                     <div class="text-center pt-2">
@@ -852,6 +601,250 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('sheet', () => ({
+                h: 70,
+                min: 30,
+                max: 95,
+                dragging: false,
+                startY: 0,
+                startH: 70,
+                set(v) {
+                    this.h = Math.min(this.max, Math.max(this.min, v));
+                },
+                y(e) {
+                    return e.touches ? e.touches[0].clientY : e.clientY;
+                },
+                down(e) {
+                    this.dragging = true;
+                    this.startY = this.y(e);
+                    this.startH = this.h;
+                },
+                move(e) {
+                    if (!this.dragging) return;
+                    const dy = this.startY - this.y(e);
+                    const vh = window.innerHeight / 100;
+                    this.set(this.startH + dy / vh);
+                },
+                up() {
+                    if (!this.dragging) return;
+                    this.dragging = false;
+                    const snaps = [this.min, 60, this.max]; // จุด snap: 30, 60, 95 vh
+                    this.h = snaps.reduce((a, b) => Math.abs(b - this.h) < Math.abs(a - this.h) ? b :
+                        a);
+                },
+            }))
+        })
+    </script>
+    <script>
+        // === Config ===
+        const STATUS_SLUG = "loykratong";
+        const MONITOR_ID = "34";
+        const ENDPOINT = `/kuma/heartbeat/${STATUS_SLUG}`;
+        const Y_MIN = 0,
+            Y_MAX = 300;
+        const TZ = 'Asia/Bangkok';
+        const POLL_MS = 10_000;
+
+        let pingChart;
+        let pollTimer = null;
+        let inflight = null;
+
+        function toUTCDate(t) {
+            if (typeof t === 'number') {
+                const ms = (t < 2e10 ? t * 1000 : t);
+                return new Date(ms);
+            }
+            if (typeof t === 'string') {
+                return new Date(t.replace(' ', 'T') + 'Z');
+            }
+            return new Date(t);
+        }
+
+        function upsertChart(series) {
+            if (window.innerWidth < 640) return; // skip on small screens
+            const xmin = series[0].x.getTime();
+            const xmax = series[series.length - 1].x.getTime();
+            const ctx = document.getElementById('pingChart');
+            if (!ctx) return;
+
+            if (!pingChart) {
+                pingChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        datasets: [{
+                            label: 'Ping',
+                            data: series,
+                            pointRadius: 0,
+                            spanGaps: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        parsing: false,
+                        animation: false,
+                        normalized: true,
+                        datasets: {
+                            line: {
+                                tension: 0,
+                                cubicInterpolationMode: 'monotone'
+                            }
+                        },
+                        interaction: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        scales: {
+                            x: {
+                                type: 'time',
+                                bounds: 'data',
+                                min: xmin,
+                                max: xmax,
+                                title: {
+                                    display: true,
+                                    text: 'เวลา'
+                                },
+                                ticks: {
+                                    source: 'data',
+                                    callback: (v) => new Date(v).toLocaleString('th-TH', {
+                                        timeZone: TZ,
+                                        hour12: false,
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        second: '2-digit'
+                                    })
+                                },
+                                time: {
+                                    displayFormats: {
+                                        millisecond: 'HH:mm:ss',
+                                        second: 'HH:mm:ss',
+                                        minute: 'HH:mm',
+                                        hour: 'HH:mm',
+                                        day: 'dd/MM HH:mm'
+                                    },
+                                    tooltipFormat: 'HH:mm:ss'
+                                }
+                            },
+                            y: {
+                                min: Y_MIN,
+                                max: Y_MAX,
+                                ticks: {
+                                    precision: 0
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'ms'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    title: (items) => {
+                                        const ts = items?.[0]?.parsed?.x;
+                                        return new Date(ts).toLocaleString('th-TH', {
+                                            timeZone: TZ,
+                                            hour12: false,
+                                            year: 'numeric',
+                                            month: '2-digit',
+                                            day: '2-digit',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            second: '2-digit'
+                                        }) + ' (UTC+7)';
+                                    },
+                                    label: (ctx) => `Ping: ${ctx.parsed.y} ms`
+                                }
+                            }
+                        }
+                    }
+                });
+            } else {
+                pingChart.data.datasets[0].data = series;
+                pingChart.options.scales.x.min = xmin;
+                pingChart.options.scales.x.max = xmax;
+                pingChart.update('none');
+            }
+        }
+
+        async function loadPingExact() {
+            const errEl = document.getElementById('pingErr');
+            if (errEl) errEl.textContent = '';
+            inflight?.abort?.();
+            const controller = new AbortController();
+            inflight = controller;
+            try {
+                const res = await fetch(ENDPOINT, {
+                    credentials: 'same-origin',
+                    signal: controller.signal
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                const raw = data.heartbeatList?.[MONITOR_ID] ?? [];
+                const series = raw
+                    .filter(h => Number.isFinite(h.ping) && h.ping > 0 && h.ping < 60000 && h.time)
+                    .map(h => ({
+                        x: toUTCDate(h.time),
+                        y: Math.min(h.ping, Y_MAX)
+                    }))
+                    .sort((a, b) => a.x - b.x);
+                if (series.length === 0) throw new Error('no data');
+                upsertChart(series);
+            } catch (e) {
+                if (e.name !== 'AbortError' && errEl) {
+                    errEl.textContent = `โหลดกราฟไม่สำเร็จ: ${e.message}`;
+                    console.error(e);
+                }
+            } finally {
+                if (inflight === controller) inflight = null;
+            }
+        }
+
+        function startPolling() {
+            if (pollTimer) return;
+            pollTimer = setInterval(() => {
+                if (document.hidden) return;
+                loadPingExact();
+            }, POLL_MS);
+        }
+
+        function stopPolling() {
+            clearInterval(pollTimer);
+            pollTimer = null;
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) return;
+            loadPingExact();
+        });
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPingExact();
+            startPolling();
+        });
+
+        document.addEventListener('alpine:init', () => {
+            let once = false;
+            Alpine.effect(() => {
+                const open = Alpine.store('ui')?.aboutOpen;
+                if (open && !once) {
+                    once = true;
+                    setTimeout(() => {
+                        loadPingExact();
+                        try {
+                            pingChart?.resize();
+                        } catch {}
+                    }, 150);
+                }
+                if (!open) once = false;
+            });
+        });
+    </script>
     {{-- หิ่งห้อยกระพริบ --}}
     <script>
         function fireflies() {
