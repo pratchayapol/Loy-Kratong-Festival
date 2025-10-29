@@ -17,6 +17,16 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
+
+  <style>
+    body{margin:0;background:#0f172a;color:#e2e8f0;font-family:system-ui,Segoe UI,Inter,Arial}
+    .wrap{max-width:920px;margin:24px auto;padding:0 16px}
+    .card{background:#0b1220;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px}
+    #pingChart{width:100%;height:260px;display:block}
+    .title{font-size:14px;margin:0 0 8px 0;color:#cbd5e1}
+    .err{font-size:12px;color:#fda4af;margin-top:6px}
+  </style>
+
     <!-- Tailwind config (short & sweet) -->
     <script>
         tailwind.config = {
@@ -482,29 +492,37 @@
                             </div>
                         </div>
 
-                        <!-- ==== Ping Chart (Recent Only) ==== -->
-                        <div id="recent-ping" class="ping-chart-wrapper select-none">
-                            <div class="mb-2 text-sm text-slate-300">Recent (last 30 min)</div>
-                            <div class="chart-wrapper relative" style="position:relative;height:250px;">
+                        <div class="wrap">
+                            <div class="card">
+                                <p class="title">Recent (last 30 min)</p>
                                 <canvas id="pingChart"></canvas>
+                                <p id="pingErr" class="err"></p>
                             </div>
-                            <p id="pingErr" class="text-xs text-rose-400 mt-1"></p>
                         </div>
 
                         <script>
-                            const STATUS_SLUG = "loykratong";
-                            const MONITOR_ID = "34";
-                            const ENDPOINT = `/kuma/heartbeat/${STATUS_SLUG}`;
-                            const RECENT_MS = 30 * 60 * 1000;
+                            // ===== ตั้งค่าของคุณ =====
+                            const STATUS_SLUG = "loykratong"; // slug ของ status page
+                            const MONITOR_ID = "34"; // monitor id ของ ping
+                            const ENDPOINT = `/kuma/heartbeat/${STATUS_SLUG}`; // Laravel proxy route
+
+                            // ช่วง Recent 30 นาที
+                            const WINDOW_MS = 30 * 60 * 1000;
+
+                            // สเกล Y ตายตัวกันเด้ง
                             const Y_MIN = 0,
                                 Y_MAX = 1000;
-                            let pingChart;
 
-                            const toDate = t =>
-                                typeof t === 'number' ? new Date((t < 2e10 ? t * 1000 : t)) :
-                                new Date(String(t).replace(' ', 'T'));
+                            let chart;
 
-                            async function loadPingRecent() {
+                            function toDate(t) {
+                                // รองรับเลข epoch วินาที/มิลลิวินาที และสตริง "YYYY-MM-DD HH:mm:ss.SSS"
+                                if (typeof t === 'number') return new Date(t < 2e10 ? t * 1000 : t);
+                                if (typeof t === 'string') return new Date(t.replace(' ', 'T'));
+                                return new Date(t);
+                            }
+
+                            async function loadRecent() {
                                 const errEl = document.getElementById('pingErr');
                                 errEl.textContent = '';
                                 try {
@@ -512,33 +530,35 @@
                                         credentials: 'same-origin'
                                     });
                                     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                                    const data = await res.json();
+                                    const json = await res.json();
 
-                                    const now = Date.now();
-                                    // เตรียมข้อมูลเรียงเวลาและกรองเฉพาะ 30 นาทีล่าสุด
-                                    const series = (data.heartbeatList?.[MONITOR_ID] || [])
+                                    const all = (json.heartbeatList?.[MONITOR_ID] || [])
                                         .filter(h => Number.isFinite(h.ping) && h.ping > 0 && h.ping < 60000)
                                         .map(h => ({
                                             x: toDate(h.time),
-                                            y: Math.min(h.ping, Y_MAX)
+                                            y: h.ping
                                         }))
-                                        .filter(p => p.x.getTime() >= now - RECENT_MS)
                                         .sort((a, b) => a.x - b.x);
 
-                                    // fallback ถ้าไม่มีจุดใน 30 นาที ให้เอาล่าสุดไม่กี่จุด
-                                    const data30 = series.length ? series :
-                                        (data.heartbeatList?.[MONITOR_ID] || [])
-                                        .slice(-60)
-                                        .map(h => ({
-                                            x: toDate(h.time),
-                                            y: Math.min(h.ping, Y_MAX)
-                                        }))
-                                        .sort((a, b) => a.x - b.x);
+                                    // เลือกเฉพาะ 30 นาทีล่าสุดโดยอิงจากเวลาปัจจุบัน
+                                    const now = Date.now();
+                                    let data30 = all.filter(p => p.x.getTime() >= now - WINDOW_MS);
+
+                                    // ถ้าไม่มีจุดใน 30 นาที ให้ fallback เป็นจุดล่าสุดไม่เกิน 60 จุด
+                                    if (data30.length === 0 && all.length) {
+                                        data30 = all.slice(-60);
+                                    }
+
+                                    // clamp กัน spike เกิน Y_MAX
+                                    data30 = data30.map(p => ({
+                                        x: p.x,
+                                        y: Math.min(p.y, Y_MAX)
+                                    }));
 
                                     const ctx = document.getElementById('pingChart');
-                                    if (pingChart) pingChart.destroy();
+                                    if (chart) chart.destroy();
 
-                                    pingChart = new Chart(ctx, {
+                                    chart = new Chart(ctx, {
                                         type: 'line',
                                         data: {
                                             datasets: [{
@@ -551,12 +571,9 @@
                                         options: {
                                             responsive: true,
                                             maintainAspectRatio: false,
-                                            parsing: {
-                                                xAxisKey: 'x',
-                                                yAxisKey: 'y'
-                                            }, // ให้จัดการคีย์ x/y
                                             animation: false,
                                             normalized: true,
+                                            // ใช้ {x:Date,y:Number} ได้โดยไม่ต้องตั้ง parsing
                                             datasets: {
                                                 line: {
                                                     tension: 0,
@@ -570,13 +587,12 @@
                                             scales: {
                                                 x: {
                                                     type: 'time',
+                                                    // บังคับให้แสดงแค่ 30 นาทีล่าสุดเสมอ
+                                                    min: now - WINDOW_MS,
+                                                    max: now,
                                                     time: {
-                                                        unit: 'minute',
-                                                        tooltipFormat: 'Pp'
-                                                    },
-                                                    bounds: 'ticks',
-                                                    min: now - RECENT_MS, // บังคับช่วง 30 นาที
-                                                    max: now
+                                                        unit: 'minute'
+                                                    }
                                                 },
                                                 y: {
                                                     min: Y_MIN,
@@ -597,11 +613,13 @@
                                             }
                                         }
                                     });
-                                } catch (e) {
-                                    errEl.textContent = `โหลดกราฟไม่สำเร็จ: ${e.message}`;
-                                    console.error(e);
+                                } catch (err) {
+                                    errEl.textContent = `โหลดกราฟไม่สำเร็จ: ${err.message}`;
+                                    console.error(err);
                                 }
                             }
+
+                            document.addEventListener('DOMContentLoaded', loadRecent);
                         </script>
 
 
