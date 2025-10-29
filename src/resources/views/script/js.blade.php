@@ -443,9 +443,9 @@
                 for (let k = 0; k < initCount; k++) this._spawnNext(true);
                 const tick = () => {
                     this._spawnNext(false);
-                    __schedule(tick, window.innerWidth < 400 ? rnd(7500, 10000) : rnd(5200, 8200));
+                    __schedule(tick, window.innerWidth < 500 ? rnd(11500, 10000) : rnd(22200, 8200));
                 };
-                __schedule(tick, 5000);
+                __schedule(tick, 1000);
             },
             _spawnNext(isInitial) {
                 if (!this.order.length) return;
