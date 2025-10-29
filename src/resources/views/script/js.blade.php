@@ -327,8 +327,8 @@
         const typeImg = t => types?.[t]?.img || Object.values(types || {})[0]?.img || '';
 
         const TOTAL_LANES = 2;
-        const TOP_PAD = window.innerWidth < 640 ? 8 : 4;
-        const BOTTOM_PAD = window.innerWidth < 640 ? 8 : 4;
+        const TOP_PAD = window.innerWidth < 640 ? 8;
+        const BOTTOM_PAD = window.innerWidth < 640 ? 4;
 
         // คำนวณพื้นที่ที่เหลือให้วางเลน
         const AVAILABLE = Math.max(0, WATER_BAND - TOP_PAD - BOTTOM_PAD);
