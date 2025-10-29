@@ -320,8 +320,8 @@
 
     // ฉากแม่น้ำลอยกระทง — เว้นแถวชัด ไม่ถี่ ระยะห่างสม่ำเสมอ
     function riverScene(types, recent) {
-        const WATER_TOP = 25; // จุดเริ่มเปอร์เซ็นต์แนวตั้งของแถบน้ำ
-        const WATER_BAND = 28; // ความสูงแถบน้ำเป็นเปอร์เซ็นต์
+        const WATER_TOP = 18; // จุดเริ่มเปอร์เซ็นต์แนวตั้งของแถบน้ำ
+        const WATER_BAND = 24; // ความสูงแถบน้ำเป็นเปอร์เซ็นต์
         const DUR = 50;
         const MAX_ITEMS = window.innerWidth < 640 ? 15 : 35;
         const typeImg = t => types?.[t]?.img || Object.values(types || {})[0]?.img || '';
