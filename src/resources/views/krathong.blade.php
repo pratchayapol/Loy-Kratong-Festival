@@ -18,6 +18,78 @@
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@200..800&display=swap&subset=thai"
         rel="stylesheet">
 
+
+    <!-- Tailwind config BEFORE CDN -->
+    <script>
+        tailwind = {
+                config: {
+                    theme: {
+                        extend: {
+                            fontFamily: {
+                                sans: ['"Sarabun"', 'ui-sans-serif', 'system-ui'],
+                                display: ['"Sarabun"', 'ui-sans-serif', 'system-ui'],
+                            },
+                            keyframes: {
+                                chop: {
+                                    '0%,96%,100%': {
+                                        transform: 'translateY(0) rotate(0)'
+                                    },
+                                    '97%': {
+                                        transform: 'translateY(-4px) rotate(-1deg)'
+                                    },
+                                    '99%': {
+                                        transform: 'translateY(3px) rotate(1deg)'
+                                    }
+                                    floatY: {
+                                        '0%,100%': {
+                                            transform: 'translateY(0)'
+                                        },
+                                        '50%': {
+                                            transform: 'translateY(-6px)'
+                                        }
+                                    },
+                                    sway: {
+                                        '0%,100%': {
+                                            transform: 'rotate(0deg)'
+                                        },
+                                        '25%': {
+                                            transform: 'rotate(-1.5deg)'
+                                        },
+                                        '75%': {
+                                            transform: 'rotate(1.5deg)'
+                                        }
+                                    },
+                                    waves: {
+                                        '0%': {
+                                            transform: 'translateX(0)'
+                                        },
+                                        '100%': {
+                                            transform: 'translateX(-50%)'
+                                        }
+                                    },
+                                    twinkle: {
+                                        '0%,100%': {
+                                            opacity: '.35',
+                                            transform: 'scale(1)'
+                                        },
+                                        '50%': {
+                                            opacity: '1',
+                                            transform: 'scale(1.15)'
+                                        }
+                                    }
+                                },
+                                animation: {
+                                    floatY: 'floatY 3.2s ease-in-out infinite',
+                                    sway: 'sway 5s ease-in-out infinite',
+                                    waves: 'waves 18s linear infinite',
+                                    twinkle: 'twinkle 3.4s ease-in-out infinite',
+                                    chop: 'chop var(--chopDur,10s) linear infinite'
+                                }
+                            }
+                        }
+                    }
+                }; // tailwindcss.com CDN จะอ่านตัวแปรนี้ตอนโหลด
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Libs: ใส่ defer -->
@@ -146,8 +218,6 @@
             touch-action: manipulation
         }
     </style>
-
-
 </head>
 
 <body class="min-h-screen bg-slate-950 text-slate-100 font-sans overflow-hidden" x-data="{}">
@@ -537,78 +607,8 @@
             </div>
         </div>
     </div>
-    <script>
-        /* Tailwind runtime config (ต้องมาก่อนโหลด CDN) */
-        tailwind = {
-            config: {
-                theme: {
-                    extend: {
-                        fontFamily: {
-                            sans: ['"Sarabun"', 'ui-sans-serif', 'system-ui'],
-                            display: ['"Sarabun"', 'ui-sans-serif', 'system-ui'],
-                        },
-                        keyframes: {
-                            chop: {
-                                '0%,96%,100%': {
-                                    transform: 'translateY(0) rotate(0)'
-                                },
-                                '97%': {
-                                    transform: 'translateY(-4px) rotate(-1deg)'
-                                },
-                                '99%': {
-                                    transform: 'translateY(3px) rotate(1deg)'
-                                }
-                            },
-                            floatY: {
-                                '0%,100%': {
-                                    transform: 'translateY(0)'
-                                },
-                                '50%': {
-                                    transform: 'translateY(-6px)'
-                                }
-                            },
-                            sway: {
-                                '0%,100%': {
-                                    transform: 'rotate(0deg)'
-                                },
-                                '25%': {
-                                    transform: 'rotate(-1.5deg)'
-                                },
-                                '75%': {
-                                    transform: 'rotate(1.5deg)'
-                                }
-                            },
-                            waves: {
-                                '0%': {
-                                    transform: 'translateX(0)'
-                                },
-                                '100%': {
-                                    transform: 'translateX(-50%)'
-                                }
-                            },
-                            twinkle: {
-                                '0%,100%': {
-                                    opacity: .35,
-                                    transform: 'scale(1)'
-                                },
-                                '50%': {
-                                    opacity: 1,
-                                    transform: 'scale(1.15)'
-                                }
-                            },
-                        },
-                        animation: {
-                            floatY: 'floatY 3.2s ease-in-out infinite',
-                            sway: 'sway 5s ease-in-out infinite',
-                            waves: 'waves 18s linear infinite',
-                            twinkle: 'twinkle 3.4s ease-in-out infinite',
-                            chop: 'chop var(--chopDur,10s) linear infinite',
-                        }
-                    }
-                }
-            }
-        };
 
+    <script>
         /* helpers + mobile vh fix */
         const rnd = (min, max) => Math.random() * (max - min) + min;
         const setVH = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight*.01}px`);
@@ -1191,6 +1191,21 @@
             document.head.appendChild(s);
         })();
     </script>
+
+    <!-- keyframes ดาวพุ่ง -->
+    <style>
+        @keyframes shootingStar {
+            0% {
+                transform: translate(0, 0);
+                opacity: 1
+            }
+
+            100% {
+                transform: translate(-200px, 200px);
+                opacity: 0
+            }
+        }
+    </style>
 
 </body>
 
