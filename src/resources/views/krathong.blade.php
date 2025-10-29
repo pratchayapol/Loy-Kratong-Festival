@@ -493,23 +493,43 @@
                         </div>
 
                         <script>
-                            // ... โค้ดเดิมด้านบนคงไว้ ...
+                            // ===== Globals (ให้เป็น global ชัดเจน) =====
+                            window.STATUS_SLUG = window.STATUS_SLUG ?? "loykratong";
+                            window.MONITOR_ID = window.MONITOR_ID ?? "34";
+                            window.ENDPOINT = window.ENDPOINT ?? `/kuma/heartbeat/${window.STATUS_SLUG}`;
+                            const Y_MIN = 0,
+                                Y_MAX = 300;
+                            const TZ = "Asia/Bangkok"; // UTC+7
 
-                            let pingChart;
+                            // ===== State =====
+                            let pingChart = null;
                             let refreshId = null;
 
+                            // ===== Utils =====
+                            function toUTCDate(t) {
+                                if (typeof t === "number") {
+                                    const ms = t < 2e10 ? t * 1000 : t;
+                                    return new Date(ms);
+                                }
+                                if (typeof t === "string") {
+                                    return new Date(t.replace(" ", "T") + "Z");
+                                }
+                                return new Date(t);
+                            }
+
+                            // ===== Fetch + Render/Update =====
                             async function loadPingExact() {
-                                const errEl = document.getElementById('pingErr');
-                                errEl.textContent = '';
+                                const errEl = document.getElementById("pingErr");
+                                if (errEl) errEl.textContent = "";
                                 try {
-                                    const res = await fetch(ENDPOINT, {
-                                        credentials: 'same-origin',
-                                        cache: 'no-store'
+                                    const res = await fetch(window.ENDPOINT, {
+                                        credentials: "same-origin",
+                                        cache: "no-store"
                                     });
                                     if (!res.ok) throw new Error(`HTTP ${res.status}`);
                                     const data = await res.json();
 
-                                    const raw = data.heartbeatList?.[MONITOR_ID] ?? [];
+                                    const raw = data.heartbeatList?.[window.MONITOR_ID] ?? [];
                                     const series = raw
                                         .filter(h => Number.isFinite(h.ping) && h.ping > 0 && h.ping < 60000 && h.time)
                                         .map(h => ({
@@ -518,25 +538,27 @@
                                         }))
                                         .sort((a, b) => a.x - b.x);
 
-                                    if (series.length === 0) throw new Error('no data');
+                                    if (series.length === 0) throw new Error("no data");
 
                                     const xmin = series[0].x.getTime();
                                     const xmax = series[series.length - 1].x.getTime();
 
-                                    const ctx = document.getElementById('pingChart');
+                                    const ctx = document.getElementById("pingChart");
+                                    if (!ctx) throw new Error("canvas#pingChart not found");
 
-                                    // อัปเดตแทนการทำลายแล้วสร้างใหม่
                                     if (pingChart) {
+                                        // update only
                                         pingChart.data.datasets[0].data = series;
                                         pingChart.options.scales.x.min = xmin;
                                         pingChart.options.scales.x.max = xmax;
-                                        pingChart.update('none'); // ไม่ต้องแอนิเมชัน
+                                        pingChart.update("none");
                                     } else {
+                                        // create once
                                         pingChart = new Chart(ctx, {
-                                            type: 'line',
+                                            type: "line",
                                             data: {
                                                 datasets: [{
-                                                    label: 'Ping',
+                                                    label: "Ping",
                                                     data: series,
                                                     pointRadius: 0,
                                                     spanGaps: false
@@ -551,42 +573,43 @@
                                                 datasets: {
                                                     line: {
                                                         tension: 0,
-                                                        cubicInterpolationMode: 'monotone'
+                                                        cubicInterpolationMode: "monotone"
                                                     }
                                                 },
                                                 interaction: {
-                                                    mode: 'index',
+                                                    mode: "index",
                                                     intersect: false
                                                 },
                                                 scales: {
                                                     x: {
-                                                        type: 'time',
-                                                        bounds: 'data',
+                                                        type: "time",
+                                                        bounds: "data",
                                                         min: xmin,
                                                         max: xmax,
                                                         title: {
                                                             display: true,
-                                                            text: 'เวลา'
+                                                            text: "เวลา"
                                                         },
                                                         ticks: {
-                                                            source: 'data',
-                                                            callback: (v) => new Date(v).toLocaleString('th-TH', {
-                                                                timeZone: TZ,
-                                                                hour12: false,
-                                                                hour: '2-digit',
-                                                                minute: '2-digit',
-                                                                second: '2-digit'
-                                                            })
+                                                            source: "data",
+                                                            callback: v =>
+                                                                new Date(v).toLocaleString("th-TH", {
+                                                                    timeZone: TZ,
+                                                                    hour12: false,
+                                                                    hour: "2-digit",
+                                                                    minute: "2-digit",
+                                                                    second: "2-digit"
+                                                                })
                                                         },
                                                         time: {
                                                             displayFormats: {
-                                                                millisecond: 'HH:mm:ss',
-                                                                second: 'HH:mm:ss',
-                                                                minute: 'HH:mm',
-                                                                hour: 'HH:mm',
-                                                                day: 'dd/MM HH:mm'
+                                                                millisecond: "HH:mm:ss",
+                                                                second: "HH:mm:ss",
+                                                                minute: "HH:mm",
+                                                                hour: "HH:mm",
+                                                                day: "dd/MM HH:mm"
                                                             },
-                                                            tooltipFormat: 'HH:mm:ss'
+                                                            tooltipFormat: "HH:mm:ss"
                                                         }
                                                     },
                                                     y: {
@@ -597,7 +620,7 @@
                                                         },
                                                         title: {
                                                             display: true,
-                                                            text: 'ms'
+                                                            text: "ms"
                                                         }
                                                     }
                                                 },
@@ -607,20 +630,20 @@
                                                     },
                                                     tooltip: {
                                                         callbacks: {
-                                                            title: (items) => {
+                                                            title: items => {
                                                                 const ts = items?.[0]?.parsed?.x;
-                                                                return new Date(ts).toLocaleString('th-TH', {
+                                                                return new Date(ts).toLocaleString("th-TH", {
                                                                     timeZone: TZ,
                                                                     hour12: false,
-                                                                    year: 'numeric',
-                                                                    month: '2-digit',
-                                                                    day: '2-digit',
-                                                                    hour: '2-digit',
-                                                                    minute: '2-digit',
-                                                                    second: '2-digit'
-                                                                }) + ' (UTC+7)';
+                                                                    year: "numeric",
+                                                                    month: "2-digit",
+                                                                    day: "2-digit",
+                                                                    hour: "2-digit",
+                                                                    minute: "2-digit",
+                                                                    second: "2-digit"
+                                                                }) + " (UTC+7)";
                                                             },
-                                                            label: (ctx) => `Ping: ${ctx.parsed.y} ms`
+                                                            label: ctx => `Ping: ${ctx.parsed.y} ms`
                                                         }
                                                     }
                                                 }
@@ -628,19 +651,19 @@
                                         });
                                     }
                                 } catch (e) {
-                                    errEl.textContent = `โหลดกราฟไม่สำเร็จ: ${e.message}`;
+                                    if (errEl) errEl.textContent = `โหลดกราฟไม่สำเร็จ: ${e.message}`;
                                     console.error(e);
                                 }
                             }
 
-                            // เริ่มโหลดและตั้ง interval 10 วินาที
-                            document.addEventListener('DOMContentLoaded', () => {
+                            // ===== Boot + 10s Auto Refresh =====
+                            document.addEventListener("DOMContentLoaded", () => {
                                 loadPingExact();
-                                refreshId = setInterval(loadPingExact, 10000);
+                                refreshId = setInterval(loadPingExact, 10000); // 10 วินาที
                             });
 
-                            // พัก-เล่นต่อเมื่อสลับแท็บ ลดภาระ
-                            document.addEventListener('visibilitychange', () => {
+                            // ===== Pause when tab hidden =====
+                            document.addEventListener("visibilitychange", () => {
                                 if (document.hidden) {
                                     if (refreshId) {
                                         clearInterval(refreshId);
@@ -652,11 +675,11 @@
                                 }
                             });
 
-                            // alpine เดิมคงไว้ได้
-                            document.addEventListener('alpine:init', () => {
+                            // ===== Alpine hook (คงพฤติกรรมเดิม) =====
+                            document.addEventListener("alpine:init", () => {
                                 let once = false;
                                 Alpine.effect(() => {
-                                    const open = Alpine.store('ui')?.aboutOpen;
+                                    const open = Alpine.store("ui")?.aboutOpen;
                                     if (open && !once) {
                                         once = true;
                                         setTimeout(() => {
