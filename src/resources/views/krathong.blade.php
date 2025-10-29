@@ -637,19 +637,19 @@
     <!-- กราฟ Ping ผ่าน Laravel proxy -->
     <script>
         const STATUS_SLUG = "loykratong";
-        const MONITOR_ID = "34";
+        const MONITOR_ID = "34"; // แก้ให้ตรงของจริง
         const ENDPOINT = `/kuma/heartbeat/${STATUS_SLUG}`;
 
         let pingChart;
+        let aboutWasOpen = false; // guard ป้องกันโหลดซ้ำ
+        const Y_MIN = 0;
+        const Y_MAX = 1000; // ล็อกเพดานคงที่ (ปรับตาม SLA)
 
-        function p95(arr) {
-            if (!arr.length) return 0;
-            const a = [...arr].sort((x, y) => x - y);
-            const i = Math.floor(0.95 * (a.length - 1));
-            return a[i];
+        function toDate(t) {
+            return typeof t === 'number' ? new Date((t < 2e10 ? t * 1000 : t)) : new Date(t);
         }
 
-        async function loadPing() {
+        async function loadPingOnce() {
             const errEl = document.getElementById('pingErr');
             errEl.textContent = '';
             try {
@@ -659,19 +659,13 @@
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
 
-                // ดึงซีรีส์และกรองค่าแปลก
-                const raw = (data.heartbeatList?.[MONITOR_ID] || []).filter(h => Number.isFinite(h.ping));
-                const toDate = t => typeof t === 'number' ? new Date((t < 2e10 ? t * 1000 : t)) : new Date(t);
-
-                // ทิ้งค่า 0, ติดลบ, และค่ามหาศาลที่มักมาจากช่วงล่ม
-                const series = raw.filter(h => h.ping > 0 && h.ping < 60000);
-
-                const labels = series.map(h => toDate(h.time));
-                const pings = series.map(h => h.ping);
-
-                // คำนวณเพดานจาก P95 แล้วบวกระยะเผื่อ
-                const baseMax = p95(pings);
-                const yMax = Math.max(100, Math.ceil((baseMax * 1.15) / 10) * 10); // ปัดขึ้นทีละ 10ms อย่างน้อย 100ms
+                // ดึงและกรองค่า ping ผิดปกติ
+                const list = (data.heartbeatList?.[MONITOR_ID] || [])
+                    .filter(h => Number.isFinite(h.ping) && h.ping > 0 && h.ping < 60000)
+                    .map(h => ({
+                        x: toDate(h.time),
+                        y: Math.min(h.ping, Y_MAX)
+                    })); // clamp กันหลุดสเกล
 
                 const ctx = document.getElementById('pingChart');
                 if (pingChart) pingChart.destroy();
@@ -679,11 +673,9 @@
                 pingChart = new Chart(ctx, {
                     type: 'line',
                     data: {
-                        labels,
                         datasets: [{
                             label: 'Ping',
-                            data: pings,
-                            tension: 0.25,
+                            data: list,
                             pointRadius: 0,
                             spanGaps: true
                         }]
@@ -692,10 +684,14 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         parsing: false,
-                        animation: {
-                            duration: 0
-                        }, // ไม่ให้แกนเด้ง
+                        animation: false, // ไม่ให้เด้ง
                         normalized: true,
+                        datasets: {
+                            line: {
+                                tension: 0,
+                                cubicInterpolationMode: 'monotone'
+                            }
+                        }, // ไม่ overshoot
                         interaction: {
                             mode: 'index',
                             intersect: false
@@ -705,8 +701,8 @@
                                 type: 'time'
                             },
                             y: {
-                                min: 0,
-                                max: yMax, // ล็อกเพดานตาม P95
+                                min: Y_MIN,
+                                max: Y_MAX,
                                 ticks: {
                                     precision: 0
                                 },
@@ -729,21 +725,27 @@
             }
         }
 
-        // โหลดเมื่อเปิดโมดัลเกี่ยวกับ แล้ว resize หลัง transition
+        // โหลดครั้งเดียวเมื่อโมดัล "เกี่ยวกับ" เปลี่ยนจากปิด -> เปิด
         document.addEventListener('alpine:init', () => {
             Alpine.effect(() => {
-                if (Alpine.store('ui')?.aboutOpen) {
+                const open = Alpine.store('ui')?.aboutOpen;
+                if (open && !aboutWasOpen) {
+                    aboutWasOpen = true;
                     setTimeout(() => {
-                        loadPing().then(() => {
+                        loadPingOnce().then(() => {
                             try {
                                 pingChart?.resize();
                             } catch {}
                         });
                     }, 200);
                 }
+                if (!open && aboutWasOpen) {
+                    aboutWasOpen = false; // รีเซ็ตให้พร้อมโหลดรอบหน้า
+                }
             });
         });
     </script>
+
 
 
     <!-- keyframes ดาวพุ่ง -->
