@@ -21,9 +21,9 @@ class KrathongController extends Controller
     public function metrics()
     {
         return response()->json([
-            'total'   => \App\Models\Krathong::count(),
+            'total' => \App\Models\Krathong::count(),
             'updated' => now()->toIso8601String(),
-        ]);
+        ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
     }
 
     public function show()

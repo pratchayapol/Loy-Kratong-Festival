@@ -647,45 +647,42 @@
     }
 
     // ดึงและอัปเดตตัวนับกระทง
-    const $total = document.getElementById('totalCount');
+    document.addEventListener('DOMContentLoaded', () => {
+        async function refreshCount(signal) {
+            try {
+                const res = await fetch(`{{ secure_url('krathong/metrics') }}`, {
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    cache: 'no-store',
+                    signal
+                });
+                if (!res.ok) return;
 
-    async function refreshCount(signal) {
-        try {
-            // เลือกอย่างใดอย่างหนึ่ง:
+                const {
+                    total
+                } = await res.json();
 
-            // 1) ใช้ relative URL ปลอดภัยสุดกับ HTTPS/โดเมนใดๆ
-            // const res = await fetch('/krathong/metrics', {
+                // คว้า element ตอนอัปเดต เพื่อกันกรณีมันเพิ่งถูกเรนเดอร์
+                const el = document.getElementById('totalCount');
+                if (el) el.textContent = Number(total).toLocaleString();
+            } catch (e) {
+                /* เงียบไว้พอ */ }
+        }
 
-            // 2) บังคับ https ผ่าน Blade helper
-            const res = await fetch(`{{ secure_url('krathong/metrics') }}`, {
-                headers: {
-                    'Accept': 'application/json'
-                },
-                signal
-            });
+        // ดึงทุก 3 วินาทีพอ ไม่โหดเกิน
+        let timer = setInterval(() => refreshCount(), 3000);
 
-            if (!res.ok) return;
-            const {
-                total
-            } = await res.json();
-            if ($total) $total.textContent = Number(total).toLocaleString();
-        } catch (e) {
-            /* เงียบไว้พอ */ }
-    }
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) refreshCount();
+        });
 
-    // ดึงทุก 5 วินาที และตอนโฟกัสกลับมา
-    let timer = setInterval(() => refreshCount(), 5000);
-    document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) refreshCount();
+        // ครั้งแรก
+        refreshCount();
+
+        // ให้ส่วนอื่นเรียกได้หลัง POST สำเร็จ
+        window.refreshKrathongMetrics = () => refreshCount();
     });
-
-    // เรียกครั้งแรก
-    refreshCount();
-
-    // ให้ฟังก์ชันนี้ใช้ซ้ำหลังโพสต์สำเร็จ
-    window.refreshKrathongMetrics = () => refreshCount();
-
-
 
     // ตั้งตัวแปร CSS --vh ให้เท่ากับ 1% ของความสูง viewport จริง
     const rnd = (min, max) => Math.random() * (max - min) + min;
