@@ -458,7 +458,7 @@
                 const dur = init ? rnd(DUR_INIT_MIN, DUR_INIT_MAX) : rnd(DUR_LOOP_MIN, DUR_LOOP_MAX);
                 const delay = init ? rnd(0, 12) : 0;
                 const top = rnd(WATER_TOP + 6, WATER_TOP + WATER_BAND + (init ? 0 : 4));
-                return { id: r.id, clientId: `${init?'srv':'cli'}_${r.id}_${Math.random().toString(36).slice(2)}`, img: typeImg(r.type), wish: `${r.nickname} (${r.age}) : ${r.wish}` , style: makeStyle(dur, delay, top), __life: (dur + delay) * 1000 };
+                return { id: r.id, clientId: `${init?'srv':'cli'}_${r.id}_${Math.random().toString(36).slice(2)}`, img: typeImg(r.type), wish: `${r.nickname} : ${r.wish}` , style: makeStyle(dur, delay, top), __life: (dur + delay) * 1000 };
             };
 
             const scheduleRemoval = (vm, clientId, ms) => { __schedule(() => { const i = vm.items.findIndex(x => x.clientId === clientId); if (i > -1) vm.items.splice(i, 1); }, ms + 30); };
