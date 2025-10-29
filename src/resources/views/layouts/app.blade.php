@@ -98,8 +98,16 @@
     <!-- Base styles for layout & chart -->
     <style>
         html,
+        html,
         body {
             font-family: "Sarabun", "TH Sarabun New", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Thai", Tahoma, Arial, sans-serif;
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font-family: inherit;
         }
 
         /* หิ่งห้อยกระพริบ */
