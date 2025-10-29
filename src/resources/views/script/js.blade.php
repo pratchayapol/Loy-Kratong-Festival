@@ -469,7 +469,7 @@
             const waitTimes = laneNextTime.map(t => Math.max(0, t - now));
             const minWait = Math.min(...waitTimes);
             // เพิ่ม buffer ให้มากขึ้น เพื่อไม่ให้ปล่อยถี่
-            return Math.max(300, minWait + 200);
+            return Math.max(400, minWait + 200);
         }
 
         return {
