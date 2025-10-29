@@ -445,7 +445,7 @@
                     this._spawnNext(false);
                     __schedule(tick, window.innerWidth < 400 ? rnd(7500, 10000) : rnd(5200, 8200));
                 };
-                __schedule(tick, 900);
+                __schedule(tick, 5000);
             },
             _spawnNext(isInitial) {
                 if (!this.order.length) return;
