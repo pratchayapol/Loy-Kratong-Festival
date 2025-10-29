@@ -498,7 +498,7 @@
                             const MONITOR_ID = "34";
                             const ENDPOINT = `/kuma/heartbeat/${STATUS_SLUG}`;
                             const Y_MIN = 0,
-                                Y_MAX = 1000;
+                                Y_MAX = 300;
                             const TZ = 'Asia/Bangkok'; // UTC+7
 
                             let pingChart;
