@@ -322,25 +322,18 @@
     function riverScene(types, recent) {
         const WATER_TOP = 25;
         const WATER_BAND = 28;
-        const DUR = 50;
+        const DUR = 50; // เพิ่มเวลาให้ช้าลง ลอยนานขึ้น
         const MAX_ITEMS = window.innerWidth < 640 ? 15 : 35;
         const typeImg = t => types?.[t]?.img || Object.values(types || {})[0]?.img || '';
 
+        // ลดจำนวนเลน และเว้นระยะห่างระหว่างแถวให้ชัดเจน
         const TOTAL_LANES = window.innerWidth < 640 ? 3 : 5;
-
-        // เพิ่มช่องว่างหัวท้ายแถว
-        const EDGE_GAP = 4; // ปรับเลขนี้เพื่อเพิ่ม/ลดระยะห่างแถวบนและล่าง
-
-        const usableBand = Math.max(0, (WATER_BAND - 20) - (EDGE_GAP * 2));
-        const VERTICAL_SPACING = TOTAL_LANES > 1 ?
-            usableBand / (TOTAL_LANES - 1) :
-            0;
-
-        const base = WATER_TOP + 12 + EDGE_GAP;
-
+        const VERTICAL_SPACING = (WATER_BAND - 20) / Math.max(1, TOTAL_LANES - 1);
         const laneTops = Array.from({
-            length: TOTAL_LANES
-        }, (_, i) => base + (i * VERTICAL_SPACING));
+                length: TOTAL_LANES
+            }, (_, i) =>
+            WATER_TOP + 20 + (i * VERTICAL_SPACING)
+        );
 
         // เพิ่มระยะห่างแนวนอนให้มากขึ้น
         const TRACK_WIDTH = 140;
@@ -350,7 +343,7 @@
 
         console.log(
             `Config: ${TOTAL_LANES} lanes, vertical: ${VERTICAL_SPACING.toFixed(1)}%, gap: ${(TIME_GAP_MS/1000).toFixed(1)}s`
-        );
+            );
 
         // ติดตามเวลาของแต่ละเลน
         const laneNextTime = new Array(TOTAL_LANES).fill(0);
