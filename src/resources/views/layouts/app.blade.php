@@ -173,7 +173,7 @@
         }
     </style>
 
-    <style id="dyn-keyframes"></style>
+    
     <style>
         .pb-safe {
             padding-bottom: max(1rem, env(safe-area-inset-bottom));

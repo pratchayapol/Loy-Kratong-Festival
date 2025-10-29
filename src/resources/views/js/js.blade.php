@@ -1,5 +1,5 @@
  <script>
-     // === Config ===
+     // โหลดและแสดงกราฟ Ping Monitoring
      const STATUS_SLUG = "loykratong";
      const MONITOR_ID = "34";
      const ENDPOINT = `/kuma/heartbeat/${STATUS_SLUG}`;
@@ -23,6 +23,7 @@
          return new Date(t);
      }
 
+     // สร้างหรืออัปเดตกราฟ
      function upsertChart(series) {
          if (window.innerWidth < 640) return; // skip on small screens
          const xmin = series[0].x.getTime();
@@ -133,6 +134,7 @@
          }
      }
 
+     // โหลดข้อมูล Ping แบบละเอียด
      async function loadPingExact() {
          const errEl = document.getElementById('pingErr');
          if (errEl) errEl.textContent = '';
@@ -204,9 +206,23 @@
              if (!open) once = false;
          });
      });
- </script>
- {{-- หิ่งห้อยกระพริบ --}}
- <script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     // สร้างหิ่งห้อยบินบนผิวน้ำ
      function fireflies() {
          const COUNT = window.innerWidth < 640 ? 18 : 36;
          const DUR_MIN = 8,
@@ -289,10 +305,8 @@
              }
          }
      }
- </script>
 
- <!-- Logic ลอยกระทง -->
- <script>
+     // อ่านคุกกี้แบบง่าย
      const readCookie = n => decodeURIComponent((document.cookie.split('; ').find(x => x.startsWith(n + '=')) || '')
          .split('=')[1] || '');
      const __timers = new Set();
@@ -306,6 +320,9 @@
          __timers.clear();
      };
      window.addEventListener('beforeunload', __clearAll);
+
+
+     // สร้างห้องเก็บ keyframe ไว้เพิ่มตอนรัน
 
      function ensureKeyframeSheet() {
          let el = document.getElementById('dyn-keyframes');
@@ -324,7 +341,7 @@
          return el.sheet;
      }
 
-     // วนลูปใหม่→เก่าเป็นรอบ ๆ ไม่ว่าง ไม่ซ้ำภายในรอบเดียว และแสดงใหม่ทันที
+     // ฉากแม่น้ำลอยกระทง
      function riverScene(types, recent) {
          const WATER_TOP = 25; // เริ่มน้ำที่ 60% ของจอในมือถือ
          const WATER_BAND = 28;
@@ -336,6 +353,7 @@
          const MAX_ITEMS = window.innerWidth < 640 ? 40 : 100; // จำกัดจำนวนบนมือถือ
          const typeImg = t => types?.[t]?.img || Object.values(types || {})[0]?.img || '';
 
+         // สร้างสไตล์การลอย
          const makeStyle = (dur, delay, top) => {
              const name = `drift_${Math.random().toString(36).slice(2)}`;
              const sheet = ensureKeyframeSheet();
@@ -345,6 +363,7 @@
              return `top:${top}%;left:-20%;--floatDur:${rnd(2.8,4.4)}s;--swayDur:${rnd(4.5,6.5)}s;animation:${name} ${dur}s linear ${delay}s forwards,var(--_dummy,0s);`;
          };
 
+         // สร้างไอเท็มจากเรคคอร์ด
          const mkItem = (r, init = false) => {
              const dur = init ? rnd(DUR_INIT_MIN, DUR_INIT_MAX) : rnd(DUR_LOOP_MIN, DUR_LOOP_MAX);
              const delay = init ? rnd(0, 12) : 0;
@@ -362,6 +381,7 @@
              };
          };
 
+         // ตั้งเวลาลบไอเท็ม
          const scheduleRemoval = (vm, item, ms) => {
              // เคลียร์ตัวเดิม
              if (item.__tid) {
@@ -456,6 +476,7 @@
          }
      }
 
+     // ฟอร์มลอยกระทง
      function krathongForm() {
          return {
              form: {
@@ -507,9 +528,8 @@
              }
          }
      }
- </script>
- <!-- helpers + mobile vh fix + safe area -->
- <script>
+
+     // ตั้งตัวแปร CSS --vh ให้เท่ากับ 1% ของความสูง viewport จริง
      const rnd = (min, max) => Math.random() * (max - min) + min;
      const setVH = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
      window.addEventListener('resize', setVH, {
