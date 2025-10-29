@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Loy Kratong Festival</title>
+    <title>Loy Krathong Festival</title>
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     <!-- Favicon / Manifest (กัน mixed content) -->
     <link rel="icon" href="{{ secure_asset('favicon.ico') }}" />
