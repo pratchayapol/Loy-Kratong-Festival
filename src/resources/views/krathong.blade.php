@@ -903,6 +903,38 @@
 
     <!-- Logic ลอยกระทง -->
     <script>
+        const readCookie = n => decodeURIComponent((document.cookie.split('; ').find(x => x.startsWith(n + '=')) || '')
+            .split('=')[1] || '');
+        const __timers = new Set();
+        const __schedule = (fn, ms) => {
+            const t = setTimeout(fn, ms);
+            __timers.add(t);
+            return t;
+        };
+        const __clearAll = () => {
+            for (const t of __timers) clearTimeout(t);
+            __timers.clear();
+        };
+        window.addEventListener('beforeunload', __clearAll);
+
+        function ensureKeyframeSheet() {
+            let el = document.getElementById('dyn-keyframes');
+            if (!el) {
+                el = document.createElement('style');
+                el.id = 'dyn-keyframes';
+                document.head.appendChild(el);
+            }
+            if (!el.sheet) {
+                const tmp = document.createElement('style');
+                document.head.appendChild(tmp);
+                const sheet = tmp.sheet;
+                document.head.removeChild(tmp);
+                return sheet;
+            }
+            return el.sheet;
+        }
+
+        // วนลูปใหม่→เก่าเป็นรอบ ๆ ไม่ว่าง ไม่ซ้ำภายในรอบเดียว และแสดงใหม่ทันที
         function riverScene(types, recent) {
             const WATER_TOP = 25; // % จากขอบบนโซนน้ำ
             const WATER_BAND = 28; // ช่วงความสูงที่ให้ลอย
