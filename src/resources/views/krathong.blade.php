@@ -95,6 +95,27 @@
             }
         }
 
+        /* กระทงหยุด*/
+        .krathong-item.is-paused {
+            animation-play-state: paused !important
+        }
+
+        .krathong-pop {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 90%;
+            max-width: 280px;
+            z-index: 50;
+            padding: .6rem .8rem;
+            border-radius: 12px;
+            background: rgba(2, 6, 23, .85);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255, 255, 255, .15);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .4)
+        }
+
+        /* โบว์สีดำ */
         .ribbon-black {
             position: fixed;
             right: 0;
@@ -332,9 +353,17 @@
                 x-init="init()">
                 <template x-for="k in items" :key="k.clientId">
                     <div class="absolute flex flex-col items-center will-change-transform krathong-item"
-                        :style="k.style">
+                        :class="k.paused ? 'is-paused' : ''" :style="k.style" @mouseenter="pause(k); k.show=true"
+                        @mouseleave="resume(k); k.show=false" @touchstart.passive="pause(k); k.show=true"
+                        @touchend.passive="resume(k); k.show=false">
                         <div class="px-3 py-2 rounded-2xl text-xs sm:text-sm max-w-[240px] sm:max-w-[300px] text-cyan-50 bg-slate-900/80 backdrop-blur-xl border border-cyan-400/30 shadow-lg shadow-cyan-500/20 whitespace-nowrap overflow-hidden text-ellipsis"
                             x-text="k.wish"></div>
+
+                        <!-- popup ข้อความเต็ม -->
+                        <div x-show="k.show" x-transition.opacity.duration.120ms class="krathong-pop">
+                            <div class="text-[11px] leading-5 sm:text-sm text-slate-100" x-text="k.wish"></div>
+                        </div>
+
                         <div class="relative mt-2">
                             <img :src="k.img" alt="krathong" decoding="async" fetchpriority="low"
                                 class="w-16 h-16 sm:w-20 sm:h-20 drop-shadow-[0_15px_25px_rgba(0,0,0,0.6)] relative z-10">
@@ -848,6 +877,8 @@
             }
         }
     </script>
+
+    <!-- Logic ลอยกระทง -->
     <script>
         const readCookie = n => decodeURIComponent((document.cookie.split('; ').find(x => x.startsWith(n + '=')) || '')
             .split('=')[1] || '');
@@ -911,13 +942,23 @@
                     img: typeImg(r.type),
                     wish: `${r.nickname} : ${r.wish}`,
                     style: makeStyle(dur, delay, top),
-                    __life: (dur + delay) * 1000
+                    show: false,
+                    paused: false,
+                    __life: (dur + delay) * 1000,
+                    __deadline: Date.now() + (dur + delay) * 1000
                 };
             };
 
-            const scheduleRemoval = (vm, clientId, ms) => {
-                __schedule(() => {
-                    const i = vm.items.findIndex(x => x.clientId === clientId);
+            const scheduleRemoval = (vm, item, ms) => {
+                // เคลียร์ตัวเดิม
+                if (item.__tid) {
+                    clearTimeout(item.__tid);
+                    __timers.delete(item.__tid);
+                    item.__tid = null;
+                }
+                item.__deadline = Date.now() + ms;
+                item.__tid = __schedule(() => {
+                    const i = vm.items.findIndex(x => x.clientId === item.clientId);
                     if (i > -1) vm.items.splice(i, 1);
                 }, ms + 30);
             };
@@ -925,6 +966,29 @@
 
             return {
                 items: [],
+                order: base,
+                seenInCycle: new Set(),
+                idx: 0,
+
+                pause(k) {
+                    if (!k || k.paused) return;
+                    k.paused = true;
+                    // คงเหลือเท่าไร
+                    k.__remain = Math.max(3000, (k.__deadline || 0) - Date.now());
+                    if (k.__tid) {
+                        clearTimeout(k.__tid);
+                        __timers.delete(k.__tid);
+                        k.__tid = null;
+                    }
+                },
+                resume(k) {
+                    if (!k || !k.paused) return;
+                    k.paused = false;
+                    // ยืดเวลาอ่านอีกหน่อย
+                    const extra = 8000;
+                    const ms = (k.__remain || 0) + extra;
+                    scheduleRemoval(this, k, ms);
+                },
                 order: base,
                 seenInCycle: new Set(),
                 idx: 0,
@@ -955,7 +1019,7 @@
                     const item = mkItem(r, isInitial);
                     this.items.unshift(item);
                     if (this.items.length > MAX_ITEMS) this.items.splice(MAX_ITEMS);
-                    scheduleRemoval(this, item.clientId, item.__life);
+                    scheduleRemoval(this, item, item.__life);
                 },
                 spawnFromRecord(r) {
                     this.order = [r, ...this.order.filter(x => x.id !== r.id)].sort((a, b) => b.id - a.id);
@@ -964,7 +1028,7 @@
                     const item = mkItem(r, false);
                     this.items.unshift(item);
                     if (this.items.length > MAX_ITEMS) this.items.splice(MAX_ITEMS);
-                    scheduleRemoval(this, item.clientId, item.__life);
+                    scheduleRemoval(this, item, item.__life);
                 },
                 spawnNew(p) {
                     const r = {
