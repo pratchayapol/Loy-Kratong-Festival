@@ -469,7 +469,7 @@
             const waitTimes = laneNextTime.map(t => Math.max(0, t - now));
             const minWait = Math.min(...waitTimes);
             // เพิ่ม buffer ให้มากขึ้น เพื่อไม่ให้ปล่อยถี่
-            return Math.max(300, minWait + 150);
+            return Math.max(300, minWait + 200);
         }
 
         return {
@@ -497,7 +497,7 @@
                 if (order.length === 0) return;
 
                 // เริ่มต้นด้วยจำนวนน้อย ค่อยๆ เติม
-                const initialGap = TIME_GAP_MS * 1.2; // เพิ่มช่องว่างตอนเริ่มต้น
+                const initialGap = TIME_GAP_MS * 1.75; // เพิ่มช่องว่างตอนเริ่มต้น
                 let spawnCount = 0;
                 const targetCount = Math.min(TOTAL_LANES, order.length);
 
