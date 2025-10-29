@@ -612,7 +612,7 @@
 
         // === Krathong effect config ===
         const AMP_PX = 10; // แอมพลิจูดการลอย (px)
-        const SPEED = 0.5; // ความเร็วลอย (รอบ/วินาที)
+        const SPEED = 0.2; // ความเร็วลอย (รอบ/วินาที)
         const STAGGER_MS = 1000; // เว้นระยะปล่อยทีละกระทง
         const SHOW_TRAIL = true; // วาดเส้นตามหรือไม่
 
