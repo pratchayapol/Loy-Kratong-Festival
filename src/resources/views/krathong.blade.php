@@ -492,128 +492,134 @@
                         </div>
 
                         <script>
-                            const MONITOR_ID = "34";
-                            const ENDPOINT = `/kuma/heartbeat/loykratong`;
-                            const Y_MIN = 0,
-                                Y_MAX = 1000;
-                            let pingChart;
+  // === Config ===
+  const STATUS_SLUG = "loykratong";
+  const MONITOR_ID = "34";
+  const ENDPOINT = `/kuma/heartbeat/${STATUS_SLUG}`;
+  const Y_MIN = 0, Y_MAX = 1000;
+  const TZ = 'Asia/Bangkok'; // UTC+7
 
-                            function toDate(t) {
-                                if (typeof t === 'number') return new Date((t < 2e10 ? t * 1000 : t));
-                                if (typeof t === 'string') return new Date(t.replace(' ', 'T'));
-                                return new Date(t);
-                            }
+  let pingChart;
 
-                            async function loadPingExact() {
-                                const errEl = document.getElementById('pingErr');
-                                errEl.textContent = '';
-                                try {
-                                    const res = await fetch(ENDPOINT, {
-                                        credentials: 'same-origin'
-                                    });
-                                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                                    const data = await res.json();
+  function toDate(t){
+    if (typeof t === 'number') return new Date((t < 2e10 ? t*1000 : t));
+    if (typeof t === 'string') return new Date(t.replace(' ', 'T'));
+    return new Date(t);
+  }
 
-                                    const raw = data.heartbeatList?.[MONITOR_ID] ?? [];
-                                    const series = raw
-                                        .filter(h => Number.isFinite(h.ping) && h.ping > 0 && h.ping < 60000 && h.time)
-                                        .map(h => ({
-                                            x: toDate(h.time),
-                                            y: Math.min(h.ping, Y_MAX)
-                                        }))
-                                        .sort((a, b) => a.x - b.x);
+  async function loadPingExact(){
+    const errEl = document.getElementById('pingErr');
+    errEl.textContent = '';
+    try{
+      const res = await fetch(ENDPOINT, { credentials: 'same-origin' });
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
 
-                                    if (series.length === 0) throw new Error('no data');
+      const raw = data.heartbeatList?.[MONITOR_ID] ?? [];
+      const series = raw
+        .filter(h => Number.isFinite(h.ping) && h.ping > 0 && h.ping < 60000 && h.time)
+        .map(h => ({ x: toDate(h.time), y: Math.min(h.ping, Y_MAX) }))
+        .sort((a,b) => a.x - b.x);
 
-                                    const xmin = series[0].x.getTime();
-                                    const xmax = series[series.length - 1].x.getTime();
+      if(series.length === 0) throw new Error('no data');
 
-                                    const ctx = document.getElementById('pingChart');
-                                    if (pingChart) pingChart.destroy();
+      const xmin = series[0].x.getTime();
+      const xmax = series[series.length-1].x.getTime();
 
-                                    pingChart = new Chart(ctx, {
-                                        type: 'line',
-                                        data: {
-                                            datasets: [{
-                                                label: 'Ping',
-                                                data: series,
-                                                pointRadius: 0,
-                                                spanGaps: false
-                                            }]
-                                        },
-                                        options: {
-                                            responsive: true,
-                                            maintainAspectRatio: false,
-                                            parsing: false,
-                                            animation: false,
-                                            normalized: true,
-                                            datasets: {
-                                                line: {
-                                                    tension: 0,
-                                                    cubicInterpolationMode: 'monotone'
-                                                }
-                                            },
-                                            interaction: {
-                                                mode: 'index',
-                                                intersect: false
-                                            },
-                                            scales: {
-                                                x: {
-                                                    type: 'time',
-                                                    bounds: 'data',
-                                                    min: xmin,
-                                                    max: xmax,
-                                                    time: {
-                                                        tooltipFormat: 'HH:mm:ss'
-                                                    }
-                                                },
-                                                y: {
-                                                    min: Y_MIN,
-                                                    max: Y_MAX,
-                                                    ticks: {
-                                                        precision: 0
-                                                    },
-                                                    title: {
-                                                        display: true,
-                                                        text: 'ms'
-                                                    }
-                                                }
-                                            },
-                                            plugins: {
-                                                legend: {
-                                                    display: false
-                                                }
-                                            }
-                                        }
-                                    });
-                                } catch (e) {
-                                    errEl.textContent = `โหลดกราฟไม่สำเร็จ: ${e.message}`;
-                                    console.error(e);
-                                }
-                            }
+      const ctx = document.getElementById('pingChart');
+      if (pingChart) pingChart.destroy();
 
-                            // เรียกใช้
-                            document.addEventListener('DOMContentLoaded', loadPingExact);
+      pingChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          datasets: [{
+            label: 'Ping',
+            data: series,
+            pointRadius: 0,
+            spanGaps: false
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          parsing: false,
+          animation: false,
+          normalized: true,
+          datasets: { line: { tension: 0, cubicInterpolationMode: 'monotone' } },
+          interaction: { mode: 'index', intersect: false },
+          scales: {
+            x: {
+              type: 'time',
+              bounds: 'data',
+              min: xmin,
+              max: xmax,
+              title: { display: true, text: 'เวลา (UTC+7, 24 ชม.)' },
+              ticks: {
+                callback: (v) =>
+                  new Date(v).toLocaleString('th-TH', {
+                    timeZone: TZ, hour12: false,
+                    hour: '2-digit', minute: '2-digit', second: '2-digit'
+                  })
+              },
+              time: {
+                displayFormats: {
+                  millisecond: 'HH:mm:ss',
+                  second:      'HH:mm:ss',
+                  minute:      'HH:mm',
+                  hour:        'HH:mm',
+                  day:         'dd/MM HH:mm'
+                },
+                tooltipFormat: 'HH:mm:ss'
+              }
+            },
+            y: {
+              min: Y_MIN, max: Y_MAX,
+              ticks: { precision: 0 },
+              title: { display: true, text: 'ms' }
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                title: (items) => {
+                  const ts = items?.[0]?.parsed?.x;
+                  return new Date(ts).toLocaleString('th-TH', {
+                    timeZone: TZ, hour12: false,
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit'
+                  }) + ' (UTC+7)';
+                },
+                label: (ctx) => `Ping: ${ctx.parsed.y} ms`
+              }
+            }
+          }
+        }
+      });
+    }catch(e){
+      errEl.textContent = `โหลดกราฟไม่สำเร็จ: ${e.message}`;
+      console.error(e);
+    }
+  }
 
-                            // ถ้าโหลดตอนเปิดโมดัล "เกี่ยวกับ"
-                            document.addEventListener('alpine:init', () => {
-                                let once = false;
-                                Alpine.effect(() => {
-                                    const open = Alpine.store('ui')?.aboutOpen;
-                                    if (open && !once) {
-                                        once = true;
-                                        setTimeout(() => {
-                                            loadPingExact().then(() => {
-                                                try {
-                                                    pingChart?.resize();
-                                                } catch {}
-                                            });
-                                        }, 150);
-                                    }
-                                    if (!open) once = false;
-                                });
-                            });
-                        </script>
+  // โหลดเมื่อหน้า ready
+  document.addEventListener('DOMContentLoaded', loadPingExact);
+
+  // โหลดเมื่อเปิดโมดัล "เกี่ยวกับ" ครั้งแรกหลังเปิด
+  document.addEventListener('alpine:init', () => {
+    let once = false;
+    Alpine.effect(() => {
+      const open = Alpine.store('ui')?.aboutOpen;
+      if(open && !once){
+        once = true;
+        setTimeout(() => {
+          loadPingExact().then(() => { try{ pingChart?.resize(); }catch{} });
+        }, 150);
+      }
+      if(!open) once = false;
+    });
+  });
+</script>
 
 
                     </div>
