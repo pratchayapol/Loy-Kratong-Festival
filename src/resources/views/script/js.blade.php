@@ -343,12 +343,21 @@
 
     // ฉากแม่น้ำลอยกระทง
     function riverScene(types, recent) {
-        const WATER_TOP = 25; // เริ่มน้ำที่ 60% ของจอในมือถือ
+        const WATER_TOP = 25;
         const WATER_BAND = 28;
         const DUR_INIT_MIN = 22,
-            DUR_INIT_MAX = 34; // ชุดแรก
+            DUR_INIT_MAX = 34;
         const DUR_LOOP_MIN = 18,
-            DUR_LOOP_MAX = 28; // รอบต่อไป
+            DUR_LOOP_MAX = 28;
+
+        // เพิ่ม: จำนวนเลนและตำแหน่งเลนแบบเว้นระยะคงที่
+        const LANES = window.innerWidth < 640 ? 6 : 12; // ปรับตามจอ
+        const laneTops = Array.from({
+                length: LANES
+            }, (_, i) => // กระจายสม่ำเสมอ
+            WATER_TOP + 6 + (i * (WATER_BAND - 6) / Math.max(1, LANES - 1))
+        );
+        let nextLane = 0;
 
         const MAX_ITEMS = window.innerWidth < 640 ? 40 : 100; // จำกัดจำนวนบนมือถือ
         const typeImg = t => types?.[t]?.img || Object.values(types || {})[0]?.img || '';
@@ -367,7 +376,11 @@
         const mkItem = (r, init = false) => {
             const dur = init ? rnd(DUR_INIT_MIN, DUR_INIT_MAX) : rnd(DUR_LOOP_MIN, DUR_LOOP_MAX);
             const delay = init ? rnd(0, 12) : 0;
-            const top = rnd(WATER_TOP + 6, WATER_TOP + WATER_BAND + (init ? 0 : 4));
+
+            // เลือกเลนแบบรอบ-โรบิน เพื่อไม่ซ้อนกันแนวตั้ง
+            const top = laneTops[nextLane];
+            nextLane = (nextLane + 1) % LANES;
+
             return {
                 id: r.id,
                 clientId: `${init ? 'srv' : 'cli'}_${r.id}_${Math.random().toString(36).slice(2)}`,
