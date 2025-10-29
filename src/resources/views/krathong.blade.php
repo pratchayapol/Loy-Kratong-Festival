@@ -481,6 +481,8 @@
                                 <div class="font-semibold text-white">1.0.1 <br>29 ตุลาคม 2568</div>
                             </div>
                         </div>
+
+                        <img src="https://kuma.pcnone.com/api/badge/34/ping/1" alt="Ping" class="h-6">
                     </div>
 
                     <div class="text-center pt-2">
