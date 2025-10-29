@@ -12,12 +12,11 @@
     <link rel="manifest" href="{{ secure_asset('site.webmanifest') }}" />
     <meta name="theme-color" content="#0b2e4a" />
 
-    <!-- Google Fonts -->
+    {{-- Google Fonts: Sarabun --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@200..800&display=swap&subset=thai"
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@200;300;400;500;600;700;800&display=swap"
         rel="stylesheet">
-
 
     <!-- Tailwind config BEFORE CDN -->
     <script>
