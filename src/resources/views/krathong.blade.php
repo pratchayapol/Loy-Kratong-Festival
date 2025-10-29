@@ -24,8 +24,11 @@
             config: {
                 theme: {
                     extend: {
-                        sans: ['"Sarabun"', 'ui-sans-serif', 'system-ui'],
-                        display: ['"Sarabun"', 'ui-sans-serif', 'system-ui'],
+                        fontFamily: {
+                            // ตั้ง Sarabun เป็นฟอนต์หลักทั้งตัวเนื้อหาและหัวข้อ
+                            sans: ['"Sarabun"', 'ui-sans-serif', 'system-ui'],
+                            display: ['"Sarabun"', 'ui-sans-serif', 'system-ui'],
+                        },
                         keyframes: {
                             floatY: {
                                 '0%,100%': {
