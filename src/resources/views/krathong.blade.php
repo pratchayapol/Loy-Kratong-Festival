@@ -506,9 +506,10 @@
 
     <script>
         // === ตั้งค่าให้ถูกกับของคุณ ===
-        const KUMA_ORIGIN = "https://kuma.pcnone.com"; // โดเมน Uptime Kuma ของคุณ
-        const STATUS_SLUG = "loykratong"; // slug ของ status page
-        const MONITOR_ID = "34"; // id ของ monitor ที่อยากแสดง ping
+        const KUMA_ORIGIN = ""; // ว่างไว้
+        const STATUS_SLUG = "loykratong";
+        const ENDPOINT = `/kuma/heartbeat/${STATUS_SLUG}`;
+        const res = await fetch(ENDPOINT);
 
         (async () => {
             const res = await fetch(`${KUMA_ORIGIN}/api/status-page/heartbeat/${STATUS_SLUG}`);
