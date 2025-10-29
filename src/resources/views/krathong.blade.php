@@ -380,6 +380,12 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // ==== โค้ดพลุเดิมทั้งก้อนของคุณ วางไว้ในนี้ ====
+        });
+    </script>
 @endsection
 
 @push('scripts')
