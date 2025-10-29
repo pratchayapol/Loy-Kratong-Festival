@@ -168,6 +168,7 @@
         }
     }
 
+ // เริ่มต้นการโพลข้อมูลเป็นระยะ
     function startPolling() {
         if (pollTimer) return;
         pollTimer = setInterval(() => {
@@ -239,6 +240,7 @@
             return name;
         };
 
+        // สร้างหิ่งห้อยตัวหนึ่ง
         const makeOne = () => {
             const id = crypto?.randomUUID?.() || (Date.now() + Math.random());
             const left = rnd(5, 95);
@@ -377,7 +379,7 @@
             const sheet = ensureKeyframeSheet();
 
             // คลื่นน้ำอ่อนๆ
-            const waveAmp = 1.2;
+            const waveAmp = 1.5;
             const wavePhase = (laneIdx / TOTAL_LANES) * Math.PI * 2;
             const waveFreq = 2;
 
