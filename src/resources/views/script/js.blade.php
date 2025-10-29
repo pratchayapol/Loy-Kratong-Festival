@@ -434,11 +434,29 @@
         };
 
         let recPtr = 0;
+        const usedIds = new Set(); // เก็บ ID ที่ใช้แล้ว
 
         function nextRecord() {
             if (order.length === 0) return null;
+
+            // หาเรคคอร์ดที่ยังไม่ได้ใช้
+            let attempts = 0;
+            while (attempts < order.length) {
+                const r = order[recPtr];
+                recPtr = (recPtr + 1) % order.length;
+
+                if (!usedIds.has(r.id)) {
+                    usedIds.add(r.id);
+                    return r;
+                }
+                attempts++;
+            }
+
+            // ถ้าใช้หมดแล้ว รีเซ็ตแล้ววนใหม่
+            usedIds.clear();
             const r = order[recPtr];
             recPtr = (recPtr + 1) % order.length;
+            usedIds.add(r.id);
             return r;
         }
 
