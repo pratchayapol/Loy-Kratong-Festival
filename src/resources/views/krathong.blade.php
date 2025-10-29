@@ -482,38 +482,12 @@
                             </div>
                         </div>
 
-                        <!-- ==== Ping Chart (Period Dropdown) ==== -->
-                        <div x-data="pingChartUI()" x-init="init()" class="ping-chart-wrapper select-none">
-                            <!-- Period dropdown -->
-                            <div class="relative inline-block text-left mb-2">
-                                <button @click="open=!open"
-                                    class="btn btn-light dropdown-toggle btn-period-toggle inline-flex items-center gap-1 px-3 py-1.5 rounded border border-white/15 bg-white/10 hover:bg-white/15">
-                                    <span x-text="periods[active].label"></span>
-                                    <svg class="w-4 h-4 opacity-80" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd"
-                                            d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </button>
-                                <div x-show="open" @click.outside="open=false" x-transition
-                                    class="dropdown-menu dropdown-menu-end absolute z-20 mt-1 min-w-[8rem] rounded-lg border border-white/10 bg-slate-900/95 backdrop-blur p-1">
-                                    <template x-for="(p, i) in periods" :key="p.key">
-                                        <a href="#" @click.prevent="setPeriod(i)"
-                                            class="dropdown-item flex items-center justify-between px-3 py-1.5 rounded hover:bg-white/10"
-                                            :class="i === active && 'bg-white/10 font-semibold'">
-                                            <span x-text="p.label"></span>
-                                            <span x-show="i===active">✓</span>
-                                        </a>
-                                    </template>
-                                </div>
-                            </div>
-
-                            <!-- Chart -->
+                        <!-- ==== Ping Chart (Recent Only) ==== -->
+                        <div id="recent-ping" class="ping-chart-wrapper select-none">
+                            <div class="mb-2 text-sm text-slate-300">Recent (last 30 min)</div>
                             <div class="chart-wrapper relative" style="position:relative;height:250px;">
                                 <canvas id="pingChart"></canvas>
                             </div>
-
-                            <!-- Error -->
                             <p id="pingErr" class="text-xs text-rose-400 mt-1"></p>
                         </div>
 
@@ -523,19 +497,19 @@
                             const MONITOR_ID = "34";
                             const ENDPOINT = `/kuma/heartbeat/${STATUS_SLUG}`;
 
-                            // แสดงช่วง Recent เท่านั้น (30 นาทีล่าสุด)
+                            // ช่วง Recent 30 นาที
                             const RECENT_MS = 30 * 60 * 1000;
 
-                            // ล็อกสเกลกันเด้ง
+                            // ล็อกสเกล Y กันเด้ง
                             const Y_MIN = 0;
                             const Y_MAX = 1000;
 
                             let pingChart;
+                            let loadedOnceForAbout = false; // กันโหลดซ้ำถ้าอยู่ในโมดัล
 
                             function toDate(t) {
-                                // รองรับทั้งตัวเลข epoch และสตริง "YYYY-MM-DD HH:mm:ss.SSS"
                                 if (typeof t === 'number') return new Date((t < 2e10 ? t * 1000 : t));
-                                if (typeof t === 'string') return new Date(t.replace(' ', 'T'));
+                                if (typeof t === 'string') return new Date(t.replace(' ', 'T')); // "YYYY-MM-DD HH:mm:ss" -> local time
                                 return new Date(t);
                             }
 
@@ -549,19 +523,26 @@
                                     if (!res.ok) throw new Error(`HTTP ${res.status}`);
                                     const data = await res.json();
 
-                                    // ดึง ping ปกติ ๆ แล้วกรองให้เหลือแค่ช่วง RECENT_MS
-                                    const now = Date.now();
-                                    const raw = (data.heartbeatList?.[MONITOR_ID] || [])
+                                    const all = (data.heartbeatList?.[MONITOR_ID] || [])
                                         .filter(h => Number.isFinite(h.ping) && h.ping > 0 && h.ping < 60000)
                                         .map(h => ({
                                             x: toDate(h.time),
                                             y: h.ping
-                                        }))
-                                        .filter(p => p.x.getTime() >= now - RECENT_MS)
-                                        .map(p => ({
-                                            x: p.x,
-                                            y: Math.min(p.y, Y_MAX)
-                                        })); // clamp กันหลุดสเกล
+                                        }));
+
+                                    const now = Date.now();
+                                    let recent = all.filter(p => p.x.getTime() >= now - RECENT_MS);
+
+                                    // ถ้าเงียบเกิน 30 นาที ให้ fallback เป็นจุดล่าสุดจำนวนหนึ่ง (เช่น 60 จุด)
+                                    if (recent.length === 0 && all.length) {
+                                        recent = all.slice(-60);
+                                    }
+
+                                    // clamp กันหลุดสเกล
+                                    const series = recent.map(p => ({
+                                        x: p.x,
+                                        y: Math.min(p.y, Y_MAX)
+                                    }));
 
                                     const ctx = document.getElementById('pingChart');
                                     if (pingChart) pingChart.destroy();
@@ -571,7 +552,7 @@
                                         data: {
                                             datasets: [{
                                                 label: 'Ping',
-                                                data: raw,
+                                                data: series,
                                                 pointRadius: 0,
                                                 spanGaps: true
                                             }]
@@ -621,19 +602,33 @@
                                 }
                             }
 
-                            // ถ้าอยู่ในโมดัล ให้เรียกตอนเปิด
+                            // ใช้นอกโมดัล (โหลดทันที)
+                            if (!window.Alpine) {
+                                document.addEventListener('DOMContentLoaded', () => {
+                                    loadPingRecent();
+                                });
+                            }
+
+                            // ถ้าอยู่ในโมดัล "เกี่ยวกับ" ให้โหลดครั้งเดียวตอนเปิด
                             document.addEventListener('alpine:init', () => {
                                 Alpine.effect(() => {
-                                    if (Alpine.store('ui')?.aboutOpen) {
+                                    const open = Alpine.store('ui')?.aboutOpen;
+                                    if (open && !loadedOnceForAbout) {
+                                        loadedOnceForAbout = true;
                                         setTimeout(() => {
-                                            loadPingRecent();
+                                            loadPingRecent().then(() => {
+                                                try {
+                                                    pingChart?.resize();
+                                                } catch {}
+                                            });
                                         }, 150);
+                                    }
+                                    if (!open && loadedOnceForAbout) {
+                                        loadedOnceForAbout = false; // ปิดแล้วเปิดใหม่ค่อยโหลดอีกครั้ง
                                     }
                                 });
                             });
                         </script>
-
-
 
                     </div>
 
