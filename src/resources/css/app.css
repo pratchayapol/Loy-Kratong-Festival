@@ -1,11 +1,19 @@
+/* โหลดฟอนต์ก่อน */
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@200..800&display=swap&subset=thai');
+
+/* ใช้ Tailwind v4 */
 @import 'tailwindcss';
 
+/* บอกตำแหน่งไฟล์ให้ JIT สแกน */
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
+/* ตั้งฟอนต์หลัก */
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-sans: "Sarabun", ui-sans-serif, system-ui, sans-serif,
+               "Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
 }
+
+/* ไม่ต้องมี @tailwind base/components/utilities ใน v4 */
