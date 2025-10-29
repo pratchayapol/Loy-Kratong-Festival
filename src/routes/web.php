@@ -15,3 +15,5 @@ Route::get('/kuma/heartbeat/{slug}', function (string $slug) {
     abort_unless($r->ok(), $r->status(), $r->body());
     return response($r->body(), 200)->header('Content-Type', 'application/json');
 });
+
+Route::get('/krathong/metrics', [KrathongController::class, 'metrics'])->name('krathong.metrics');

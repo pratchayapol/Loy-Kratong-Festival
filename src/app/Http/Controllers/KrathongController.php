@@ -18,6 +18,14 @@ class KrathongController extends Controller
         'kurab'    => ['label' => 'กระทงกุหลาบ', 'img' => '/images/krathongs/kurab.png'],
     ];
 
+    public function metrics()
+    {
+        return response()->json([
+            'total'   => \App\Models\Krathong::count(),
+            'updated' => now()->toIso8601String(),
+        ]);
+    }
+
     public function show()
     {
         $recent = Krathong::latest()

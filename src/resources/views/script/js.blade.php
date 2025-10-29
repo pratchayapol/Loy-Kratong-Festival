@@ -646,6 +646,39 @@
         }
     }
 
+    // ดึงและอัปเดตตัวนับกระทง
+    const $total = document.getElementById('totalCount');
+
+    async function refreshCount(signal) {
+        try {
+            const res = await fetch(`{{ route('krathong.metrics') }}`, {
+                headers: {
+                    'Accept': 'application/json'
+                },
+                signal
+            });
+            if (!res.ok) return;
+            const {
+                total
+            } = await res.json();
+            if ($total) $total.textContent = Number(total).toLocaleString();
+        } catch (e) {
+            /* เงียบไว้พอ */ }
+    }
+
+    // ดึงทุก 1 วินาที และตอนโฟกัสกลับมา
+    let timer = setInterval(() => refreshCount(), 1000);
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) refreshCount();
+    });
+
+    // เรียกครั้งแรก
+    refreshCount();
+
+    // ให้ฟังก์ชันนี้ใช้ซ้ำหลังโพสต์สำเร็จ
+    window.refreshKrathongMetrics = () => refreshCount();
+
+
 
     // ตั้งตัวแปร CSS --vh ให้เท่ากับ 1% ของความสูง viewport จริง
     const rnd = (min, max) => Math.random() * (max - min) + min;
