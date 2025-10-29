@@ -1,5 +1,4 @@
-@import('layouts.app')
-
+@extends('layouts.app')
 <body class="min-h-screen bg-slate-950 text-slate-100 font-sans overflow-hidden" x-data="{}">
    
     <!-- ป้ายเชิญด้านบนตรงกลาง -->
