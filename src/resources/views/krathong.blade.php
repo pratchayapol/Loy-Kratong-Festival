@@ -592,7 +592,7 @@
         const MONITOR_ID = "34";
         const ENDPOINT = `/kuma/heartbeat/${STATUS_SLUG}`;
         const Y_MIN = 0,
-            Y_MAX = 300;
+            Y_MAX = 5000;
         const TZ = 'Asia/Bangkok';
         const POLL_MS = 10_000;
 
