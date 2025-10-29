@@ -379,5 +379,8 @@
             </div>
         </div>
     </div>
-
-    @extends('js.js')
+@endsection
+@extends('js.js')
+@push('scripts')
+    @vite('resources/js/custom.js')
+@endpush
