@@ -499,51 +499,30 @@
                             const ENDPOINT = `/kuma/heartbeat/${STATUS_SLUG}`;
                             const Y_MIN = 0,
                                 Y_MAX = 300;
-                            const TZ = 'Asia/Bangkok'; // UTC+7
+                            const TZ = 'Asia/Bangkok';
+                            const POLL_MS = 10_000;
 
                             let pingChart;
+                            let pollTimer = null;
+                            let inflight = null;
 
-                            // Parse เป็น UTC เสมอ แล้วค่อย format เป็น Asia/Bangkok ตอนแสดง
                             function toUTCDate(t) {
                                 if (typeof t === 'number') {
-                                    // epoch seconds/millis -> UTC
                                     const ms = (t < 2e10 ? t * 1000 : t);
-                                    return new Date(ms); // Date เก็บเป็น UTC ภายในอยู่แล้ว
+                                    return new Date(ms);
                                 }
                                 if (typeof t === 'string') {
-                                    // "YYYY-MM-DD HH:mm:ss[.SSS]" -> UTC ด้วยการเติม 'Z'
                                     return new Date(t.replace(' ', 'T') + 'Z');
                                 }
                                 return new Date(t);
                             }
 
-                            async function loadPingExact() {
-                                const errEl = document.getElementById('pingErr');
-                                errEl.textContent = '';
-                                try {
-                                    const res = await fetch(ENDPOINT, {
-                                        credentials: 'same-origin'
-                                    });
-                                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                                    const data = await res.json();
+                            function upsertChart(series) {
+                                const xmin = series[0].x.getTime();
+                                const xmax = series[series.length - 1].x.getTime();
+                                const ctx = document.getElementById('pingChart');
 
-                                    const raw = data.heartbeatList?.[MONITOR_ID] ?? [];
-                                    const series = raw
-                                        .filter(h => Number.isFinite(h.ping) && h.ping > 0 && h.ping < 60000 && h.time)
-                                        .map(h => ({
-                                            x: toUTCDate(h.time),
-                                            y: Math.min(h.ping, Y_MAX)
-                                        }))
-                                        .sort((a, b) => a.x - b.x);
-
-                                    if (series.length === 0) throw new Error('no data');
-
-                                    const xmin = series[0].x.getTime();
-                                    const xmax = series[series.length - 1].x.getTime();
-
-                                    const ctx = document.getElementById('pingChart');
-                                    if (pingChart) pingChart.destroy();
-
+                                if (!pingChart) {
                                     pingChart = new Chart(ctx, {
                                         type: 'line',
                                         data: {
@@ -582,14 +561,13 @@
                                                     },
                                                     ticks: {
                                                         source: 'data',
-                                                        callback: (v) =>
-                                                            new Date(v).toLocaleString('th-TH', {
-                                                                timeZone: TZ,
-                                                                hour12: false,
-                                                                hour: '2-digit',
-                                                                minute: '2-digit',
-                                                                second: '2-digit'
-                                                            })
+                                                        callback: (v) => new Date(v).toLocaleString('th-TH', {
+                                                            timeZone: TZ,
+                                                            hour12: false,
+                                                            hour: '2-digit',
+                                                            minute: '2-digit',
+                                                            second: '2-digit'
+                                                        })
                                                     },
                                                     time: {
                                                         displayFormats: {
@@ -639,14 +617,78 @@
                                             }
                                         }
                                     });
-                                } catch (e) {
-                                    errEl.textContent = `โหลดกราฟไม่สำเร็จ: ${e.message}`;
-                                    console.error(e);
+                                } else {
+                                    pingChart.data.datasets[0].data = series;
+                                    pingChart.options.scales.x.min = xmin;
+                                    pingChart.options.scales.x.max = xmax;
+                                    pingChart.update('none');
                                 }
                             }
 
-                            document.addEventListener('DOMContentLoaded', loadPingExact);
+                            async function loadPingExact() {
+                                const errEl = document.getElementById('pingErr');
+                                errEl.textContent = '';
 
+                                // กันซ้อนด้วย AbortController
+                                inflight?.abort?.();
+                                const controller = new AbortController();
+                                inflight = controller;
+
+                                try {
+                                    const res = await fetch(ENDPOINT, {
+                                        credentials: 'same-origin',
+                                        signal: controller.signal
+                                    });
+                                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                                    const data = await res.json();
+
+                                    const raw = data.heartbeatList?.[MONITOR_ID] ?? [];
+                                    const series = raw
+                                        .filter(h => Number.isFinite(h.ping) && h.ping > 0 && h.ping < 60000 && h.time)
+                                        .map(h => ({
+                                            x: toUTCDate(h.time),
+                                            y: Math.min(h.ping, Y_MAX)
+                                        }))
+                                        .sort((a, b) => a.x - b.x);
+
+                                    if (series.length === 0) throw new Error('no data');
+                                    upsertChart(series);
+                                } catch (e) {
+                                    if (e.name !== 'AbortError') {
+                                        errEl.textContent = `โหลดกราฟไม่สำเร็จ: ${e.message}`;
+                                        console.error(e);
+                                    }
+                                } finally {
+                                    if (inflight === controller) inflight = null;
+                                }
+                            }
+
+                            function startPolling() {
+                                if (pollTimer) return;
+                                pollTimer = setInterval(() => {
+                                    // ถ้าแท็บซ่อนอยู่ ให้ข้ามรอบนี้ ลดโหลดเครื่อง
+                                    if (document.hidden) return;
+                                    loadPingExact();
+                                }, POLL_MS);
+                            }
+
+                            function stopPolling() {
+                                clearInterval(pollTimer);
+                                pollTimer = null;
+                            }
+
+                            document.addEventListener('visibilitychange', () => {
+                                if (document.hidden) return; // หยุดอัตโนมัติด้วย guard ใน interval
+                                // ดึงทันทีเมื่อกลับมาเห็น
+                                loadPingExact();
+                            });
+
+                            document.addEventListener('DOMContentLoaded', () => {
+                                loadPingExact();
+                                startPolling();
+                            });
+
+                            // ถ้าคุณใช้ Alpine UI toggle เหมือนเดิม ก็ผูกให้รีเฟรชครั้งหนึ่งตอนเปิด
                             document.addEventListener('alpine:init', () => {
                                 let once = false;
                                 Alpine.effect(() => {
