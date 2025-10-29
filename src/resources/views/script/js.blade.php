@@ -350,7 +350,7 @@
         const TRACK_WIDTH = 140;
         const KRATHONG_WIDTH_PCT = window.innerWidth < 640 ? 60 : 40;
         const SAFE_GAP_PCT = KRATHONG_WIDTH_PCT * 1.25; // เว้นห่างกันสักนิด
-        const TIME_GAP_MS = (SAFE_GAP_PCT / TRACK_WIDTH) * DUR * 1300;
+        const TIME_GAP_MS = (SAFE_GAP_PCT / TRACK_WIDTH) * DUR * 1000;
 
         console.log(
             `Config: ${TOTAL_LANES} lanes, padTop:${TOP_PAD}%, padBot:${BOTTOM_PAD}%, avail:${AVAILABLE.toFixed(1)}%, gap:${(TIME_GAP_MS/1000).toFixed(1)}s`
