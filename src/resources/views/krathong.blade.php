@@ -15,8 +15,9 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@200;300;400;500;600;700;800&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@200..800&display=swap&subset=thai"
         rel="stylesheet">
+
 
     <!-- Tailwind config BEFORE CDN -->
     <script>
@@ -25,7 +26,6 @@
                 theme: {
                     extend: {
                         fontFamily: {
-                            // ตั้ง Sarabun เป็นฟอนต์หลักทั้งตัวเนื้อหาและหัวข้อ
                             sans: ['"Sarabun"', 'ui-sans-serif', 'system-ui'],
                             display: ['"Sarabun"', 'ui-sans-serif', 'system-ui'],
                         },
@@ -209,7 +209,7 @@
     </style>
 </head>
 
-<body x-data="{}" class="font-sans min-h-screen bg-slate-950 text-slate-100 font-display overflow-hidden">
+<body class="min-h-screen bg-slate-950 text-slate-100 font-sans overflow-hidden" x-data="{}">
     <div class="ribbon-black">
         <img src="https://roietonline.net/images/black-ribbon.png" alt="โบว์แสดงความอาลัย"
             title="ปวงพสกนิกรชาวไทยน้อมสำนึกในพระมหากรุณาธิคุณตราบนิจนิรันดร์" class="img-responsive" loading="lazy"
