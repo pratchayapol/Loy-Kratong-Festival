@@ -1,87 +1,45 @@
-@php
-    $node = request()->route('node');
-    $vmid = request()->route('vmid');
-@endphp
-
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Loy Krathong Festival</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Loy Krathong Festival</title>
+  <meta name="csrf-token" content="{{ csrf_token() }}" />
 
-    <!-- Favicons -->
-    <link rel="icon" href="{{ secure_asset('favicon.ico') }}" />
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ secure_asset('favicon-32x32.png') }}" />
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ secure_asset('favicon-16x16.png') }}" />
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ secure_asset('apple-touch-icon.png') }}" />
-    <link rel="manifest" href="{{ secure_asset('site.webmanifest') }}" />
-    <meta name="theme-color" content="#0b2e4a" />
+  <!-- Favicons -->
+  <link rel="icon" href="{{ secure_asset('favicon.ico') }}" />
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ secure_asset('favicon-32x32.png') }}" />
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ secure_asset('favicon-16x16.png') }}" />
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ secure_asset('apple-touch-icon.png') }}" />
+  <link rel="manifest" href="{{ secure_asset('site.webmanifest') }}" />
+  <meta name="theme-color" content="#0b2e4a" />
 
-    <!-- Tailwind config BEFORE CDN -->
-    <script>
-        tailwind = {
-            config: {
-                theme: {
-                    extend: {
-                        fontFamily: {
-                            display: ['Inter', 'ui-sans-serif', 'system-ui']
-                        },
-                        keyframes: {
-                            floatY: {
-                                '0%,100%': {
-                                    transform: 'translateY(0)'
-                                },
-                                '50%': {
-                                    transform: 'translateY(-6px)'
-                                }
-                            },
-                            sway: {
-                                '0%,100%': {
-                                    transform: 'rotate(0deg)'
-                                },
-                                '25%': {
-                                    transform: 'rotate(-1.5deg)'
-                                },
-                                '75%': {
-                                    transform: 'rotate(1.5deg)'
-                                }
-                            },
-                            waves: {
-                                '0%': {
-                                    transform: 'translateX(0)'
-                                },
-                                '100%': {
-                                    transform: 'translateX(-50%)'
-                                }
-                            },
-                            twinkle: {
-                                '0%,100%': {
-                                    opacity: '.35',
-                                    transform: 'scale(1)'
-                                },
-                                '50%': {
-                                    opacity: '1',
-                                    transform: 'scale(1.15)'
-                                }
-                            }
-                        },
-                        animation: {
-                            floatY: 'floatY 3.2s ease-in-out infinite',
-                            sway: 'sway 5s ease-in-out infinite',
-                            waves: 'waves 18s linear infinite',
-                            twinkle: 'twinkle 3.4s ease-in-out infinite'
-                        }
-                    }
-                }
-            }
-        }; // tailwindcss.com CDN จะอ่านตัวแปรนี้ตอนโหลด
-    </script>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind config BEFORE CDN -->
+  <script>
+    tailwind = { config: {
+      theme: {
+        extend: {
+          fontFamily: { display: ['Inter','ui-sans-serif','system-ui'] },
+          keyframes: {
+            floatY:{'0%,100%':{transform:'translateY(0)'},'50%':{transform:'translateY(-6px)'}},
+            sway:{'0%,100%':{transform:'rotate(0deg)'},'25%':{transform:'rotate(-1.5deg)'},'75%':{transform:'rotate(1.5deg)'}},
+            waves:{'0%':{transform:'translateX(0)'},'100%':{transform:'translateX(-50%)'}},
+            twinkle:{'0%,100%':{opacity:'.35',transform:'scale(1)'},'50%':{opacity:'1',transform:'scale(1.15)'}}
+          },
+          animation: {
+            floatY:'floatY 3.2s ease-in-out infinite',
+            sway:'sway 5s ease-in-out infinite',
+            waves:'waves 18s linear infinite',
+            twinkle:'twinkle 3.4s ease-in-out infinite'
+          }
+        }
+      }
+    }}; // tailwindcss.com CDN จะอ่านตัวแปรนี้ตอนโหลด
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Libs: ใส่ defer -->
-    <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <!-- Libs: ใส่ defer -->
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
 
     <!-- Base styles for layout & chart -->
@@ -587,16 +545,14 @@
                         </div>
 
                         <script>
-                            // สร้าง URL จาก route helper โดยตรง
-                            const cpuJsonUrl = @json(route('metrics.cpu.json', ['node' => $node, 'vmid' => $vmid])) + '?timeframe=day&type=lxc';
+                            // ดึง node และ vmid จาก URL /ct/{node}/{vmid}
+                            const parts = location.pathname.split('/').filter(Boolean);
+                            const node = parts[1];
+                            const vmid = parts[2];
 
                             async function render() {
-                                const r = await fetch(cpuJsonUrl);
-                                if (!r.ok) {
-                                    const txt = await r.text();
-                                    console.error('fetch failed', r.status, txt);
-                                    return;
-                                }
+                                const r = await fetch(
+                                    `/metrics/${encodeURIComponent(node)}/${encodeURIComponent(vmid)}/cpu.json?timeframe=day&type=lxc`);
                                 const {
                                     points
                                 } = await r.json();
