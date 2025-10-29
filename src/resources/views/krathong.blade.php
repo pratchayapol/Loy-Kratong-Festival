@@ -610,6 +610,16 @@
         let pollTimer = null;
         let inflight = null;
 
+        // === Krathong effect config ===
+        const AMP_PX = 10; // แอมพลิจูดการลอย (px)
+        const SPEED = 1.2; // ความเร็วลอย (รอบ/วินาที)
+        const STAGGER_MS = 300; // เว้นระยะปล่อยทีละกระทง
+        const SHOW_TRAIL = true; // วาดเส้นตามหรือไม่
+
+        // Triangle wave 0..1..0
+        const tri = (t) => 2 * Math.abs(t - Math.floor(t + 0.5));
+        let baseSeries = [];
+
         function toUTCDate(t) {
             if (typeof t === 'number') {
                 const ms = (t < 2e10 ? t * 1000 : t);
@@ -623,8 +633,17 @@
 
         function upsertChart(series) {
             if (window.innerWidth < 640) return; // skip on small screens
-            const xmin = series[0].x.getTime();
-            const xmax = series[series.length - 1].x.getTime();
+
+            // เรียงล่าสุดก่อน เพื่อปล่อยใหม่->เก่า
+            series.sort((a, b) => b.x - a.x);
+            baseSeries = series.map(p => ({
+                x: p.x,
+                y: p.y
+            }));
+
+            const xmin = series[series.length - 1].x.getTime(); // เก่าสุดซ้าย
+            const xmax = series[0].x.getTime(); // ล่าสุดขวา
+
             const ctx = document.getElementById('pingChart');
             if (!ctx) return;
 
@@ -634,8 +653,9 @@
                     data: {
                         datasets: [{
                             label: 'Ping',
-                            data: series,
+                            data: series, // เส้นฐาน
                             pointRadius: 0,
+                            borderWidth: SHOW_TRAIL ? 1 : 0,
                             spanGaps: false
                         }]
                     },
@@ -643,7 +663,10 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         parsing: false,
-                        animation: false,
+                        animation: {
+                            duration: 600,
+                            delay: (c) => (c?.dataIndex ?? 0) * STAGGER_MS, // ปล่อยทีละกระทง
+                        },
                         normalized: true,
                         datasets: {
                             line: {
@@ -720,9 +743,92 @@
                                     label: (ctx) => `Ping: ${ctx.parsed.y} ms`
                                 }
                             }
+                        },
+                        transitions: {
+                            active: {
+                                animation: {
+                                    duration: 0
+                                }
+                            }
                         }
-                    }
+                    },
+                    plugins: [{
+                        id: 'floatingKrathong',
+                        beforeDraw(chart) {
+                            const {
+                                ctx
+                            } = chart;
+                            const yScale = chart.scales.y;
+                            const xScale = chart.scales.x;
+                            if (!baseSeries.length) return;
+
+                            const now = performance.now();
+                            chart._startTime ??= now;
+                            const elapsed = now - chart._startTime;
+
+                            // จำนวนที่ปล่อยแล้ว
+                            const released = Math.min(
+                                baseSeries.length,
+                                Math.floor(elapsed / STAGGER_MS) + 1
+                            );
+
+                            ctx.save();
+                            ctx.lineWidth = 1;
+
+                            for (let i = 0; i < released; i++) {
+                                // index 0 = ล่าสุด
+                                const p = baseSeries[i];
+
+                                // ฟันปลาแนวดิ่ง
+                                const phase = (now / 1000) * SPEED + i * 0.35;
+                                const tri01 = tri(phase % 1); // 0..1..0
+                                const offsetPx = (tri01 - 0.5) * 2 * AMP_PX;
+
+                                const px = xScale.getPixelForValue(p.x);
+                                const pyBase = yScale.getPixelForValue(p.y);
+                                const py = pyBase + offsetPx;
+
+                                // โปร่งลงตามลำดับ
+                                const alpha = Math.max(0.25, 1 - i / (released + 4));
+                                ctx.globalAlpha = alpha;
+
+                                // ตัวกระทง
+                                ctx.beginPath();
+                                ctx.arc(px, py, 4, 0, Math.PI * 2);
+                                ctx.fillStyle = '#ffcc00';
+                                ctx.fill();
+
+                                // เปลวเทียน
+                                ctx.beginPath();
+                                ctx.arc(px, py - 6, 1.5, 0, Math.PI * 2);
+                                ctx.fillStyle = '#ffffff';
+                                ctx.fill();
+
+                                // เส้นตามน้ำ
+                                if (SHOW_TRAIL && i + 1 < released) {
+                                    const p2 = baseSeries[i + 1];
+                                    const px2 = xScale.getPixelForValue(p2.x);
+                                    const py2 = yScale.getPixelForValue(p2.y) +
+                                        (tri(((now / 1000) * SPEED + (i + 1) * 0.35) % 1) - 0.5) * 2 *
+                                        AMP_PX;
+                                    ctx.beginPath();
+                                    ctx.moveTo(px, py);
+                                    ctx.lineTo(px2, py2);
+                                    ctx.strokeStyle = 'rgba(255,204,0,0.25)';
+                                    ctx.stroke();
+                                }
+                            }
+                            ctx.restore();
+                        }
+                    }]
                 });
+
+                // อัปเดตต่อเนื่องให้เอฟเฟกต์เคลื่อนไหว
+                (function loop() {
+                    if (!pingChart) return;
+                    pingChart.update('none');
+                    requestAnimationFrame(loop);
+                })();
             } else {
                 pingChart.data.datasets[0].data = series;
                 pingChart.options.scales.x.min = xmin;
@@ -750,8 +856,7 @@
                     .map(h => ({
                         x: toUTCDate(h.time),
                         y: Math.min(h.ping, Y_MAX)
-                    }))
-                    .sort((a, b) => a.x - b.x);
+                    }));
                 if (series.length === 0) throw new Error('no data');
                 upsertChart(series);
             } catch (e) {
@@ -781,6 +886,7 @@
             if (document.hidden) return;
             loadPingExact();
         });
+
         document.addEventListener('DOMContentLoaded', () => {
             loadPingExact();
             startPolling();
@@ -802,6 +908,8 @@
                 if (!open) once = false;
             });
         });
+    </script>
+
     </script>
     {{-- หิ่งห้อยกระพริบ --}}
     <script>
