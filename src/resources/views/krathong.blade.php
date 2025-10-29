@@ -14,18 +14,18 @@
             <div class="mt-1 text-base sm:text-lg md:text-xl text-slate-200/90">
                 ตั้งจิตอธิษฐาน แล้วปล่อยความกังวลให้ลอยไปกับสายน้ำ
             </div>
+
+            <div class="px-4 py-2 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl text-center">
+                <span class="text-slate-200/90">จำนวนกระทงทั้งหมด</span>
+                <span id="totalCount" class="ml-2 text-2xl font-extrabold text-white">
+                    {{ number_format($total ?? 0) }}
+                </span>
+            </div>
+
         </div>
 
     </div>
-    <br>
-    <div class="fixed top-28 left-1/2 -translate-x-1/2 z-40 select-none">
-        <div class="px-4 py-2 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl text-center">
-            <span class="text-slate-200/90">จำนวนกระทงทั้งหมด</span>
-            <span id="totalCount" class="ml-2 text-2xl font-extrabold text-white">
-                {{ number_format($total ?? 0) }}
-            </span>
-        </div>
-    </div>
+
 
 
     <!-- Alpine store -->
