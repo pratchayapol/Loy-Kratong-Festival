@@ -15,6 +15,7 @@ class KrathongController extends Controller
         'eco'     => ['label'=>'รักษ์โลก', 'img'=>'/images/krathongs/eco.png'],
         'silver'  => ['label'=>'กระทงเงิน','img'=>'/images/krathongs/silver.png'],
         'gold'    => ['label'=>'กระทงทอง','img'=>'/images/krathongs/gold.png'],
+        'kurab'    => ['label'=>'กระทงกุหลาบ','img'=>'/images/krathongs/kurab.png'],
     ];
 
     public function show()
