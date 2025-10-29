@@ -22,62 +22,73 @@
     <!-- Tailwind config BEFORE CDN -->
     <script>
         tailwind = {
-            config: {
-                theme: {
-                    extend: {
-                        fontFamily: {
-                            sans: ['"Sarabun"', 'ui-sans-serif', 'system-ui'],
-                            display: ['"Sarabun"', 'ui-sans-serif', 'system-ui'],
-                        },
-                        keyframes: {
-                            floatY: {
-                                '0%,100%': {
-                                    transform: 'translateY(0)'
-                                },
-                                '50%': {
-                                    transform: 'translateY(-6px)'
-                                }
+                config: {
+                    theme: {
+                        extend: {
+                            fontFamily: {
+                                sans: ['"Sarabun"', 'ui-sans-serif', 'system-ui'],
+                                display: ['"Sarabun"', 'ui-sans-serif', 'system-ui'],
                             },
-                            sway: {
-                                '0%,100%': {
-                                    transform: 'rotate(0deg)'
+                            keyframes: {
+                                chop: {
+                                    '0%,96%,100%': {
+                                        transform: 'translateY(0) rotate(0)'
+                                    },
+                                    '97%': {
+                                        transform: 'translateY(-4px) rotate(-1deg)'
+                                    },
+                                    '99%': {
+                                        transform: 'translateY(3px) rotate(1deg)'
+                                    }
+                                    floatY: {
+                                        '0%,100%': {
+                                            transform: 'translateY(0)'
+                                        },
+                                        '50%': {
+                                            transform: 'translateY(-6px)'
+                                        }
+                                    },
+                                    sway: {
+                                        '0%,100%': {
+                                            transform: 'rotate(0deg)'
+                                        },
+                                        '25%': {
+                                            transform: 'rotate(-1.5deg)'
+                                        },
+                                        '75%': {
+                                            transform: 'rotate(1.5deg)'
+                                        }
+                                    },
+                                    waves: {
+                                        '0%': {
+                                            transform: 'translateX(0)'
+                                        },
+                                        '100%': {
+                                            transform: 'translateX(-50%)'
+                                        }
+                                    },
+                                    twinkle: {
+                                        '0%,100%': {
+                                            opacity: '.35',
+                                            transform: 'scale(1)'
+                                        },
+                                        '50%': {
+                                            opacity: '1',
+                                            transform: 'scale(1.15)'
+                                        }
+                                    }
                                 },
-                                '25%': {
-                                    transform: 'rotate(-1.5deg)'
-                                },
-                                '75%': {
-                                    transform: 'rotate(1.5deg)'
-                                }
-                            },
-                            waves: {
-                                '0%': {
-                                    transform: 'translateX(0)'
-                                },
-                                '100%': {
-                                    transform: 'translateX(-50%)'
-                                }
-                            },
-                            twinkle: {
-                                '0%,100%': {
-                                    opacity: '.35',
-                                    transform: 'scale(1)'
-                                },
-                                '50%': {
-                                    opacity: '1',
-                                    transform: 'scale(1.15)'
+                                animation: {
+                                    floatY: 'floatY 3.2s ease-in-out infinite',
+                                    sway: 'sway 5s ease-in-out infinite',
+                                    waves: 'waves 18s linear infinite',
+                                    twinkle: 'twinkle 3.4s ease-in-out infinite',
+                                    chop: 'chop var(--chopDur,10s) linear infinite'
                                 }
                             }
-                        },
-                        animation: {
-                            floatY: 'floatY 3.2s ease-in-out infinite',
-                            sway: 'sway 5s ease-in-out infinite',
-                            waves: 'waves 18s linear infinite',
-                            twinkle: 'twinkle 3.4s ease-in-out infinite'
                         }
                     }
-                }
-            }
-        }; // tailwindcss.com CDN จะอ่านตัวแปรนี้ตอนโหลด
+                }; // tailwindcss.com CDN จะอ่านตัวแปรนี้ตอนโหลด
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -596,7 +607,7 @@
             </div>
         </div>
     </div>
-    
+
     <script>
         // === Config ===
         const STATUS_SLUG = "loykratong";
@@ -892,77 +903,106 @@
 
     <!-- Logic ลอยกระทง -->
     <script>
-        const readCookie = n => decodeURIComponent((document.cookie.split('; ').find(x => x.startsWith(n + '=')) || '')
-            .split('=')[1] || '');
-        const __timers = new Set();
-        const __schedule = (fn, ms) => {
-            const t = setTimeout(fn, ms);
-            __timers.add(t);
-            return t;
-        };
-        const __clearAll = () => {
-            for (const t of __timers) clearTimeout(t);
-            __timers.clear();
-        };
-        window.addEventListener('beforeunload', __clearAll);
-
-        function ensureKeyframeSheet() {
-            let el = document.getElementById('dyn-keyframes');
-            if (!el) {
-                el = document.createElement('style');
-                el.id = 'dyn-keyframes';
-                document.head.appendChild(el);
-            }
-            if (!el.sheet) {
-                const tmp = document.createElement('style');
-                document.head.appendChild(tmp);
-                const sheet = tmp.sheet;
-                document.head.removeChild(tmp);
-                return sheet;
-            }
-            return el.sheet;
-        }
-
-        // วนลูปใหม่→เก่าเป็นรอบ ๆ ไม่ว่าง ไม่ซ้ำภายในรอบเดียว และแสดงใหม่ทันที
         function riverScene(types, recent) {
-            const WATER_TOP = 25; // เริ่มน้ำที่ 60% ของจอในมือถือ
-            const WATER_BAND = 28;
+            const WATER_TOP = 25; // % จากขอบบนโซนน้ำ
+            const WATER_BAND = 28; // ช่วงความสูงที่ให้ลอย
             const DUR_INIT_MIN = 22,
-                DUR_INIT_MAX = 34; // ชุดแรก
+                DUR_INIT_MAX = 34;
             const DUR_LOOP_MIN = 18,
-                DUR_LOOP_MAX = 28; // รอบต่อไป
+                DUR_LOOP_MAX = 28;
 
-            const MAX_ITEMS = window.innerWidth < 640 ? 40 : 100; // จำกัดจำนวนบนมือถือ
+            // === LANE CONFIG: คุมการชนและทำสลับฟันปลา ===
+            const LANE_COUNT = window.innerWidth < 640 ? 7 : 12;
+            const LANE_HEIGHT = WATER_BAND / LANE_COUNT;
+            const laneNextFree = Array.from({
+                length: LANE_COUNT
+            }, () => 0);
+            let laneCursor = 0;
+            const MIN_GAP_MS = window.innerWidth < 640 ? 1700 : 2200; // ระยะห่างแนวนอนขั้นต่ำ
+
+            const MAX_ITEMS = window.innerWidth < 640 ? 40 : 100;
             const typeImg = t => types?.[t]?.img || Object.values(types || {})[0]?.img || '';
 
-            const makeStyle = (dur, delay, top) => {
+            // keyframe แนว x คร่อมจอเหมือนเดิม แต่ inline style จะ *รวม* floatY+sway+chop ด้วย
+            const makeStyle = (dur, delay, top, zigDelay) => {
                 const name = `drift_${Math.random().toString(36).slice(2)}`;
                 const sheet = ensureKeyframeSheet();
                 sheet.insertRule(
-                    `@keyframes ${name}{0%{left:-20%;opacity:0}10%{opacity:1}90%{opacity:1}100%{left:120%;opacity:0}}`,
-                    sheet.cssRules.length);
-                return `top:${top}%;left:-20%;--floatDur:${rnd(2.8,4.4)}s;--swayDur:${rnd(4.5,6.5)}s;animation:${name} ${dur}s linear ${delay}s forwards,var(--_dummy,0s);`;
+                    `@keyframes ${name}{
+        0%{ left:-20%; opacity:0 }
+        10%{ opacity:1 }
+        90%{ opacity:1 }
+        100%{ left:120%; opacity:0 }
+      }`,
+                    sheet.cssRules.length
+                );
+
+                // phase/period ของคลื่นและการเด้ง
+                const floatDur = rnd(2.8, 4.4) + rnd(-0.2, 0.2);
+                const swayDur = rnd(4.5, 6.5) + rnd(-0.2, 0.2);
+                const chopDur = rnd(8, 13);
+                const waveDelay = rnd(0, 5) + zigDelay; // ทำให้แต่ละเลนไม่พร้อมกัน
+
+                // รวมทุกแอนิเมชันไว้ใน animation เดียวเพื่อไม่ override กัน
+                return `
+      top:${top}%;
+      left:-20%;
+      --floatDur:${floatDur}s;
+      --swayDur:${swayDur}s;
+      --chopDur:${chopDur}s;
+      animation:
+        ${name} ${dur}s linear ${delay}s forwards,
+        floatY var(--floatDur) ease-in-out ${waveDelay}s infinite,
+        sway   var(--swayDur)  ease-in-out ${waveDelay}s infinite,
+        chop   var(--chopDur)  linear      ${rnd(0,3)}s infinite;
+    `;
             };
 
-            const mkItem = (r, init = false) => {
+            const mkItem = (r, init = false, laneIdx = 0) => {
                 const dur = init ? rnd(DUR_INIT_MIN, DUR_INIT_MAX) : rnd(DUR_LOOP_MIN, DUR_LOOP_MAX);
-                const delay = init ? rnd(0, 12) : 0;
-                const top = rnd(WATER_TOP + 6, WATER_TOP + WATER_BAND + (init ? 0 : 4));
+
+                // สลับฟันปลา: เลนคี่เริ่มเร็ว, เลนคู่หน่วงเพิ่ม
+                const zigDelay = (laneIdx % 2 === 0) ? 0 : rnd(0.6, 1.4);
+                const delay = init ? rnd(0, 12) + zigDelay : zigDelay;
+
+                // ตำแหน่งแกน Y ตามเลน + jitter เล็กน้อย
+                const laneTop = WATER_TOP + 6 + laneIdx * LANE_HEIGHT;
+                const top = laneTop + rnd(-1.4, 1.4);
+
                 return {
                     id: r.id,
                     clientId: `${init?'srv':'cli'}_${r.id}_${Math.random().toString(36).slice(2)}`,
                     img: typeImg(r.type),
                     wish: `${r.nickname} : ${r.wish}`,
-                    style: makeStyle(dur, delay, top),
+                    style: makeStyle(dur, delay, top, zigDelay),
                     show: false,
                     paused: false,
                     __life: (dur + delay) * 1000,
-                    __deadline: Date.now() + (dur + delay) * 1000
+                    __deadline: Date.now() + (dur + delay) * 1000,
+                    __lane: laneIdx
                 };
             };
 
+            // เลือกเลนที่ “ว่างเร็วสุด” เพื่อกันชน
+            function pickLane(now) {
+                // ลองเลนตามคิวก่อน
+                for (let i = 0; i < LANE_COUNT; i++) {
+                    const idx = (laneCursor + i) % LANE_COUNT;
+                    if (now >= laneNextFree[idx]) {
+                        laneCursor = (idx + 1) % LANE_COUNT;
+                        return idx;
+                    }
+                }
+                // ถ้าทุกเลนยังไม่ว่าง เลือกเลนที่ว่างเร็วที่สุด
+                let best = 0;
+                for (let i = 1; i < LANE_COUNT; i++) {
+                    if (laneNextFree[i] < laneNextFree[best]) best = i;
+                }
+                laneCursor = (best + 1) % LANE_COUNT;
+                return best;
+            }
+
             const scheduleRemoval = (vm, item, ms) => {
-                // เคลียร์ตัวเดิม
                 if (item.__tid) {
                     clearTimeout(item.__tid);
                     __timers.delete(item.__tid);
@@ -974,6 +1014,7 @@
                     if (i > -1) vm.items.splice(i, 1);
                 }, ms + 30);
             };
+
             const base = Array.from(new Map((recent || []).map(r => [r.id, r])).values()).sort((a, b) => b.id - a.id);
 
             return {
@@ -985,7 +1026,6 @@
                 pause(k) {
                     if (!k || k.paused) return;
                     k.paused = true;
-                    // คงเหลือเท่าไร
                     k.__remain = Math.max(3000, (k.__deadline || 0) - Date.now());
                     if (k.__tid) {
                         clearTimeout(k.__tid);
@@ -996,14 +1036,11 @@
                 resume(k) {
                     if (!k || !k.paused) return;
                     k.paused = false;
-                    // ยืดเวลาอ่านอีกหน่อย
                     const extra = 8000;
                     const ms = (k.__remain || 0) + extra;
                     scheduleRemoval(this, k, ms);
                 },
-                order: base,
-                seenInCycle: new Set(),
-                idx: 0,
+
                 init() {
                     const initCount = Math.min(24, this.order.length);
                     for (let k = 0; k < initCount; k++) this._spawnNext(true);
@@ -1013,6 +1050,7 @@
                     };
                     __schedule(tick, 900);
                 },
+
                 _spawnNext(isInitial) {
                     if (!this.order.length) return;
                     if (this.seenInCycle.size >= this.order.length) {
@@ -1028,20 +1066,33 @@
                     if (!r) return;
                     this.seenInCycle.add(r.id);
                     this.idx = (this.idx + 1) % this.order.length;
-                    const item = mkItem(r, isInitial);
+
+                    // เลือกเลน + จองเวลาเลนกันชนกัน
+                    const now = Date.now();
+                    const lane = pickLane(now);
+                    laneNextFree[lane] = now + MIN_GAP_MS;
+
+                    const item = mkItem(r, isInitial, lane);
                     this.items.unshift(item);
                     if (this.items.length > MAX_ITEMS) this.items.splice(MAX_ITEMS);
                     scheduleRemoval(this, item, item.__life);
                 },
+
                 spawnFromRecord(r) {
                     this.order = [r, ...this.order.filter(x => x.id !== r.id)].sort((a, b) => b.id - a.id);
                     this.seenInCycle.clear();
                     this.idx = 0;
-                    const item = mkItem(r, false);
+
+                    const now = Date.now();
+                    const lane = pickLane(now);
+                    laneNextFree[lane] = now + MIN_GAP_MS;
+
+                    const item = mkItem(r, false, lane);
                     this.items.unshift(item);
                     if (this.items.length > MAX_ITEMS) this.items.splice(MAX_ITEMS);
                     scheduleRemoval(this, item, item.__life);
                 },
+
                 spawnNew(p) {
                     const r = {
                         id: p.id ?? Date.now(),
