@@ -478,7 +478,7 @@
                             </div>
                             <div class="flex-1">
                                 <div class="text-xs text-slate-400 mb-0.5">เวอร์ชัน</div>
-                                <div class="font-semibold text-white">1.0.1 29 ตุลาคม 2568</div>
+                                <div class="font-semibold text-white">1.0.1 <br>29 ตุลาคม 2568</div>
                             </div>
                         </div>
                     </div>
