@@ -562,7 +562,7 @@
                             </div>
                             <div class="flex-1">
                                 <div class="text-xs text-slate-400 mb-0.5">เวอร์ชัน</div>
-                                <div class="font-semibold text-white">1.0.1 <br>29 ตุลาคม 2568</div>
+                                <div class="font-semibold text-white">1.0.1</div>
                             </div>
                         </div>
                         <div class="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10 w-full">
