@@ -375,9 +375,9 @@
                 x-init="init()">
                 <template x-for="k in items" :key="k.clientId">
                     <div class="absolute flex flex-col items-center will-change-transform krathong-item"
-                        :class="k.paused ? 'is-paused' : ''" :style="k.style" @mouseenter="pause(k); k.show=true"
-                        @mouseleave="resume(k); k.show=false" @touchstart.passive="pause(k); k.show=true"
-                        @touchend.passive="resume(k); k.show=false">
+                        :class="k.paused ? 'is-paused' : ''" :style="k.style + `;z-index:${k.z};`"
+                        @mouseenter="pause(k); k.show=true" @mouseleave="resume(k); k.show=false"
+                        @touchstart.passive="pause(k); k.show=true" @touchend.passive="resume(k); k.show=false">
                         <div class="px-3 py-2 rounded-2xl text-xs sm:text-sm max-w-[240px] sm:max-w-[300px] text-cyan-50 bg-slate-900/80 backdrop-blur-xl border border-cyan-400/30 shadow-lg shadow-cyan-500/20 whitespace-nowrap overflow-hidden text-ellipsis"
                             x-text="k.wish"></div>
 
@@ -936,102 +936,126 @@
 
         // วนลูปใหม่→เก่าเป็นรอบ ๆ ไม่ว่าง ไม่ซ้ำภายในรอบเดียว และแสดงใหม่ทันที
         function riverScene(types, recent) {
-            const WATER_TOP = 25; // % จากขอบบนโซนน้ำ
-            const WATER_BAND = 40; // ช่วงความสูงที่ให้ลอย
+            const WATER_TOP = 25; // เริ่มโซนน้ำ
+            const WATER_BAND = 28; // ความสูงโซนน้ำ
+            // เลนสูงขึ้น = ช่องไฟแนวตั้งมากขึ้น
+            const LANE_COUNT = window.innerWidth < 640 ? 6 : 10;
+            const LANE_HEIGHT = WATER_BAND / LANE_COUNT;
+
+            // เวลาห่างขั้นต่ำแนวนอน
+            const GAP_GLOBAL_MS = window.innerWidth < 640 ? 2200 : 2800;
+            const GAP_PER_LANE_MS = window.innerWidth < 640 ? 3200 : 3800;
+
+            // ห้ามเลนติดกันยิงพร้อมกันภายในช่วงนี้ เพื่อตัด “กลุ่มก้อน”
+            const NEIGHBOR_COOLDOWN_MS = 1400;
+
             const DUR_INIT_MIN = 22,
                 DUR_INIT_MAX = 34;
             const DUR_LOOP_MIN = 18,
                 DUR_LOOP_MAX = 28;
 
-            // === LANE CONFIG: คุมการชนและทำสลับฟันปลา ===
-            const LANE_COUNT = window.innerWidth < 640 ? 7 : 12;
-            const LANE_HEIGHT = WATER_BAND / LANE_COUNT;
+            const MAX_ITEMS = window.innerWidth < 640 ? 32 : 80;
+            const typeImg = t => types?.[t]?.img || Object.values(types || {})[0]?.img || '';
+
+            // สถานะเลน
             const laneNextFree = Array.from({
                 length: LANE_COUNT
             }, () => 0);
-            let laneCursor = 0;
-            const MIN_GAP_MS = window.innerWidth < 640 ? 1700 : 2200; // ระยะห่างแนวนอนขั้นต่ำ
+            const lanePhase = Array.from({
+                length: LANE_COUNT
+            }, (_, i) => (i % 2) ? 900 : 0); // สลับฟันปลาแบบแข็ง
+            let globalNextFree = 0;
 
-            const MAX_ITEMS = window.innerWidth < 640 ? 40 : 100;
-            const typeImg = t => types?.[t]?.img || Object.values(types || {})[0]?.img || '';
-
-            // keyframe แนว x คร่อมจอเหมือนเดิม แต่ inline style จะ *รวม* floatY+sway+chop ด้วย
-            const makeStyle = (dur, delay, top, zigDelay) => {
-                const name = `drift_${Math.random().toString(36).slice(2)}`;
+            function ensureKeyframes(name, css) {
                 const sheet = ensureKeyframeSheet();
-                sheet.insertRule(
-                    `@keyframes ${name}{
-        0%{ left:-20%; opacity:0 }
-        10%{ opacity:1 }
-        90%{ opacity:1 }
-        100%{ left:120%; opacity:0 }
-      }`,
-                    sheet.cssRules.length
-                );
+                sheet.insertRule(css, sheet.cssRules.length);
+                return name;
+            }
 
-                // phase/period ของคลื่นและการเด้ง
-                const floatDur = rnd(2.8, 4.4) + rnd(-0.2, 0.2);
-                const swayDur = rnd(4.5, 6.5) + rnd(-0.2, 0.2);
-                const chopDur = rnd(8, 13);
-                const waveDelay = rnd(0, 5) + zigDelay; // ทำให้แต่ละเลนไม่พร้อมกัน
+            function makeStyle(dur, delay, top, z) {
+                const drift = `dr_${Math.random().toString(36).slice(2)}`;
+                ensureKeyframes(drift, `@keyframes ${drift}{
+      0%{left:-20%;opacity:0} 10%{opacity:1} 90%{opacity:1} 100%{left:120%;opacity:0}
+    }`);
+                const floatDur = rnd(3.0, 4.0);
+                const swayDur = rnd(4.8, 6.2);
+                const chopDur = rnd(8, 12);
 
-                // รวมทุกแอนิเมชันไว้ใน animation เดียวเพื่อไม่ override กัน
                 return `
       top:${top}%;
       left:-20%;
-      --floatDur:${floatDur}s;
-      --swayDur:${swayDur}s;
-      --chopDur:${chopDur}s;
       animation:
-        ${name} ${dur}s linear ${delay}s forwards,
-        floatY var(--floatDur) ease-in-out ${waveDelay}s infinite,
-        sway   var(--swayDur)  ease-in-out ${waveDelay}s infinite,
-        chop   var(--chopDur)  linear      ${rnd(0,3)}s infinite;
+        ${drift} ${dur}s linear ${delay}s forwards,
+        floatY ${floatDur}s ease-in-out ${delay}s infinite,
+        sway   ${swayDur}s  ease-in-out ${delay}s infinite,
+        chop   ${chopDur}s  linear      ${rnd(0,3)}s infinite;
     `;
-            };
+            }
 
-            const mkItem = (r, init = false, laneIdx = 0) => {
+            function mkItem(r, init, laneIdx) {
                 const dur = init ? rnd(DUR_INIT_MIN, DUR_INIT_MAX) : rnd(DUR_LOOP_MIN, DUR_LOOP_MAX);
+                const delay = (lanePhase[laneIdx] || 0) / 1000; // ฟันปลาแบบคงที่ต่อเลน
 
-                // สลับฟันปลา: เลนคี่เริ่มเร็ว, เลนคู่หน่วงเพิ่ม
-                const zigDelay = (laneIdx % 2 === 0) ? 0 : rnd(0.6, 1.4);
-                const delay = init ? rnd(0, 12) + zigDelay : zigDelay;
-
-                // ตำแหน่งแกน Y ตามเลน + jitter เล็กน้อย
+                // ไม่ใส่ jitter แนวตั้ง เพื่อตัดการทับกันจริง
                 const laneTop = WATER_TOP + 6 + laneIdx * LANE_HEIGHT;
-                const top = laneTop + rnd(-1.4, 1.4);
+                const top = laneTop;
+
+                const z = 100 + (laneIdx % 2 ? laneIdx : (LANE_COUNT - laneIdx)); // สลับชั้นบนล่างตามเลน
 
                 return {
                     id: r.id,
                     clientId: `${init?'srv':'cli'}_${r.id}_${Math.random().toString(36).slice(2)}`,
                     img: typeImg(r.type),
                     wish: `${r.nickname} : ${r.wish}`,
-                    style: makeStyle(dur, delay, top, zigDelay),
+                    style: makeStyle(dur, delay, top, z),
+                    z,
                     show: false,
                     paused: false,
                     __life: (dur + delay) * 1000,
                     __deadline: Date.now() + (dur + delay) * 1000,
                     __lane: laneIdx
                 };
-            };
+            }
 
-            // เลือกเลนที่ “ว่างเร็วสุด” เพื่อกันชน
+            function canUseLane(now, lane) {
+                if (now < laneNextFree[lane]) return false;
+                // กันเลนข้างเคียงยิงพร้อมๆ กัน
+                const L = lane - 1,
+                    R = lane + 1;
+                if (L >= 0 && now < laneNextFree[L] + NEIGHBOR_COOLDOWN_MS) return false;
+                if (R < LANE_COUNT && now < laneNextFree[R] + NEIGHBOR_COOLDOWN_MS) return false;
+                return now >= globalNextFree;
+            }
+
             function pickLane(now) {
-                // ลองเลนตามคิวก่อน
+                // เลือกเลนที่ “ใช้ได้” ก่อน หากไม่มี เลือกเลนที่ว่างเร็วสุด
+                let bestLane = -1;
                 for (let i = 0; i < LANE_COUNT; i++) {
-                    const idx = (laneCursor + i) % LANE_COUNT;
-                    if (now >= laneNextFree[idx]) {
-                        laneCursor = (idx + 1) % LANE_COUNT;
-                        return idx;
+                    if (canUseLane(now, i)) {
+                        bestLane = i;
+                        break;
                     }
                 }
-                // ถ้าทุกเลนยังไม่ว่าง เลือกเลนที่ว่างเร็วที่สุด
-                let best = 0;
-                for (let i = 1; i < LANE_COUNT; i++) {
-                    if (laneNextFree[i] < laneNextFree[best]) best = i;
+                if (bestLane === -1) {
+                    let minT = Infinity,
+                        idx = 0;
+                    for (let i = 0; i < LANE_COUNT; i++) {
+                        const t = Math.max(laneNextFree[i], globalNextFree);
+                        if (t < minT) {
+                            minT = t;
+                            idx = i;
+                        }
+                    }
+                    bestLane = idx;
                 }
-                laneCursor = (best + 1) % LANE_COUNT;
-                return best;
+                return bestLane;
+            }
+
+            function bookLane(now, lane) {
+                laneNextFree[lane] = now + GAP_PER_LANE_MS;
+                globalNextFree = now + GAP_GLOBAL_MS;
+                // ขยับเฟสเล็กน้อยเพื่อกระจาย
+                lanePhase[lane] = (lanePhase[lane] + 600) % 2000;
             }
 
             const scheduleRemoval = (vm, item, ms) => {
@@ -1068,17 +1092,15 @@
                 resume(k) {
                     if (!k || !k.paused) return;
                     k.paused = false;
-                    const extra = 8000;
-                    const ms = (k.__remain || 0) + extra;
-                    scheduleRemoval(this, k, ms);
+                    scheduleRemoval(this, k, (k.__remain || 0) + 8000);
                 },
 
                 init() {
-                    const initCount = Math.min(24, this.order.length);
+                    const initCount = Math.min(16, this.order.length);
                     for (let k = 0; k < initCount; k++) this._spawnNext(true);
                     const tick = () => {
                         this._spawnNext(false);
-                        __schedule(tick, window.innerWidth < 400 ? rnd(6500, 9000) : rnd(4500, 7200));
+                        __schedule(tick, window.innerWidth < 400 ? rnd(6500, 9000) : rnd(4800, 7600));
                     };
                     __schedule(tick, 900);
                 },
@@ -1090,19 +1112,17 @@
                         this.idx = 0;
                     }
                     let guard = 0;
-                    while (this.seenInCycle.has(this.order[this.idx]?.id) && guard < this.order.length) {
+                    while (this.seenInCycle.has(this.order[this.idx]?.id) && guard++ < this.order.length) {
                         this.idx = (this.idx + 1) % this.order.length;
-                        guard++;
                     }
                     const r = this.order[this.idx];
                     if (!r) return;
                     this.seenInCycle.add(r.id);
                     this.idx = (this.idx + 1) % this.order.length;
 
-                    // เลือกเลน + จองเวลาเลนกันชนกัน
                     const now = Date.now();
                     const lane = pickLane(now);
-                    laneNextFree[lane] = now + MIN_GAP_MS;
+                    bookLane(now, lane);
 
                     const item = mkItem(r, isInitial, lane);
                     this.items.unshift(item);
@@ -1117,7 +1137,7 @@
 
                     const now = Date.now();
                     const lane = pickLane(now);
-                    laneNextFree[lane] = now + MIN_GAP_MS;
+                    bookLane(now, lane);
 
                     const item = mkItem(r, false, lane);
                     this.items.unshift(item);
@@ -1126,17 +1146,16 @@
                 },
 
                 spawnNew(p) {
-                    const r = {
+                    this.spawnFromRecord({
                         id: p.id ?? Date.now(),
                         type: p.type,
                         nickname: p.nickname,
                         age: p.age,
                         wish: p.wish
-                    };
-                    this.spawnFromRecord(r);
+                    });
                 }
             }
-        }
+        }ด
 
         function krathongForm() {
             return {
