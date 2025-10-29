@@ -331,7 +331,7 @@
 
         // เพิ่มระยะขอบบน–ล่างของแถวนานๆ เข้าไปเลย
         const TOP_PAD = window.innerWidth < 640 ? 6 : 8; // ยิ่งเยอะ ยิ่งห่างขอบบน
-        const BOTTOM_PAD = window.innerWidth < 640 ? 14 : 12; // ยิ่งเยอะ ยิ่งห่างขอบล่าง
+        const BOTTOM_PAD = window.innerWidth < 640 ? 24 : 22; // ยิ่งเยอะ ยิ่งห่างขอบล่าง
 
         // คำนวณพื้นที่ที่เหลือให้วางเลน
         const AVAILABLE = Math.max(0, WATER_BAND - TOP_PAD - BOTTOM_PAD);
