@@ -17,7 +17,7 @@ Route::get('/kuma/heartbeat/{slug}', function (string $slug) {
     return response($r->body(), 200)->header('Content-Type', 'application/json');
 });
 
-Route::get('/metrics/{node}/{vmid}/cpu.json', [ProxmoxMetricsController::class, 'cpuJson']);
-Route::get('/metrics/{node}/{vmid}/cpu.png',  [ProxmoxMetricsController::class, 'cpuPng']);
+Route::get('/metrics/{node}/{vmid}/cpu.json', [ProxmoxMetricsController::class, 'cpuJson'])
+    ->name('metrics.cpu.json');
 
-Route::view('/ct/{node}/{vmid}', 'ct'); // หน้าแสดงกราฟ
+Route::view('/ct/{node}/{vmid}', 'ct')->name('ct.page');
