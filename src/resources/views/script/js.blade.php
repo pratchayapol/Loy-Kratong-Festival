@@ -339,7 +339,7 @@
         const TRACK_WIDTH = 140;
         const KRATHONG_WIDTH_PCT = window.innerWidth < 640 ? 40 : 15;
         const SAFE_GAP_PCT = KRATHONG_WIDTH_PCT * 2; // เว้นระยะ 2 เท่า!
-        const TIME_GAP_MS = (SAFE_GAP_PCT / TRACK_WIDTH) * DUR * 1000;
+        const TIME_GAP_MS = (SAFE_GAP_PCT / TRACK_WIDTH) * DUR * 1300;
 
         console.log(
             `Config: ${TOTAL_LANES} lanes, vertical: ${VERTICAL_SPACING.toFixed(1)}%, gap: ${(TIME_GAP_MS/1000).toFixed(1)}s`
