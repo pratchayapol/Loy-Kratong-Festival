@@ -89,6 +89,11 @@
 
     <!-- Base styles for layout & chart -->
     <style>
+        html,
+        body {
+            font-family: "Sarabun", "TH Sarabun New", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Thai", Tahoma, Arial, sans-serif;
+        }
+
         /* หิ่งห้อยกระพริบ */
         @keyframes fireflyBlink {
 
@@ -171,10 +176,7 @@
             width: 100%;
             height: 200px
         }
-    </style>
 
-    
-    <style>
         .pb-safe {
             padding-bottom: max(1rem, env(safe-area-inset-bottom));
         }
@@ -194,9 +196,9 @@
         body {
             touch-action: manipulation
         }
-  
+
         /* ดาวตก */
-        
+
         @keyframes shootingStar {
             0% {
                 transform: translate(0, 0);
@@ -209,5 +211,17 @@
             }
         }
     </style>
-
+    @stack('head')
 </head>
+
+<body class="min-h-screen bg-slate-950 text-slate-100 font-sans overflow-hidden" x-data="{}">
+
+    {{-- เนื้อหาหน้า --}}
+    @yield('content')
+
+    {{-- ช่องให้เพจยัดสคริปต์ท้ายหน้า --}}
+    @stack('scripts')
+
+</body>
+
+</html>

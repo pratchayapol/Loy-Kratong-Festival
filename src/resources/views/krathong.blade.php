@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-<body class="min-h-screen bg-slate-950 text-slate-100 font-sans overflow-hidden" x-data="{}">
 
+@section('content')
     <!-- ป้ายเชิญด้านบนตรงกลาง -->
     <div class="fixed top-4 left-1/2 -translate-x-1/2 z-40 select-none">
         <div
@@ -76,11 +76,9 @@
             <div
                 class="absolute top-[18%] right-[10%] w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-[#fffef0] via-[#fff8dc] to-[#ffe4b5] animate-moonGlow pointer-events-none z-10 opacity-95 shadow-[0_0_60px_rgba(255,248,220,0.8),0_0_120px_rgba(255,248,220,0.4),inset_0_0_20px_rgba(255,255,255,0.3)]">
                 <div class="absolute inset-0 rounded-full overflow-hidden opacity-20">
-                    <div
-                        class="absolute top-[30%] left-[20%] w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-slate-400/40 blur-sm">
+                    <div class="absolute top-[30%] left-[20%] w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-slate-400/40 blur-sm">
                     </div>
-                    <div
-                        class="absolute top-[55%] right-[25%] w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-slate-400/30 blur-sm">
+                    <div class="absolute top-[55%] right-[25%] w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-slate-400/30 blur-sm">
                     </div>
                     <div
                         class="absolute bottom-[35%] left-[40%] w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-slate-400/35 blur-sm">
@@ -127,8 +125,7 @@
         <!-- HORIZON โค้ง -->
         <svg class="absolute left-0 right-0 top-[60%] sm:top-[58%] h-20 pointer-events-none" viewBox="0 0 1440 160"
             preserveAspectRatio="none" aria-hidden="true">
-            <path d="M0,100 C360,140 1080,60 1440,100" stroke="rgba(255,255,255,0.40)" stroke-width="1"
-                fill="none" />
+            <path d="M0,100 C360,140 1080,60 1440,100" stroke="rgba(255,255,255,0.40)" stroke-width="1" fill="none" />
             <path d="M0,100 C360,140 1080,60 1440,100 L1440,160 L0,160 Z" fill="rgba(255,255,255,0.08)" />
         </svg>
 
@@ -148,8 +145,7 @@
             </div>
 
             <!-- กระทง -->
-            <div id="river" class="absolute inset-0 overflow-hidden" x-data="riverScene(@js($types), @js($recent))"
-                x-init="init()">
+            <div id="river" class="absolute inset-0 overflow-hidden" x-data="riverScene(@js($types), @js($recent))" x-init="init()">
                 <template x-for="k in items" :key="k.clientId">
                     <div class="absolute flex flex-col items-center will-change-transform krathong-item"
                         :class="k.paused ? 'is-paused' : ''" :style="k.style" @mouseenter="pause(k); k.show=true"
@@ -191,8 +187,8 @@
 
     <!-- Modal ฟอร์ม -->
     <div x-show="$store.ui.open" x-cloak class="fixed inset-0 z-50" @keydown.escape.window="$store.ui.open=false">
-        <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity"
-            @click="$store.ui.open=false"></div>
+        <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity" @click="$store.ui.open=false">
+        </div>
 
         <div class="absolute inset-0 flex items-center justify-center p-0 sm:p-6 overflow-y-auto" @click.stop>
             <div class="w-full max-w-full sm:max-w-xl modal-enter backdrop-blur-2xl rounded-none sm:rounded-3xl border border-white/20 bg-slate-900/50 shadow-glass h-[calc(var(--vh,1vh)*100)] sm:h-auto flex flex-col pb-safe pt-safe"
@@ -267,8 +263,8 @@
                     <div class="flex flex-wrap items-center gap-3 pt-2">
                         <button type="submit"
                             class="min-h-12 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 px-6 py-3 font-semibold shadow-btn hover:shadow-[0_15px_50px_rgba(34,211,238,0.55)] hover:scale-105 active:scale-100 transition-all duration-300">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M4.5 12a7.5 7.5 0 0015 0m-15 0a7.5 7.5 0 0115 0M12 3v9" />
                             </svg>
@@ -300,8 +296,7 @@
                             class="text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-500 bg-clip-text text-transparent">
                             เกี่ยวกับ</h2>
                     </div>
-                    <button @click="$store.ui.aboutOpen=false"
-                        class="rounded-xl p-2 hover:bg-white/10 transition-colors">
+                    <button @click="$store.ui.aboutOpen=false" class="rounded-xl p-2 hover:bg-white/10 transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -350,10 +345,10 @@
                                     fill="none" stroke="currentColor">
                                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"
                                         stroke-width="2" />
-                                    <line x1="16" y1="2" x2="16" y2="6"
-                                        stroke-width="2" stroke-linecap="round" />
-                                    <line x1="8" y1="2" x2="8" y2="6"
-                                        stroke-width="2" stroke-linecap="round" />
+                                    <line x1="16" y1="2" x2="16" y2="6" stroke-width="2"
+                                        stroke-linecap="round" />
+                                    <line x1="8" y1="2" x2="8" y2="6" stroke-width="2"
+                                        stroke-linecap="round" />
                                     <line x1="3" y1="10" x2="21" y2="10"
                                         stroke-width="2" />
                                 </svg>
@@ -386,6 +381,3 @@
     </div>
 
     @extends('js.js')
-</body>
-
-</html>
