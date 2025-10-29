@@ -523,10 +523,10 @@
                             </svg>
                         </div>
 
-                        <h3 class="text-3xl md:text-4xl font-bold text-white">ลอยกระทงออนไลน์</h3>
-                        <p class="text-base md:text-lg text-slate-300">
+                        <h1 class="text-3xl md:text-4xl font-bold text-white">ลอยกระทงออนไลน์</h1>
+                        <h3 class="text-base md:text-lg text-slate-300">
                             ระบบลอยกระทงออนไลน์ เพื่อส่งต่อความปรารถนาดีในวันลอยกระทง
-                        </p>
+                        </h3>
                     </div>
 
                     <div class="h-px bg-gradient-to-r from-transparent via-purple-400/30 to-transparent"></div>
