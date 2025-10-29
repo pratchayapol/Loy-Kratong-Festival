@@ -382,5 +382,5 @@
 @endsection
 
 @push('scripts')
-   @import('resources/js/custom.js')
+    @extends('script.js')
 @endpush
