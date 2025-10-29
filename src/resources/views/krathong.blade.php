@@ -17,16 +17,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-
-  <style>
-    body{margin:0;background:#0f172a;color:#e2e8f0;font-family:system-ui,Segoe UI,Inter,Arial}
-    .wrap{max-width:920px;margin:24px auto;padding:0 16px}
-    .card{background:#0b1220;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px}
-    #pingChart{width:100%;height:260px;display:block}
-    .title{font-size:14px;margin:0 0 8px 0;color:#cbd5e1}
-    .err{font-size:12px;color:#fda4af;margin-top:6px}
-  </style>
-
     <!-- Tailwind config (short & sweet) -->
     <script>
         tailwind.config = {
@@ -492,37 +482,38 @@
                             </div>
                         </div>
 
-                        <div class="wrap">
-                            <div class="card">
-                                <p class="title">Recent (last 30 min)</p>
+                        <!-- ==== Ping Chart (Recent Only) ==== -->
+                        <div id="recent-ping" class="ping-chart-wrapper select-none">
+                            <div class="mb-2 text-sm text-slate-300">Recent (last 30 min)</div>
+                            <div class="chart-wrapper relative" style="position:relative;height:250px;">
                                 <canvas id="pingChart"></canvas>
-                                <p id="pingErr" class="err"></p>
                             </div>
+                            <p id="pingErr" class="text-xs text-rose-400 mt-1"></p>
                         </div>
 
                         <script>
-                            // ===== ตั้งค่าของคุณ =====
-                            const STATUS_SLUG = "loykratong"; // slug ของ status page
-                            const MONITOR_ID = "34"; // monitor id ของ ping
-                            const ENDPOINT = `/kuma/heartbeat/${STATUS_SLUG}`; // Laravel proxy route
+                            // === ปรับค่าให้ตรงของคุณ ===
+                            const STATUS_SLUG = "loykratong";
+                            const MONITOR_ID = "34";
+                            const ENDPOINT = `/kuma/heartbeat/${STATUS_SLUG}`;
 
                             // ช่วง Recent 30 นาที
-                            const WINDOW_MS = 30 * 60 * 1000;
+                            const RECENT_MS = 30 * 60 * 1000;
 
-                            // สเกล Y ตายตัวกันเด้ง
-                            const Y_MIN = 0,
-                                Y_MAX = 1000;
+                            // ล็อกสเกล Y กันเด้ง
+                            const Y_MIN = 0;
+                            const Y_MAX = 1000;
 
-                            let chart;
+                            let pingChart;
+                            let loadedOnceForAbout = false; // กันโหลดซ้ำถ้าอยู่ในโมดัล
 
                             function toDate(t) {
-                                // รองรับเลข epoch วินาที/มิลลิวินาที และสตริง "YYYY-MM-DD HH:mm:ss.SSS"
-                                if (typeof t === 'number') return new Date(t < 2e10 ? t * 1000 : t);
-                                if (typeof t === 'string') return new Date(t.replace(' ', 'T'));
+                                if (typeof t === 'number') return new Date((t < 2e10 ? t * 1000 : t));
+                                if (typeof t === 'string') return new Date(t.replace(' ', 'T')); // "YYYY-MM-DD HH:mm:ss" -> local time
                                 return new Date(t);
                             }
 
-                            async function loadRecent() {
+                            async function loadPingRecent() {
                                 const errEl = document.getElementById('pingErr');
                                 errEl.textContent = '';
                                 try {
@@ -530,50 +521,48 @@
                                         credentials: 'same-origin'
                                     });
                                     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                                    const json = await res.json();
+                                    const data = await res.json();
 
-                                    const all = (json.heartbeatList?.[MONITOR_ID] || [])
+                                    const all = (data.heartbeatList?.[MONITOR_ID] || [])
                                         .filter(h => Number.isFinite(h.ping) && h.ping > 0 && h.ping < 60000)
                                         .map(h => ({
                                             x: toDate(h.time),
                                             y: h.ping
-                                        }))
-                                        .sort((a, b) => a.x - b.x);
+                                        }));
 
-                                    // เลือกเฉพาะ 30 นาทีล่าสุดโดยอิงจากเวลาปัจจุบัน
                                     const now = Date.now();
-                                    let data30 = all.filter(p => p.x.getTime() >= now - WINDOW_MS);
+                                    let recent = all.filter(p => p.x.getTime() >= now - RECENT_MS);
 
-                                    // ถ้าไม่มีจุดใน 30 นาที ให้ fallback เป็นจุดล่าสุดไม่เกิน 60 จุด
-                                    if (data30.length === 0 && all.length) {
-                                        data30 = all.slice(-60);
+                                    // ถ้าเงียบเกิน 30 นาที ให้ fallback เป็นจุดล่าสุดจำนวนหนึ่ง (เช่น 60 จุด)
+                                    if (recent.length === 0 && all.length) {
+                                        recent = all.slice(-60);
                                     }
 
-                                    // clamp กัน spike เกิน Y_MAX
-                                    data30 = data30.map(p => ({
+                                    // clamp กันหลุดสเกล
+                                    const series = recent.map(p => ({
                                         x: p.x,
                                         y: Math.min(p.y, Y_MAX)
                                     }));
 
                                     const ctx = document.getElementById('pingChart');
-                                    if (chart) chart.destroy();
+                                    if (pingChart) pingChart.destroy();
 
-                                    chart = new Chart(ctx, {
+                                    pingChart = new Chart(ctx, {
                                         type: 'line',
                                         data: {
                                             datasets: [{
                                                 label: 'Ping',
-                                                data: data30,
+                                                data: series,
                                                 pointRadius: 0,
-                                                spanGaps: false
+                                                spanGaps: true
                                             }]
                                         },
                                         options: {
                                             responsive: true,
                                             maintainAspectRatio: false,
+                                            parsing: false,
                                             animation: false,
                                             normalized: true,
-                                            // ใช้ {x:Date,y:Number} ได้โดยไม่ต้องตั้ง parsing
                                             datasets: {
                                                 line: {
                                                     tension: 0,
@@ -586,13 +575,7 @@
                                             },
                                             scales: {
                                                 x: {
-                                                    type: 'time',
-                                                    // บังคับให้แสดงแค่ 30 นาทีล่าสุดเสมอ
-                                                    min: now - WINDOW_MS,
-                                                    max: now,
-                                                    time: {
-                                                        unit: 'minute'
-                                                    }
+                                                    type: 'time'
                                                 },
                                                 y: {
                                                     min: Y_MIN,
@@ -613,15 +596,39 @@
                                             }
                                         }
                                     });
-                                } catch (err) {
-                                    errEl.textContent = `โหลดกราฟไม่สำเร็จ: ${err.message}`;
-                                    console.error(err);
+                                } catch (e) {
+                                    errEl.textContent = `โหลดกราฟไม่สำเร็จ: ${e.message}`;
+                                    console.error(e);
                                 }
                             }
 
-                            document.addEventListener('DOMContentLoaded', loadRecent);
-                        </script>
+                            // ใช้นอกโมดัล (โหลดทันที)
+                            if (!window.Alpine) {
+                                document.addEventListener('DOMContentLoaded', () => {
+                                    loadPingRecent();
+                                });
+                            }
 
+                            // ถ้าอยู่ในโมดัล "เกี่ยวกับ" ให้โหลดครั้งเดียวตอนเปิด
+                            document.addEventListener('alpine:init', () => {
+                                Alpine.effect(() => {
+                                    const open = Alpine.store('ui')?.aboutOpen;
+                                    if (open && !loadedOnceForAbout) {
+                                        loadedOnceForAbout = true;
+                                        setTimeout(() => {
+                                            loadPingRecent().then(() => {
+                                                try {
+                                                    pingChart?.resize();
+                                                } catch {}
+                                            });
+                                        }, 150);
+                                    }
+                                    if (!open && loadedOnceForAbout) {
+                                        loadedOnceForAbout = false; // ปิดแล้วเปิดใหม่ค่อยโหลดอีกครั้ง
+                                    }
+                                });
+                            });
+                        </script>
 
                     </div>
 
