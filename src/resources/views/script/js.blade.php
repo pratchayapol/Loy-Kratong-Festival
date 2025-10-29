@@ -651,12 +651,19 @@
 
     async function refreshCount(signal) {
         try {
-            const res = await fetch(`{{ route('krathong.metrics') }}`, {
+            // เลือกอย่างใดอย่างหนึ่ง:
+
+            // 1) ใช้ relative URL ปลอดภัยสุดกับ HTTPS/โดเมนใดๆ
+            // const res = await fetch('/krathong/metrics', {
+
+            // 2) บังคับ https ผ่าน Blade helper
+            const res = await fetch(`{{ secure_url('krathong/metrics') }}`, {
                 headers: {
                     'Accept': 'application/json'
                 },
                 signal
             });
+
             if (!res.ok) return;
             const {
                 total
