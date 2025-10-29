@@ -568,7 +568,7 @@
                         <div class="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10 w-full">
                             <!-- ==== Ping Chart (Recent Only) ==== -->
                             <div id="recent-ping"
-                                class="ping-chart-wrapper select-none w-full flex-1 min-w-0 hidden sm:block">
+                                class="ping-chart-wrapper select-none w-full flex-1 min-w-0 block sm:block">
                                 <div class="mb-2 text-sm text-slate-300">Ping ล่าสุด</div>
                                 <div class="chart-wrapper relative w-full" style="position:relative;height:200px;">
                                     <canvas id="pingChart" class="w-full block"></canvas>
@@ -576,7 +576,7 @@
                                 <p id="pingErr" class="text-xs text-rose-400 mt-1"></p>
                             </div>
                         </div>
-                       
+
                     </div>
 
                     <div class="text-center pt-2">
