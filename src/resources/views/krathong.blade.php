@@ -16,6 +16,9 @@
     <meta name="theme-color" content="#0b2e4a">
     <!-- Tailwind & Alpine -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
     <style>
         .ribbon-black {
             position: fixed;
@@ -480,6 +483,12 @@
                                 <div class="text-xs text-slate-400 mb-0.5">เวอร์ชัน</div>
                                 <div class="font-semibold text-white">1.0.1 29 ตุลาคม 2568</div>
                             </div>
+
+                            <div class="wrap">
+                                <h2>Ping (ms)</h2>
+                                <canvas id="pingChart"></canvas>
+                            </div>
+
                         </div>
                     </div>
 
@@ -490,6 +499,63 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // === ตั้งค่าให้ถูกกับของคุณ ===
+        const KUMA_ORIGIN = "https://kuma.pcnone.com"; // โดเมน Uptime Kuma ของคุณ
+        const STATUS_SLUG = "loykratong"; // slug ของ status page
+        const MONITOR_ID = "34"; // id ของ monitor ที่อยากแสดง ping
+
+        (async () => {
+            const res = await fetch(`${KUMA_ORIGIN}/api/status-page/heartbeat/${STATUS_SLUG}`);
+            if (!res.ok) throw new Error("fetch heartbeat failed");
+            const data = await res.json();
+
+            const series = (data.heartbeatList?.[MONITOR_ID] || [])
+                // เก็บเฉพาะที่มี ping
+                .filter(h => typeof h.ping === "number");
+
+            const labels = series.map(h => new Date(h.time)); // ISO -> Date
+            const pings = series.map(h => h.ping);
+
+            const ctx = document.getElementById("pingChart");
+            new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels,
+                    datasets: [{
+                        label: "Ping",
+                        data: pings,
+                        tension: 0.25,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    parsing: false,
+                    scales: {
+                        x: {
+                            type: "time",
+                            time: {
+                                tooltipFormat: "yyyy-MM-dd HH:mm"
+                            }
+                        },
+                        y: {
+                            title: {
+                                text: "ms",
+                                display: true
+                            },
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        })().catch(console.error);
+    </script>
 
     <script>
         const readCookie = n => decodeURIComponent((document.cookie.split('; ').find(x => x.startsWith(n + '=')) || '')
