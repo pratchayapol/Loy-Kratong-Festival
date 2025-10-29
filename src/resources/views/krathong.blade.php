@@ -6,31 +6,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Loy Kratong Festival</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <!-- Favicon -->
-    <link rel="icon" href="/favicon.ico">
-    <link rel="icon" sizes="any" type="image/x-icon" href="{{ asset('favicon.ico') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
-    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+
+    <!-- Favicon / Manifest: ใช้ secure_asset เพื่อกัน mixed content -->
+    <link rel="icon" href="{{ secure_asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ secure_asset('favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ secure_asset('favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ secure_asset('apple-touch-icon.png') }}">
+    <link rel="manifest" href="{{ secure_asset('site.webmanifest') }}">
     <meta name="theme-color" content="#0b2e4a">
-    <!-- Tailwind & Alpine -->
+
+    <!-- Tailwind, Alpine, Chart.js, Time adapter -->
     <script src="https://cdn.tailwindcss.com"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
-    <!-- ใส่ใต้ Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
-
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
         .ribbon-black {
             position: fixed;
             right: 0;
             top: 0;
-            z-index: 2568;
+            z-index: 2568
+        }
+
+        [x-cloak] {
+            display: none !important
+        }
+
+        .krathong-item {
+            animation: floatY var(--floatDur, 3.2s) ease-in-out infinite, sway var(--swayDur, 5s) ease-in-out infinite;
+            will-change: transform
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(.95)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1)
+            }
+        }
+
+        .modal-enter {
+            animation: slideUp .3s ease-out
+        }
+
+        /* ให้กราฟสูงแน่นอนเวลาซ่อน/โชว์ในโมดัล */
+        .wrap {
+            max-width: 900px;
+            margin: 0.75rem auto
+        }
+
+        #pingChart {
+            width: 100%;
+            height: 260px
         }
     </style>
+
     <script>
         tailwind.config = {
             theme: {
@@ -105,39 +140,10 @@
             }
         }
     </script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
     <script>
         const rnd = (min, max) => Math.random() * (max - min) + min;
     </script>
     <style id="dyn-keyframes"></style>
-
-    <style>
-        [x-cloak] {
-            display: none !important
-        }
-
-        .krathong-item {
-            animation: floatY var(--floatDur, 3.2s) ease-in-out infinite, sway var(--swayDur, 5s) ease-in-out infinite;
-            will-change: transform
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px) scale(.95)
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1)
-            }
-        }
-
-        .modal-enter {
-            animation: slideUp .3s ease-out
-        }
-    </style>
 </head>
 
 <body x-data="{}" class="min-h-screen bg-slate-950 text-slate-100 font-display overflow-hidden">
@@ -487,13 +493,13 @@
                                 <div class="text-xs text-slate-400 mb-0.5">เวอร์ชัน</div>
                                 <div class="font-semibold text-white">1.0.1 29 ตุลาคม 2568</div>
                             </div>
-
-                            <div class="wrap">
-                                <h2>Ping (ms)</h2>
-                                <canvas id="pingChart"></canvas>
-                            </div>
-
                         </div>
+
+                        <div class="wrap mt-4">
+                            <h2 class="text-sm mb-2 text-slate-200">Ping (ms)</h2>
+                            <canvas id="pingChart"></canvas>
+                        </div>
+                        <p id="pingErr" class="text-xs text-rose-400"></p>
                     </div>
 
                     <div class="text-center pt-2">
@@ -503,63 +509,119 @@
             </div>
         </div>
     </div>
-
     <script>
-        // === ตั้งค่าให้ถูกกับของคุณ ===
-        const KUMA_ORIGIN = ""; // ว่างไว้
+        const readCookie = n => decodeURIComponent((document.cookie.split('; ').find(x => x.startsWith(n + '=')) || '')
+            .split('=')[1] || '');
+        const __timers = new Set();
+        const __schedule = (fn, ms) => {
+            const t = setTimeout(fn, ms);
+            __timers.add(t);
+            return t;
+        }
+        window.addEventListener('beforeunload', () => {
+            for (const t of __timers) clearTimeout(t);
+            __timers.clear();
+        });
+
+        function ensureKeyframeSheet() {
+            let el = document.getElementById('dyn-keyframes');
+            if (!el) {
+                el = document.createElement('style');
+                el.id = 'dyn-keyframes';
+                document.head.appendChild(el);
+            }
+            if (!el.sheet) {
+                const tmp = document.createElement('style');
+                document.head.appendChild(tmp);
+                const sheet = tmp.sheet;
+                document.head.removeChild(tmp);
+                return sheet;
+            }
+            return el.sheet;
+        }
+    </script>
+
+    <!-- กราฟ Ping ผ่าน Laravel proxy (แก้ CORS แล้ว) -->
+    <script>
         const STATUS_SLUG = "loykratong";
+        const MONITOR_ID = "34"; // เปลี่ยนให้ตรงของจริง
         const ENDPOINT = `/kuma/heartbeat/${STATUS_SLUG}`;
-        const res = await fetch(ENDPOINT);
 
-        (async () => {
-            const res = await fetch(`${KUMA_ORIGIN}/api/status-page/heartbeat/${STATUS_SLUG}`);
-            if (!res.ok) throw new Error("fetch heartbeat failed");
-            const data = await res.json();
+        let pingChart;
 
-            const series = (data.heartbeatList?.[MONITOR_ID] || [])
-                // เก็บเฉพาะที่มี ping
-                .filter(h => typeof h.ping === "number");
+        async function loadPing() {
+            const errEl = document.getElementById('pingErr');
+            errEl.textContent = '';
+            try {
+                const res = await fetch(ENDPOINT, {
+                    credentials: 'same-origin'
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
 
-            const labels = series.map(h => new Date(h.time)); // ISO -> Date
-            const pings = series.map(h => h.ping);
+                const list = (data.heartbeatList?.[MONITOR_ID] || []).filter(h => typeof h.ping === 'number');
+                const toDate = t => typeof t === 'number' ? new Date((t < 2e10 ? t * 1000 : t)) : new Date(t);
+                const labels = list.map(h => toDate(h.time));
+                const pings = list.map(h => h.ping);
 
-            const ctx = document.getElementById("pingChart");
-            new Chart(ctx, {
-                type: "line",
-                data: {
-                    labels,
-                    datasets: [{
-                        label: "Ping",
-                        data: pings,
-                        tension: 0.25,
-                        pointRadius: 0
-                    }]
-                },
-                options: {
-                    parsing: false,
-                    scales: {
-                        x: {
-                            type: "time",
-                            time: {
-                                tooltipFormat: "yyyy-MM-dd HH:mm"
+                const ctx = document.getElementById('pingChart');
+                if (pingChart) {
+                    pingChart.destroy();
+                }
+                pingChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: 'Ping',
+                            data: pings,
+                            tension: 0.25,
+                            pointRadius: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        parsing: false,
+                        scales: {
+                            x: {
+                                type: 'time'
+                            },
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'ms'
+                                }
                             }
                         },
-                        y: {
-                            title: {
-                                text: "ms",
-                                display: true
-                            },
-                            beginAtZero: true
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
                         }
                     }
+                });
+            } catch (e) {
+                errEl.textContent = `โหลดกราฟไม่สำเร็จ: ${e.message}`;
+                console.error(e);
+            }
+        }
+
+        // โหลดเมื่อเปิดโมดัล และ resize หลัง transition
+        document.addEventListener('alpine:init', () => {
+            Alpine.effect(() => {
+                if (Alpine.store('ui')?.aboutOpen) {
+                    setTimeout(() => {
+                        loadPing().then(() => {
+                            try {
+                                pingChart?.resize();
+                            } catch {}
+                        });
+                    }, 200);
                 }
             });
-        })().catch(console.error);
+        });
     </script>
 
     <script>
