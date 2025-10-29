@@ -1,82 +1,46 @@
-<!DOCTYPE html>
-<html lang="th">
-
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Loy Krathong Festival</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}" />
-    <!-- Favicon / Manifest (กัน mixed content) -->
-    <link rel="icon" href="{{ secure_asset('favicon.ico') }}" />
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ secure_asset('favicon-32x32.png') }}" />
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ secure_asset('favicon-16x16.png') }}" />
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ secure_asset('apple-touch-icon.png') }}" />
-    <link rel="manifest" href="{{ secure_asset('site.webmanifest') }}" />
-    <meta name="theme-color" content="#0b2e4a" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Loy Krathong Festival</title>
+  <meta name="csrf-token" content="{{ csrf_token() }}" />
 
-    <!-- Tailwind, Alpine, Chart.js, Time adapter -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <!-- Favicons -->
+  <link rel="icon" href="{{ secure_asset('favicon.ico') }}" />
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ secure_asset('favicon-32x32.png') }}" />
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ secure_asset('favicon-16x16.png') }}" />
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ secure_asset('apple-touch-icon.png') }}" />
+  <link rel="manifest" href="{{ secure_asset('site.webmanifest') }}" />
+  <meta name="theme-color" content="#0b2e4a" />
 
-    <!-- Tailwind config (short & sweet) -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        display: ['Inter', 'ui-sans-serif', 'system-ui']
-                    },
-                    keyframes: {
-                        floatY: {
-                            '0%,100%': {
-                                transform: 'translateY(0)'
-                            },
-                            '50%': {
-                                transform: 'translateY(-6px)'
-                            }
-                        },
-                        sway: {
-                            '0%,100%': {
-                                transform: 'rotate(0deg)'
-                            },
-                            '25%': {
-                                transform: 'rotate(-1.5deg)'
-                            },
-                            '75%': {
-                                transform: 'rotate(1.5deg)'
-                            }
-                        },
-                        waves: {
-                            '0%': {
-                                transform: 'translateX(0)'
-                            },
-                            '100%': {
-                                transform: 'translateX(-50%)'
-                            }
-                        },
-                        twinkle: {
-                            '0%,100%': {
-                                opacity: '0.35',
-                                transform: 'scale(1)'
-                            },
-                            '50%': {
-                                opacity: '1',
-                                transform: 'scale(1.15)'
-                            }
-                        }
-                    },
-                    animation: {
-                        floatY: 'floatY 3.2s ease-in-out infinite',
-                        sway: 'sway 5s ease-in-out infinite',
-                        waves: 'waves 18s linear infinite',
-                        twinkle: 'twinkle 3.4s ease-in-out infinite'
-                    }
-                }
-            }
+  <!-- Tailwind config BEFORE CDN -->
+  <script>
+    tailwind = { config: {
+      theme: {
+        extend: {
+          fontFamily: { display: ['Inter','ui-sans-serif','system-ui'] },
+          keyframes: {
+            floatY:{'0%,100%':{transform:'translateY(0)'},'50%':{transform:'translateY(-6px)'}},
+            sway:{'0%,100%':{transform:'rotate(0deg)'},'25%':{transform:'rotate(-1.5deg)'},'75%':{transform:'rotate(1.5deg)'}},
+            waves:{'0%':{transform:'translateX(0)'},'100%':{transform:'translateX(-50%)'}},
+            twinkle:{'0%,100%':{opacity:'.35',transform:'scale(1)'},'50%':{opacity:'1',transform:'scale(1.15)'}}
+          },
+          animation: {
+            floatY:'floatY 3.2s ease-in-out infinite',
+            sway:'sway 5s ease-in-out infinite',
+            waves:'waves 18s linear infinite',
+            twinkle:'twinkle 3.4s ease-in-out infinite'
+          }
         }
-    </script>
+      }
+    }}; // tailwindcss.com CDN จะอ่านตัวแปรนี้ตอนโหลด
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Libs: ใส่ defer -->
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
 
     <!-- Base styles for layout & chart -->
     <style>
@@ -579,7 +543,7 @@
                             <h1>CPU %</h1>
                             <canvas id="cpuChart"></canvas>
                         </div>
-                        
+
                         <script>
                             // ดึง node และ vmid จาก URL /ct/{node}/{vmid}
                             const parts = location.pathname.split('/').filter(Boolean);
