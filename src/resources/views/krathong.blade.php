@@ -937,7 +937,7 @@
         // วนลูปใหม่→เก่าเป็นรอบ ๆ ไม่ว่าง ไม่ซ้ำภายในรอบเดียว และแสดงใหม่ทันที
         function riverScene(types, recent) {
             const WATER_TOP = 25; // % จากขอบบนโซนน้ำ
-            const WATER_BAND = 28; // ช่วงความสูงที่ให้ลอย
+            const WATER_BAND = 40; // ช่วงความสูงที่ให้ลอย
             const DUR_INIT_MIN = 22,
                 DUR_INIT_MAX = 34;
             const DUR_LOOP_MIN = 18,
