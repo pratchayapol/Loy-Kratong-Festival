@@ -578,7 +578,7 @@
                         </div>
                         <div class="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10 w-full">
                             <h1>CPU %</h1>
-                            <img src="https://<PVE_HOST>:8006/api2/png/nodes/pve/lxc/101/rrd?ds=cpu&timeframe=hour" />
+                            <img src="https://proxmox_khonkean.pcnone.com/api2/png/nodes/pve/lxc/101/rrd?ds=cpu&timeframe=hour" />
                         </div>
 
                         <script>
