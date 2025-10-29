@@ -609,54 +609,37 @@
     </div>
 
     <script>
-        /* helpers + mobile vh fix */
-        const rnd = (min, max) => Math.random() * (max - min) + min;
-        const setVH = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight*.01}px`);
-        window.addEventListener('resize', setVH, {
-            passive: true
-        });
-        window.addEventListener('orientationchange', setVH, {
-            passive: true
-        });
-        document.addEventListener('DOMContentLoaded', setVH);
-
-        /* Alpine global store */
-        document.addEventListener('alpine:init', () => {
-            Alpine.store('ui', {
-                open: false,
-                aboutOpen: false
-            });
-        });
-
-        /* ping chart */
+        // === Config ===
         const STATUS_SLUG = "loykratong";
         const MONITOR_ID = "34";
         const ENDPOINT = `/kuma/heartbeat/${STATUS_SLUG}`;
         const Y_MIN = 0,
-            Y_MAX = 5000,
-            TZ = 'Asia/Bangkok',
-            POLL_MS = 10000;
-        let pingChart = null,
-            pollTimer = null,
-            inflight = null;
+            Y_MAX = 5000;
+        const TZ = 'Asia/Bangkok';
+        const POLL_MS = 10_000;
+
+        let pingChart;
+        let pollTimer = null;
+        let inflight = null;
 
         function toUTCDate(t) {
             if (typeof t === 'number') {
                 const ms = (t < 2e10 ? t * 1000 : t);
-                return new Date(ms)
+                return new Date(ms);
             }
             if (typeof t === 'string') {
-                return new Date(t.replace(' ', 'T') + 'Z')
+                return new Date(t.replace(' ', 'T') + 'Z');
             }
             return new Date(t);
         }
 
         function upsertChart(series) {
-            if (window.innerWidth < 640) return;
-            const xmin = series[0].x.getTime(),
-                xmax = series[series.length - 1].x.getTime();
+            if (window.innerWidth < 640) return; // skip on small screens
+            const xmin = series[0].x.getTime();
+            const xmax = series[series.length - 1].x.getTime();
             const ctx = document.getElementById('pingChart');
             if (!ctx) return;
+
             if (!pingChart) {
                 pingChart = new Chart(ctx, {
                     type: 'line',
@@ -696,7 +679,7 @@
                                 },
                                 ticks: {
                                     source: 'data',
-                                    callback: v => new Date(v).toLocaleString('th-TH', {
+                                    callback: (v) => new Date(v).toLocaleString('th-TH', {
                                         timeZone: TZ,
                                         hour12: false,
                                         hour: '2-digit',
@@ -733,7 +716,7 @@
                             },
                             tooltip: {
                                 callbacks: {
-                                    title: items => {
+                                    title: (items) => {
                                         const ts = items?.[0]?.parsed?.x;
                                         return new Date(ts).toLocaleString('th-TH', {
                                             timeZone: TZ,
@@ -744,9 +727,9 @@
                                             hour: '2-digit',
                                             minute: '2-digit',
                                             second: '2-digit'
-                                        }) + ' (UTC+7)'
+                                        }) + ' (UTC+7)';
                                     },
-                                    label: ctx => `Ping: ${ctx.parsed.y} ms`
+                                    label: (ctx) => `Ping: ${ctx.parsed.y} ms`
                                 }
                             }
                         }
@@ -759,6 +742,7 @@
                 pingChart.update('none');
             }
         }
+
         async function loadPingExact() {
             const errEl = document.getElementById('pingErr');
             if (errEl) errEl.textContent = '';
@@ -773,7 +757,8 @@
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
                 const raw = data.heartbeatList?.[MONITOR_ID] ?? [];
-                const series = raw.filter(h => Number.isFinite(h.ping) && h.ping > 0 && h.ping < 60000 && h.time)
+                const series = raw
+                    .filter(h => Number.isFinite(h.ping) && h.ping > 0 && h.ping < 60000 && h.time)
                     .map(h => ({
                         x: toUTCDate(h.time),
                         y: Math.min(h.ping, Y_MAX)
@@ -784,7 +769,7 @@
             } catch (e) {
                 if (e.name !== 'AbortError' && errEl) {
                     errEl.textContent = `โหลดกราฟไม่สำเร็จ: ${e.message}`;
-                    console.error(e)
+                    console.error(e);
                 }
             } finally {
                 if (inflight === controller) inflight = null;
@@ -803,6 +788,7 @@
             clearInterval(pollTimer);
             pollTimer = null;
         }
+
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) return;
             loadPingExact();
@@ -811,6 +797,7 @@
             loadPingExact();
             startPolling();
         });
+
         document.addEventListener('alpine:init', () => {
             let once = false;
             Alpine.effect(() => {
@@ -820,15 +807,116 @@
                     setTimeout(() => {
                         loadPingExact();
                         try {
-                            pingChart?.resize()
+                            pingChart?.resize();
                         } catch {}
                     }, 150);
                 }
                 if (!open) once = false;
             });
         });
+    </script>
+    {{-- หิ่งห้อยกระพริบ --}}
+    <script>
+        function fireflies() {
+            const COUNT = window.innerWidth < 640 ? 18 : 36;
+            const DUR_MIN = 8,
+                DUR_MAX = 16; // ระยะเวลาบินหนึ่งลูป
+            const SIZE_MIN = 2,
+                SIZE_MAX = 3.5; // ขนาดหิ่งห้อย px
+            const BAND_TOP = 6; // % จากขอบบนของน้ำ
+            const BAND_HEIGHT = 30; // ช่วงบินเหนือผิวน้ำ
+            const sheet = ensureKeyframeSheet();
 
-        /* fireflies */
+            // สร้าง keyframes เป็นรายตัว เพื่อลดงาน JS runtime
+            const pathKF = () => {
+                const name = 'ff_' + Math.random().toString(36).slice(2);
+                // จุดทางผ่าน 5 ช่วง ให้ลอยซ้ายขวา เบี่ยงขึ้นลงเล็กน้อย
+                const step = () => ({
+                    x: rnd(-30, 30),
+                    y: rnd(-18, 18)
+                });
+                const p1 = step(),
+                    p2 = step(),
+                    p3 = step(),
+                    p4 = step();
+                const css = `@keyframes ${name}{
+        0%   { transform: translate(0px,0px) }
+        25%  { transform: translate(${p1.x}px,${p1.y}px) }
+        50%  { transform: translate(${p2.x}px,${p2.y}px) }
+        75%  { transform: translate(${p3.x}px,${p3.y}px) }
+        100% { transform: translate(${p4.x}px,${p4.y}px) }
+      }`;
+                sheet.insertRule(css, sheet.cssRules.length);
+                return name;
+            };
+
+            const makeOne = () => {
+                const id = crypto?.randomUUID?.() || (Date.now() + Math.random());
+                const left = rnd(5, 95); // %
+                const top = rnd(BAND_TOP, BAND_TOP + BAND_HEIGHT); // % ภายในผิวน้ำ
+                const size = rnd(SIZE_MIN, SIZE_MAX);
+                const dur = rnd(DUR_MIN, DUR_MAX);
+                const delay = rnd(0, 4);
+                const drift = pathKF();
+                const style = `
+        left:${left}%; top:${top}%;
+        width:${size}px; height:${size}px; border-radius:9999px;
+        background: radial-gradient(circle at 50% 50%, #fff7c2 0%, #ffd86b 35%, rgba(255,215,100,.0) 70%);
+        animation:
+          ${drift} ${dur}s ease-in-out ${delay}s infinite alternate,
+          fireflyBlink ${rnd(2.2,3.6)}s ease-in-out ${rnd(0,1.5)}s infinite;
+        will-change: transform, opacity, filter;
+        mix-blend-mode: screen;
+      `;
+                return {
+                    id,
+                    style
+                };
+            };
+
+            return {
+                flies: [],
+                init() {
+                    // สร้างรอบแรก
+                    for (let i = 0; i < COUNT; i++) this.flies.push(makeOne());
+                    // เติมตัวที่หายไปเมื่อ DOM repaint นานๆ
+                    // ไม่ใช้ setInterval ถาวร เพื่อลดงานแบ็คกราวด์
+                    const refill = () => {
+                        const need = COUNT - this.flies.length;
+                        for (let i = 0; i < need; i++) this.flies.push(makeOne());
+                        __schedule(refill, 12000);
+                    };
+                    __schedule(refill, 12000);
+
+                    // รีเลย์เอาต์เมื่อขนาดจอเปลี่ยน
+                    window.addEventListener('resize', () => {
+                        const target = window.innerWidth < 640 ? 18 : 36;
+                        if (this.flies.length > target) this.flies.splice(target);
+                        while (this.flies.length < target) this.flies.push(makeOne());
+                    }, {
+                        passive: true
+                    });
+                }
+            }
+        }
+    </script>
+
+    <!-- Logic ลอยกระทง -->
+    <script>
+        const readCookie = n => decodeURIComponent((document.cookie.split('; ').find(x => x.startsWith(n + '=')) || '')
+            .split('=')[1] || '');
+        const __timers = new Set();
+        const __schedule = (fn, ms) => {
+            const t = setTimeout(fn, ms);
+            __timers.add(t);
+            return t;
+        };
+        const __clearAll = () => {
+            for (const t of __timers) clearTimeout(t);
+            __timers.clear();
+        };
+        window.addEventListener('beforeunload', __clearAll);
+
         function ensureKeyframeSheet() {
             let el = document.getElementById('dyn-keyframes');
             if (!el) {
@@ -845,140 +933,75 @@
             }
             return el.sheet;
         }
-        const readCookie = n => decodeURIComponent((document.cookie.split('; ').find(x => x.startsWith(n + '=')) || '')
-            .split('=')[1] || '');
-        const __timers = new Set();
-        const __schedule = (fn, ms) => {
-            const t = setTimeout(fn, ms);
-            __timers.add(t);
-            return t;
-        };
-        const __clearAll = () => {
-            for (const t of __timers) clearTimeout(t);
-            __timers.clear();
-        };
-        window.addEventListener('beforeunload', __clearAll);
 
-        function fireflies() {
-            const COUNT = window.innerWidth < 640 ? 18 : 36,
-                DUR_MIN = 8,
-                DUR_MAX = 16,
-                SIZE_MIN = 2,
-                SIZE_MAX = 3.5,
-                BAND_TOP = 6,
-                BAND_HEIGHT = 30;
-            const sheet = ensureKeyframeSheet();
-            const pathKF = () => {
-                const name = 'ff_' + Math.random().toString(36).slice(2);
-                const step = () => ({
-                    x: rnd(-30, 30),
-                    y: rnd(-18, 18)
-                });
-                const p1 = step(),
-                    p2 = step(),
-                    p3 = step(),
-                    p4 = step();
-                const css =
-                    `@keyframes ${name}{0%{transform:translate(0,0)}25%{transform:translate(${p1.x}px,${p1.y}px)}50%{transform:translate(${p2.x}px,${p2.y}px)}75%{transform:translate(${p3.x}px,${p3.y}px)}100%{transform:translate(${p4.x}px,${p4.y}px)}}`;
-                sheet.insertRule(css, sheet.cssRules.length);
-                return name;
-            };
-            const makeOne = () => {
-                const left = rnd(5, 95),
-                    top = rnd(BAND_TOP, BAND_TOP + BAND_HEIGHT),
-                    size = rnd(SIZE_MIN, SIZE_MAX),
-                    dur = rnd(DUR_MIN, DUR_MAX),
-                    delay = rnd(0, 4),
-                    drift = pathKF();
-                const style =
-                    `left:${left}%;top:${top}%;width:${size}px;height:${size}px;border-radius:9999px;background:radial-gradient(circle at 50% 50%,#fff7c2 0%,#ffd86b 35%,rgba(255,215,100,0) 70%);animation:${drift} ${dur}s ease-in-out ${delay}s infinite alternate,fireflyBlink ${rnd(2.2,3.6)}s ease-in-out ${rnd(0,1.5)}s infinite;will-change:transform,opacity,filter;mix-blend-mode:screen;`;
-                return {
-                    id: crypto?.randomUUID?.() || (Date.now() + Math.random()),
-                    style
-                };
-            };
-            return {
-                flies: [],
-                init() {
-                    for (let i = 0; i < COUNT; i++) this.flies.push(makeOne());
-                    const refill = () => {
-                        const need = COUNT - this.flies.length;
-                        for (let i = 0; i < need; i++) this.flies.push(makeOne());
-                        __schedule(refill, 12000);
-                    };
-                    __schedule(refill, 12000);
-                    window.addEventListener('resize', () => {
-                        const target = window.innerWidth < 640 ? 18 : 36;
-                        if (this.flies.length > target) this.flies.splice(target);
-                        while (this.flies.length < target) this.flies.push(makeOne());
-                    }, {
-                        passive: true
-                    });
-                }
-            }
-        }
-
-        /* riverScene: เว้นระยะไม่ซ้อน + สลับบนล่าง */
+        // วนลูปใหม่→เก่าเป็นรอบ ๆ ไม่ว่าง ไม่ซ้ำภายในรอบเดียว และแสดงใหม่ทันที
         function riverScene(types, recent) {
-            const WATER_TOP = 25,
-                WATER_BAND = 28,
-                LANE_COUNT = window.innerWidth < 640 ? 6 : 10,
-                LANE_HEIGHT = WATER_BAND / LANE_COUNT;
+            const WATER_TOP = 25; // เริ่มโซนน้ำ
+            const WATER_BAND = 28; // ความสูงโซนน้ำ
+            // เลนสูงขึ้น = ช่องไฟแนวตั้งมากขึ้น
+            const LANE_COUNT = window.innerWidth < 640 ? 6 : 10;
+            const LANE_HEIGHT = WATER_BAND / LANE_COUNT;
+
+            // เวลาห่างขั้นต่ำแนวนอน
+            const GAP_GLOBAL_MS = window.innerWidth < 640 ? 2200 : 2800;
+            const GAP_PER_LANE_MS = window.innerWidth < 640 ? 3200 : 3800;
+
+            // ห้ามเลนติดกันยิงพร้อมกันภายในช่วงนี้ เพื่อตัด “กลุ่มก้อน”
+            const NEIGHBOR_COOLDOWN_MS = 1400;
+
             const DUR_INIT_MIN = 22,
-                DUR_INIT_MAX = 34,
-                DUR_LOOP_MIN = 18,
+                DUR_INIT_MAX = 34;
+            const DUR_LOOP_MIN = 18,
                 DUR_LOOP_MAX = 28;
+
             const MAX_ITEMS = window.innerWidth < 640 ? 32 : 80;
             const typeImg = t => types?.[t]?.img || Object.values(types || {})[0]?.img || '';
 
-            const BASE_GAP_GLOBAL_MS = window.innerWidth < 640 ? 2200 : 2800;
-            const BASE_GAP_PER_LANE_MS = window.innerWidth < 640 ? 3200 : 3800;
-            const BASE_NEIGHBOR_COOLDOWN_MS = 1400;
-
+            // สถานะเลน
             const laneNextFree = Array.from({
                 length: LANE_COUNT
             }, () => 0);
             const lanePhase = Array.from({
                 length: LANE_COUNT
-            }, (_, i) => (i % 2) ? 900 : 0);
+            }, (_, i) => (i % 2) ? 900 : 0); // สลับฟันปลาแบบแข็ง
             let globalNextFree = 0;
 
-            function ensureKF(name, css) {
+            function ensureKeyframes(name, css) {
                 const sheet = ensureKeyframeSheet();
                 sheet.insertRule(css, sheet.cssRules.length);
                 return name;
             }
 
-            function dynamicGaps(durSec) {
-                const sameLane = Math.max(BASE_GAP_PER_LANE_MS, durSec * 1000 * 0.55);
-                const neighbor = Math.max(BASE_NEIGHBOR_COOLDOWN_MS, durSec * 1000 * 0.35);
-                const global = Math.max(BASE_GAP_GLOBAL_MS, durSec * 1000 * 0.25);
-                return {
-                    sameLane,
-                    neighbor,
-                    global
-                };
-            }
-
-            function laneZ(l) {
-                return l % 2 === 0 ? 300 + l : 100 + l;
-            }
-
             function makeStyle(dur, delay, top, z) {
                 const drift = `dr_${Math.random().toString(36).slice(2)}`;
-                ensureKF(drift,
-                    `@keyframes ${drift}{0%{left:-20%;opacity:0}10%{opacity:1}90%{opacity:1}100%{left:120%;opacity:0}}`);
-                const floatDur = rnd(3.0, 4.0),
-                    swayDur = rnd(4.8, 6.2),
-                    chopDur = rnd(8, 12);
-                return `top:${top}%;left:-20%;animation:${drift} ${dur}s linear ${delay}s forwards,floatY ${floatDur}s ease-in-out ${delay}s infinite,sway ${swayDur}s ease-in-out ${delay}s infinite,chop ${chopDur}s linear ${rnd(0,3)}s infinite;`;
+                ensureKeyframes(drift, `@keyframes ${drift}{
+      0%{left:-20%;opacity:0} 10%{opacity:1} 90%{opacity:1} 100%{left:120%;opacity:0}
+    }`);
+                const floatDur = rnd(3.0, 4.0);
+                const swayDur = rnd(4.8, 6.2);
+                const chopDur = rnd(8, 12);
+
+                return `
+      top:${top}%;
+      left:-20%;
+      animation:
+        ${drift} ${dur}s linear ${delay}s forwards,
+        floatY ${floatDur}s ease-in-out ${delay}s infinite,
+        sway   ${swayDur}s  ease-in-out ${delay}s infinite,
+        chop   ${chopDur}s  linear      ${rnd(0,3)}s infinite;
+    `;
             }
 
             function mkItem(r, init, laneIdx) {
                 const dur = init ? rnd(DUR_INIT_MIN, DUR_INIT_MAX) : rnd(DUR_LOOP_MIN, DUR_LOOP_MAX);
-                const delay = (lanePhase[laneIdx] || 0) / 1000;
-                const top = WATER_TOP + 6 + laneIdx * LANE_HEIGHT;
-                const z = laneZ(laneIdx);
+                const delay = (lanePhase[laneIdx] || 0) / 1000; // ฟันปลาแบบคงที่ต่อเลน
+
+                // ไม่ใส่ jitter แนวตั้ง เพื่อตัดการทับกันจริง
+                const laneTop = WATER_TOP + 6 + laneIdx * LANE_HEIGHT;
+                const top = laneTop;
+
+                const z = 100 + (laneIdx % 2 ? laneIdx : (LANE_COUNT - laneIdx)); // สลับชั้นบนล่างตามเลน
+
                 return {
                     id: r.id,
                     clientId: `${init?'srv':'cli'}_${r.id}_${Math.random().toString(36).slice(2)}`,
@@ -988,43 +1011,53 @@
                     z,
                     show: false,
                     paused: false,
-                    __dur: dur,
                     __life: (dur + delay) * 1000,
                     __deadline: Date.now() + (dur + delay) * 1000,
                     __lane: laneIdx
                 };
             }
 
-            function canUseLane(now, lane, gaps) {
+            function canUseLane(now, lane) {
                 if (now < laneNextFree[lane]) return false;
+                // กันเลนข้างเคียงยิงพร้อมๆ กัน
                 const L = lane - 1,
                     R = lane + 1;
-                if (L >= 0 && now < laneNextFree[L] + gaps.neighbor) return false;
-                if (R < LANE_COUNT && now < laneNextFree[R] + gaps.neighbor) return false;
+                if (L >= 0 && now < laneNextFree[L] + NEIGHBOR_COOLDOWN_MS) return false;
+                if (R < LANE_COUNT && now < laneNextFree[R] + NEIGHBOR_COOLDOWN_MS) return false;
                 return now >= globalNextFree;
             }
 
-            function pickLane(now, gaps) {
+            function pickLane(now) {
+                // เลือกเลนที่ “ใช้ได้” ก่อน หากไม่มี เลือกเลนที่ว่างเร็วสุด
+                let bestLane = -1;
                 for (let i = 0; i < LANE_COUNT; i++) {
-                    if (canUseLane(now, i, gaps)) return i;
-                }
-                let minT = Infinity,
-                    idx = 0;
-                for (let i = 0; i < LANE_COUNT; i++) {
-                    const t = Math.max(laneNextFree[i], globalNextFree);
-                    if (t < minT) {
-                        minT = t;
-                        idx = i;
+                    if (canUseLane(now, i)) {
+                        bestLane = i;
+                        break;
                     }
                 }
-                return idx;
+                if (bestLane === -1) {
+                    let minT = Infinity,
+                        idx = 0;
+                    for (let i = 0; i < LANE_COUNT; i++) {
+                        const t = Math.max(laneNextFree[i], globalNextFree);
+                        if (t < minT) {
+                            minT = t;
+                            idx = i;
+                        }
+                    }
+                    bestLane = idx;
+                }
+                return bestLane;
             }
 
-            function bookLane(now, lane, gaps) {
-                laneNextFree[lane] = now + gaps.sameLane;
-                globalNextFree = now + gaps.global;
+            function bookLane(now, lane) {
+                laneNextFree[lane] = now + GAP_PER_LANE_MS;
+                globalNextFree = now + GAP_GLOBAL_MS;
+                // ขยับเฟสเล็กน้อยเพื่อกระจาย
                 lanePhase[lane] = (lanePhase[lane] + 600) % 2000;
             }
+
             const scheduleRemoval = (vm, item, ms) => {
                 if (item.__tid) {
                     clearTimeout(item.__tid);
@@ -1037,13 +1070,15 @@
                     if (i > -1) vm.items.splice(i, 1);
                 }, ms + 30);
             };
+
             const base = Array.from(new Map((recent || []).map(r => [r.id, r])).values()).sort((a, b) => b.id - a.id);
 
-            const api = {
+            return {
                 items: [],
                 order: base,
                 seenInCycle: new Set(),
                 idx: 0,
+
                 pause(k) {
                     if (!k || k.paused) return;
                     k.paused = true;
@@ -1059,33 +1094,17 @@
                     k.paused = false;
                     scheduleRemoval(this, k, (k.__remain || 0) + 8000);
                 },
+
                 init() {
                     const initCount = Math.min(16, this.order.length);
-                    for (let i = 0; i < initCount; i++) this._spawnNext(true);
+                    for (let k = 0; k < initCount; k++) this._spawnNext(true);
                     const tick = () => {
                         this._spawnNext(false);
                         __schedule(tick, window.innerWidth < 400 ? rnd(6500, 9000) : rnd(4800, 7600));
                     };
                     __schedule(tick, 900);
                 },
-                _spawnWith(r, isInitial) {
-                    const now = Date.now();
-                    // temporary to get duration for gap calc
-                    const temp = mkItem(r, isInitial, 0);
-                    const gaps = dynamicGaps(temp.__dur);
-                    const lane = pickLane(now, gaps);
-                    const delay = (lanePhase[lane] || 0) / 1000;
-                    const top = WATER_TOP + 6 + lane * LANE_HEIGHT;
-                    const z = laneZ(lane);
-                    const item = {
-                        ...temp,
-                        __lane: lane,
-                        z,
-                        style: makeStyle(temp.__dur, delay, top, z)
-                    };
-                    bookLane(now, lane, gaps);
-                    return item;
-                },
+
                 _spawnNext(isInitial) {
                     if (!this.order.length) return;
                     if (this.seenInCycle.size >= this.order.length) {
@@ -1100,20 +1119,32 @@
                     if (!r) return;
                     this.seenInCycle.add(r.id);
                     this.idx = (this.idx + 1) % this.order.length;
-                    const item = this._spawnWith(r, isInitial);
+
+                    const now = Date.now();
+                    const lane = pickLane(now);
+                    bookLane(now, lane);
+
+                    const item = mkItem(r, isInitial, lane);
                     this.items.unshift(item);
                     if (this.items.length > MAX_ITEMS) this.items.splice(MAX_ITEMS);
                     scheduleRemoval(this, item, item.__life);
                 },
+
                 spawnFromRecord(r) {
                     this.order = [r, ...this.order.filter(x => x.id !== r.id)].sort((a, b) => b.id - a.id);
                     this.seenInCycle.clear();
                     this.idx = 0;
-                    const item = this._spawnWith(r, false);
+
+                    const now = Date.now();
+                    const lane = pickLane(now);
+                    bookLane(now, lane);
+
+                    const item = mkItem(r, false, lane);
                     this.items.unshift(item);
                     if (this.items.length > MAX_ITEMS) this.items.splice(MAX_ITEMS);
                     scheduleRemoval(this, item, item.__life);
                 },
+
                 spawnNew(p) {
                     this.spawnFromRecord({
                         id: p.id ?? Date.now(),
@@ -1123,11 +1154,9 @@
                         wish: p.wish
                     });
                 }
-            };
-            return api;
+            }
         }
 
-        /* ฟอร์ม submit */
         function krathongForm() {
             return {
                 form: {
@@ -1161,7 +1190,7 @@
                             try {
                                 const j = await res.json();
                                 msg = j.message || msg;
-                            } catch {}
+                            } catch (_) {}
                             throw new Error(msg);
                         }
                         const data = await res.json();
@@ -1179,17 +1208,6 @@
                 }
             }
         }
-
-        /* ping modal auto-refresh on open already handled above */
-
-        /* shooting star keyframes live */
-        (() => {
-            const css =
-                `@keyframes shootingStar{0%{transform:translate(0,0);opacity:1}100%{transform:translate(-200px,200px);opacity:0}}`;
-            const s = document.createElement('style');
-            s.textContent = css;
-            document.head.appendChild(s);
-        })();
     </script>
 
     <!-- keyframes ดาวพุ่ง -->
