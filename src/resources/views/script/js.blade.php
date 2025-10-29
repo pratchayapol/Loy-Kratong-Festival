@@ -33,54 +33,29 @@
         if (!pingChart) {
             pingChart = new Chart(ctx, {
                 type: 'line',
-                data: {
-                    datasets: [{
-                        label: 'Ping',
-                        data: series,
-                        pointRadius: 0,
-                        spanGaps: false
-                    }]
-                },
+                data: { datasets: [{ label: 'Ping', data: series, pointRadius: 0, spanGaps: false }] },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    parsing: false,
-                    animation: false,
-                    normalized: true,
-                    datasets: {
-                        line: {
-                            tension: 0,
-                            cubicInterpolationMode: 'monotone'
-                        }
-                    },
+                    responsive: true, maintainAspectRatio: false, parsing: false, animation: false, normalized: true,
+                    datasets: { line: { tension: 0, cubicInterpolationMode: 'monotone' } },
                     interaction: { mode: 'index', intersect: false },
                     scales: {
                         x: {
-                            type: 'time',
-                            bounds: 'data',
-                            min: xmin,
-                            max: xmax,
+                            type: 'time', bounds: 'data', min: xmin, max: xmax,
                             title: { display: true, text: 'เวลา' },
                             ticks: {
                                 source: 'data',
                                 callback: (v) => new Date(v).toLocaleString('th-TH', {
-                                    timeZone: TZ, hour12: false,
-                                    hour: '2-digit', minute: '2-digit', second: '2-digit'
+                                    timeZone: TZ, hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit'
                                 })
                             },
                             time: {
                                 displayFormats: {
-                                    millisecond: 'HH:mm:ss', second: 'HH:mm:ss',
-                                    minute: 'HH:mm', hour: 'HH:mm', day: 'dd/MM HH:mm'
+                                    millisecond: 'HH:mm:ss', second: 'HH:mm:ss', minute: 'HH:mm', hour: 'HH:mm', day: 'dd/MM HH:mm'
                                 },
                                 tooltipFormat: 'HH:mm:ss'
                             }
                         },
-                        y: {
-                            min: Y_MIN, max: Y_MAX,
-                            ticks: { precision: 0 },
-                            title: { display: true, text: 'ms' }
-                        }
+                        y: { min: Y_MIN, max: Y_MAX, ticks: { precision: 0 }, title: { display: true, text: 'ms' } }
                     },
                     plugins: {
                         legend: { display: false },
@@ -89,8 +64,7 @@
                                 title: (items) => {
                                     const ts = items?.[0]?.parsed?.x;
                                     return new Date(ts).toLocaleString('th-TH', {
-                                        timeZone: TZ, hour12: false,
-                                        year: 'numeric', month: '2-digit', day: '2-digit',
+                                        timeZone: TZ, hour12: false, year: 'numeric', month: '2-digit', day: '2-digit',
                                         hour: '2-digit', minute: '2-digit', second: '2-digit'
                                     }) + ' (UTC+7)';
                                 },
@@ -116,10 +90,7 @@
         const controller = new AbortController();
         inflight = controller;
         try {
-            const res = await fetch(ENDPOINT, {
-                credentials: 'same-origin',
-                signal: controller.signal
-            });
+            const res = await fetch(ENDPOINT, { credentials: 'same-origin', signal: controller.signal });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
             const raw = data.heartbeatList?.[MONITOR_ID] ?? [];
@@ -141,24 +112,12 @@
 
     function startPolling() {
         if (pollTimer) return;
-        pollTimer = setInterval(() => {
-            if (document.hidden) return;
-            loadPingExact();
-        }, POLL_MS);
+        pollTimer = setInterval(() => { if (!document.hidden) loadPingExact(); }, POLL_MS);
     }
-    function stopPolling() {
-        clearInterval(pollTimer);
-        pollTimer = null;
-    }
+    function stopPolling() { clearInterval(pollTimer); pollTimer = null; }
 
-    document.addEventListener('visibilitychange', () => {
-        if (document.hidden) return;
-        loadPingExact();
-    });
-    document.addEventListener('DOMContentLoaded', () => {
-        loadPingExact();
-        startPolling();
-    });
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) loadPingExact(); });
+    document.addEventListener('DOMContentLoaded', () => { loadPingExact(); startPolling(); });
 
     document.addEventListener('alpine:init', () => {
         let once = false;
@@ -166,10 +125,7 @@
             const open = Alpine.store('ui')?.aboutOpen;
             if (open && !once) {
                 once = true;
-                setTimeout(() => {
-                    loadPingExact();
-                    try { pingChart?.resize(); } catch {}
-                }, 150);
+                setTimeout(() => { loadPingExact(); try { pingChart?.resize(); } catch {} }, 150);
             }
             if (!open) once = false;
         });
@@ -230,7 +186,6 @@
                     __schedule(refill, 12000);
                 };
                 __schedule(refill, 12000);
-
                 window.addEventListener('resize', () => {
                     const target = window.innerWidth < 640 ? 18 : 36;
                     if (this.flies.length > target) this.flies.splice(target);
@@ -251,84 +206,71 @@
     // สร้างห้องเก็บ keyframe ไว้เพิ่มตอนรัน
     function ensureKeyframeSheet() {
         let el = document.getElementById('dyn-keyframes');
-        if (!el) {
-            el = document.createElement('style');
-            el.id = 'dyn-keyframes';
-            document.head.appendChild(el);
-        }
+        if (!el) { el = document.createElement('style'); el.id = 'dyn-keyframes'; document.head.appendChild(el); }
         if (!el.sheet) {
-            const tmp = document.createElement('style');
-            document.head.appendChild(tmp);
-            const sheet = tmp.sheet;
-            document.head.removeChild(tmp);
-            return sheet;
+            const tmp = document.createElement('style'); document.head.appendChild(tmp);
+            const sheet = tmp.sheet; document.head.removeChild(tmp); return sheet;
         }
         return el.sheet;
     }
 
-    // ฉากแม่น้ำลอยกระทง — กระจายสม่ำเสมอ ไม่จับกลุ่ม และใหม่→เก่า
+    // ฉากแม่น้ำลอยกระทง — ลอยตามลำดับใหม่→เก่าแบบคงที่ วนซ้ำ และเว้นระยะ "ฟันปลา" สม่ำเสมอ
     function riverScene(types, recent) {
         const WATER_TOP = 25;      // เริ่มน้ำจากบนจอ %
         const WATER_BAND = 28;     // ความสูงแถบน้ำ %
-        const DUR_INIT_MIN = 22, DUR_INIT_MAX = 34;
-        const DUR_LOOP_MIN = 18, DUR_LOOP_MAX = 28;
-
+        const DUR_INIT = 28;       // s ความยาววิ่งรอบแรก
+        const DUR_LOOP = 24;       // s ความยาววิ่งรอบวนถัดไป
         const MAX_ITEMS = window.innerWidth < 640 ? 40 : 100;
         const typeImg = t => types?.[t]?.img || Object.values(types || {})[0]?.img || '';
 
-        // เลนแนวตั้งแบบสม่ำเสมอ
-        const LANES = window.innerWidth < 640 ? 6 : 12;
-        const laneTops = Array.from({ length: LANES }, (_, i) =>
-            WATER_TOP + 6 + (i * (WATER_BAND - 6) / Math.max(1, LANES - 1))
+        // สองแถบ "ฟันปลา": บนและล่าง สลับกัน
+        const TOTAL_LANES = window.innerWidth < 640 ? 6 : 12;
+        const HALF = Math.max(1, Math.floor(TOTAL_LANES / 2));
+        const bandGap = (WATER_BAND - 6); // ใช้ช่วงเดียวกันเพื่อไม่ชนขอบ
+        const upperLanes = Array.from({ length: HALF }, (_, i) =>
+            WATER_TOP + 6 + (i * bandGap / Math.max(1, HALF - 1))
+        );
+        const lowerLanes = Array.from({ length: TOTAL_LANES - HALF }, (_, i) =>
+            WATER_TOP + 6 + (i * bandGap / Math.max(1, (TOTAL_LANES - HALF) - 1))
         );
 
-        // กฎเว้นระยะหัวชนขั้นต่ำต่อเลน เพื่อไม่จับกลุ่มแนวนอน
-        // เส้นทางวิ่งจาก -20% → 120% = 140% viewport
-        const TRACK_WIDTH = 140;      // หน่วยเป็น % ของ viewport กว้าง
-        const MIN_GAP_X = 20;         // ต้องการเว้นอย่างน้อย 20% ต่อหัวในเลนเดียวกัน
-        const now = () => performance.now();
-        const laneNextFree = new Array(LANES).fill(0); // เวลา earliest spawn ต่อเลน
+        // เว้นระยะหัวชนแนวนอนให้มากขึ้น และทำ phase shift สำหรับแถบล่างเพื่อให้ฟันปลา
+        const TRACK_WIDTH = 140;  // -20% → 120%
+        const MIN_GAP_X = window.innerWidth < 640 ? 30 : 32; // ระยะมากขึ้น
         const headwayMs = (durSec) => (MIN_GAP_X / TRACK_WIDTH) * durSec * 1000;
+        const now = () => performance.now();
 
-        // เลือกเลนด้วย golden-step เพื่อลดแพทเทิร์นซ้ำ
-        let laneCursor = 0;
-        const goldenStep = Math.max(1, Math.round(LANES * 0.382));
-        function pickLane(durSec) {
-            const t = now();
-            for (let i = 0; i < LANES; i++) {
-                const idx = (laneCursor + i * goldenStep) % LANES;
-                if (laneNextFree[idx] <= t) {
-                    laneCursor = (idx + 1) % LANES;
-                    laneNextFree[idx] = t + headwayMs(durSec);
-                    return idx;
-                }
-            }
-            return -1; // ยังไม่มีเลนว่างตามเกณฑ์
-        }
+        // เวลาว่างครั้งถัดไปต่อเลน
+        const upNext = new Array(upperLanes.length).fill(0);
+        const loNext = new Array(lowerLanes.length).fill(0);
 
-        // สร้างสไตล์การลอย
-        const makeStyle = (dur, delay, top) => {
+        // ทำ phase สำหรับล่างให้กึ่งจังหวะของบน → ฟันปลา
+        const PHASE_MS = headwayMs(DUR_LOOP) / 2;
+        for (let i = 0; i < loNext.length; i++) loNext[i] = now() + PHASE_MS;
+
+        // index ต่อเลน เพื่อเดินเรียง deterministic
+        let upIdx = 0, loIdx = 0;
+        let useUpperNext = true; // สลับบน-ล่างทุกครั้ง
+
+        // สร้าง keyframes และ style คงที่
+        const makeStyle = (dur, top) => {
             const name = `drift_${Math.random().toString(36).slice(2)}`;
             const sheet = ensureKeyframeSheet();
             sheet.insertRule(
                 `@keyframes ${name}{0%{left:-20%;opacity:0}10%{opacity:1}90%{opacity:1}100%{left:120%;opacity:0}}`,
                 sheet.cssRules.length
             );
-            return `top:${top}%;left:-20%;--floatDur:${rnd(2.8, 4.4)}s;--swayDur:${rnd(4.5, 6.5)}s;animation:${name} ${dur}s linear ${delay}s forwards,var(--_dummy,0s);`;
+            return `top:${top}%;left:-20%;animation:${name} ${dur}s linear 0s forwards;`;
         };
 
-        // บันทึกรายการตั้งต้น เรียงใหม่→เก่า
+        // ลิสต์ข้อมูลเรียงใหม่→เก่า ไม่มีการสุ่ม
         const base = Array
             .from(new Map((recent || []).map(r => [r.id, r])).values())
             .sort((a, b) => b.id - a.id);
 
-        // ตั้งเวลาลบไอเท็ม
+        // ตั้งเวลาลบ
         const scheduleRemoval = (vm, item, ms) => {
-            if (item.__tid) {
-                clearTimeout(item.__tid);
-                __timers.delete(item.__tid);
-                item.__tid = null;
-            }
+            if (item.__tid) { clearTimeout(item.__tid); __timers.delete(item.__tid); item.__tid = null; }
             item.__deadline = Date.now() + ms;
             item.__tid = __schedule(() => {
                 const i = vm.items.findIndex(x => x.clientId === item.clientId);
@@ -336,103 +278,117 @@
             }, ms + 30);
         };
 
-        // สร้างไอเท็มจากเรคคอร์ด โดยเคารพเลนและ headway
-        const mkItem = (r, init = false) => {
-            const dur = init ? rnd(DUR_INIT_MIN, DUR_INIT_MAX) : rnd(DUR_LOOP_MIN, DUR_LOOP_MAX);
-            const delay = init ? rnd(0, 12) : 0;
-            const lane = pickLane(dur);
-            if (lane === -1) return null; // ยังไม่ว่าง
+        // เลือกเลนแบบคงที่ สลับบน/ล่าง และเดินชี้ทีละเลน
+        function pickLane(durSec) {
+            const t = now();
+            const tryUpper = useUpperNext;
+            // สลับคิวเพื่อความเป็นระเบียบฟันปลา
+            useUpperNext = !useUpperNext;
 
-            const top = laneTops[lane];
+            // ฟังก์ชันทดลองเลือกในแถบ
+            const pickInBand = (lanes, nextTimes, ptrName) => {
+                if (lanes.length === 0) return null;
+                let ptr = (ptrName === 'up' ? upIdx : loIdx);
+                for (let k = 0; k < lanes.length; k++) {
+                    const idx = (ptr + k) % lanes.length;
+                    if (nextTimes[idx] <= t) {
+                        if (ptrName === 'up') upIdx = (idx + 1) % lanes.length;
+                        else loIdx = (idx + 1) % lanes.length;
+                        nextTimes[idx] = t + headwayMs(durSec);
+                        return { top: lanes[idx] };
+                    }
+                }
+                return null;
+            };
+
+            // ลองในแถบที่ถึงคิวก่อน ถ้าไม่มีลองอีกแถบ
+            return tryUpper
+                ? (pickInBand(upperLanes, upNext, 'up') || pickInBand(lowerLanes, loNext, 'lo'))
+                : (pickInBand(lowerLanes, loNext, 'lo') || pickInBand(upperLanes, upNext, 'up'));
+        }
+
+        // สร้างไอเท็มจากเรคคอร์ดแบบ deterministic
+        const mkItem = (r, initialBatch = false) => {
+            const dur = initialBatch ? DUR_INIT : DUR_LOOP;
+            const lane = pickLane(dur);
+            if (!lane) return null;
             return {
                 id: r.id,
-                clientId: `${init ? 'srv' : 'cli'}_${r.id}_${Math.random().toString(36).slice(2)}`,
+                clientId: `${initialBatch ? 'srv' : 'cli'}_${r.id}_${Math.random().toString(36).slice(2)}`,
                 img: typeImg(r.type),
                 wish: `${r.nickname} : ${r.wish}`,
-                style: makeStyle(dur, delay, top),
-                show: false,
-                paused: false,
-                __life: (dur + delay) * 1000,
-                __deadline: Date.now() + (dur + delay) * 1000
+                style: makeStyle(dur, lane.top),
+                show: false, paused: false,
+                __life: dur * 1000,
+                __deadline: Date.now() + dur * 1000
             };
         };
+
+        // ตัวควบคุมลำดับวนจากใหม่→เก่าจนครบแล้ววน
+        let idx = 0;
 
         return {
             items: [],
             order: base,
-            seenInCycle: new Set(),
-            idx: 0,
 
             pause(k) {
                 if (!k || k.paused) return;
                 k.paused = true;
                 k.__remain = Math.max(3000, (k.__deadline || 0) - Date.now());
-                if (k.__tid) {
-                    clearTimeout(k.__tid);
-                    __timers.delete(k.__tid);
-                    k.__tid = null;
-                }
+                if (k.__tid) { clearTimeout(k.__tid); __timers.delete(k.__tid); k.__tid = null; }
             },
             resume(k) {
                 if (!k || !k.paused) return;
                 k.paused = false;
                 const extra = 8000;
-                const ms = (k.__remain || 0) + extra;
-                scheduleRemoval(this, k, ms);
+                scheduleRemoval(this, k, (k.__remain || 0) + extra);
             },
 
             init() {
-                const initCount = Math.min(24, this.order.length);
-                for (let k = 0; k < initCount; k++) this._spawnNext(true);
-                const tick = () => {
-                    this._spawnNext(false);
-                    __schedule(tick, window.innerWidth < 400 ? rnd(6500, 9000) : rnd(4500, 7200));
+                // ปล่อยล็อตแรกแบบคงที่ ไม่สุ่ม และกระจายด้วยหัวชนต่อเลน
+                const initialCount = Math.min(24, this.order.length);
+                let spawned = 0;
+                const pumpInit = () => {
+                    if (spawned >= initialCount) { this._loopPump(); return; }
+                    const r = this.order[idx];
+                    const item = mkItem(r, true);
+                    if (item) {
+                        this.items.unshift(item);
+                        if (this.items.length > MAX_ITEMS) this.items.splice(MAX_ITEMS);
+                        scheduleRemoval(this, item, item.__life);
+                        idx = (idx + 1) % this.order.length;
+                        spawned++;
+                        __schedule(pumpInit, 250); // ระยะห่างคงที่
+                    } else {
+                        __schedule(pumpInit, 150); // รอเลนว่าง
+                    }
                 };
-                __schedule(tick, 900);
+                pumpInit();
             },
 
-            _spawnNext(isInitial) {
-                if (!this.order.length) return;
-
-                if (this.seenInCycle.size >= this.order.length) {
-                    this.seenInCycle.clear();
-                    this.idx = 0;
-                }
-                let guard = 0;
-                while (this.seenInCycle.has(this.order[this.idx]?.id) && guard < this.order.length) {
-                    this.idx = (this.idx + 1) % this.order.length;
-                    guard++;
-                }
-                const r = this.order[this.idx];
-                if (!r) return;
-
-                const item = mkItem(r, isInitial);
-                if (!item) {
-                    // แออัด ไม่มีเลนว่าง รออีกนิดแล้วลองใหม่
-                    __schedule(() => this._spawnNext(isInitial), 400);
-                    return;
-                }
-
-                this.seenInCycle.add(r.id);
-                this.idx = (this.idx + 1) % this.order.length;
-
-                this.items.unshift(item);
-                if (this.items.length > MAX_ITEMS) this.items.splice(MAX_ITEMS);
-                scheduleRemoval(this, item, item.__life);
+            _loopPump() {
+                // ปล่อยต่อเนื่องแบบคงที่ เรียงใหม่→เก่า วนลูป
+                const tick = () => {
+                    if (!this.order.length) { __schedule(tick, 600); return; }
+                    const r = this.order[idx];
+                    const item = mkItem(r, false);
+                    if (item) {
+                        this.items.unshift(item);
+                        if (this.items.length > MAX_ITEMS) this.items.splice(MAX_ITEMS);
+                        scheduleRemoval(this, item, item.__life);
+                        idx = (idx + 1) % this.order.length;
+                        __schedule(tick, 260); // คุมระยะสม่ำเสมอ
+                    } else {
+                        __schedule(tick, 160); // รอเลนว่างแล้วค่อยปล่อย
+                    }
+                };
+                tick();
             },
 
             spawnFromRecord(r) {
+                // ของใหม่ถูกแทรกหัวลิสต์ และจะเข้าคิวถัดไปแบบ deterministic
                 this.order = [r, ...this.order.filter(x => x.id !== r.id)].sort((a, b) => b.id - a.id);
-                this.seenInCycle.clear();
-                this.idx = 0;
-                const item = mkItem(r, false);
-                if (!item) {
-                    __schedule(() => this.spawnFromRecord(r), 400);
-                    return;
-                }
-                this.items.unshift(item);
-                if (this.items.length > MAX_ITEMS) this.items.splice(MAX_ITEMS);
-                scheduleRemoval(this, item, item.__life);
+                // ไม่รีเซ็ต idx เพื่อคงลำดับที่กำลังวิ่งอยู่ แต่ให้ปล่อย r เมื่อถึงรอบ
             },
 
             spawnNew(p) {
@@ -452,11 +408,9 @@
     function krathongForm() {
         return {
             form: { type: 'banana', nickname: '', age: '', wish: '' },
-            error: '',
-            ok: '',
+            error: '', ok: '',
             async submit() {
-                this.error = '';
-                this.ok = '';
+                this.error = ''; this.ok = '';
                 try {
                     const meta = document.querySelector('meta[name="csrf-token"]').content;
                     const xsrf = readCookie('XSRF-TOKEN');
@@ -474,10 +428,7 @@
                     });
                     if (!res.ok) {
                         let msg = `HTTP ${res.status}`;
-                        try {
-                            const j = await res.json();
-                            msg = j.message || msg;
-                        } catch(_) {}
+                        try { const j = await res.json(); msg = j.message || msg; } catch(_) {}
                         throw new Error(msg);
                     }
                     const data = await res.json();
@@ -485,18 +436,13 @@
                     const api = Alpine.$data(document.getElementById('river'));
                     api?.spawnNew?.(data);
                     this.form.wish = '';
-                    setTimeout(() => {
-                        Alpine.store('ui').open = false;
-                        this.ok = '';
-                    }, 1500);
-                } catch (e) {
-                    this.error = e.message;
-                }
+                    setTimeout(() => { Alpine.store('ui').open = false; this.ok = ''; }, 1500);
+                } catch (e) { this.error = e.message; }
             }
         }
     }
 
-    // ตั้งตัวแปร CSS --vh ให้เท่ากับ 1% ของความสูง viewport จริง
+    // ยูทิล
     const rnd = (min, max) => Math.random() * (max - min) + min;
     const setVH = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
     window.addEventListener('resize', setVH, { passive: true });
