@@ -513,22 +513,20 @@
                 </div>
 
                 <div class="p-6 space-y-6">
-                    <div class="text-center space-y-4">
+                    <div class="text-center space-y-5">
                         <div
-                            class="inline-flex items-center justify-center w-24 h-24 md:w-28 md:h-28 rounded-3xl bg-gradient-to-br from-cyan-500 to-purple-600 shadow-xl mb-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="size-12 md:size-14 text-white"
+                            class="inline-flex items-center justify-center w-32 h-32 md:w-40 md:h-40 rounded-3xl bg-gradient-to-br from-cyan-500 to-purple-600 shadow-xl mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 md:w-20 md:h-20 text-white"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M4.5 12a7.5 7.5 0 0015 0m-15 0a7.5 7.5 0 0115 0M12 3v9" />
                             </svg>
                         </div>
 
-                        <h1 class="text-3xl md:text-4xl font-bold text-white">ลอยกระทงออนไลน์</h1>
-                        <h3 class="text-base md:text-lg text-slate-300">
-                            ระบบลอยกระทงออนไลน์ เพื่อส่งต่อความปรารถนาดีในวันลอยกระทง
-                        </h3>
+                        <h1 class="text-4xl md:text-5xl font-bold text-white leading-tight">ลอยกระทงออนไลน์</h1>
+                        <h3 class="text-lg md:text-xl text-slate-300">ระบบลอยกระทงออนไลน์
+                            เพื่อส่งต่อความปรารถนาดีในวันลอยกระทง</h3>
                     </div>
-
                     <div class="h-px bg-gradient-to-r from-transparent via-purple-400/30 to-transparent"></div>
 
                     <div class="space-y-4">
