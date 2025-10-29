@@ -209,12 +209,25 @@
                 opacity: 0
             }
         }
+
+        #fwCanvas {
+            position: fixed;
+            inset: 0;
+            z-index: 60;
+            pointer-events: none;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #fwCanvas {
+                display: none
+            }
+        }
     </style>
     @stack('head')
 </head>
 
 <body class="min-h-screen bg-slate-950 text-slate-100 font-sans overflow-hidden" x-data="{}">
-
+    <canvas id="fwCanvas" aria-hidden="true"></canvas>
     {{-- เนื้อหาหน้า --}}
     @yield('content')
 

@@ -168,7 +168,7 @@
         }
     }
 
- // เริ่มต้นการโพลข้อมูลเป็นระยะ
+    // เริ่มต้นการโพลข้อมูลเป็นระยะ
     function startPolling() {
         if (pollTimer) return;
         pollTimer = setInterval(() => {
@@ -630,6 +630,7 @@
                     }
                     const data = await res.json();
                     this.ok = 'ลอยแล้ว ✨';
+                    window.__fw?.burst();
                     const api = Alpine.$data(document.getElementById('river'));
                     api?.spawnNew?.(data);
                     this.form.wish = '';
@@ -654,4 +655,171 @@
         passive: true
     });
     document.addEventListener('DOMContentLoaded', setVH);
+
+
+    // พลุไฟบนท้องฟ้า
+    (() => {
+        const TAU = Math.PI * 2;
+        const rand = (a, b) => Math.random() * (b - a) + a;
+        const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+
+        class Part {
+            constructor(x, y, ang, speed, col, grav, drag, life) {
+                this.x = x;
+                this.y = y;
+                this.vx = Math.cos(ang) * speed;
+                this.vy = Math.sin(ang) * speed;
+                this.col = col;
+                this.g = grav;
+                this.d = drag;
+                this.t = 0;
+                this.life = life;
+                this.dead = false;
+            }
+            step(dt) {
+                this.t += dt;
+                if (this.t > this.life) {
+                    this.dead = true;
+                    return;
+                }
+                this.vx *= this.d;
+                this.vy = this.vy * this.d + this.g * dt;
+                this.x += this.vx * dt * 60;
+                this.y += this.vy * dt * 60;
+            }
+        }
+
+        class Fireworks {
+            constructor(canvas) {
+                this.c = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.parts = [];
+                this.last = 0;
+                this.running = false;
+                this.dpr = window.devicePixelRatio || 1;
+                this.resize();
+                window.addEventListener('resize', () => this.resize(), {
+                    passive: true
+                });
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) this.stop();
+                    else this.start();
+                });
+                // แตะหน้าจอเพื่อยิงเพิ่ม
+                window.addEventListener('pointerdown', e => {
+                    const r = this.c.getBoundingClientRect();
+                    this.burst((e.clientX - r.left) * this.dpr, (e.clientY - r.top) * this.dpr);
+                }, {
+                    passive: true
+                });
+            }
+            resize() {
+                const w = innerWidth,
+                    h = innerHeight;
+                this.c.width = Math.floor(w * this.dpr);
+                this.c.height = Math.floor(h * this.dpr);
+            }
+            palette() {
+                const h = Math.floor(rand(0, 360));
+                const toRGB = (h, s, l) => {
+                    // hsl -> rgb mini
+                    s /= 100;
+                    l /= 100;
+                    const k = n => (n + h / 30) % 12,
+                        a = s * Math.min(l, 1 - l);
+                    const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+                    return `rgba(${Math.round(255*f(0))},${Math.round(255*f(8))},${Math.round(255*f(4))},`;
+                };
+                const base = toRGB(h, 90, 60);
+                return n => `${base}${n})`;
+            }
+            burst(x, y, opts = {}) {
+                const N = opts.n || 180;
+                const speed = opts.speed || rand(4.2, 6.2);
+                const grav = opts.grav ?? 0.12;
+                const drag = opts.drag ?? 0.988;
+                const life = opts.life || rand(0.9, 1.4);
+                const color = this.palette();
+                for (let i = 0; i < N; i++) {
+                    const ang = (i / N) * TAU + rand(-0.05, 0.05);
+                    const sp = speed * rand(0.6, 1.1);
+                    const alphaStart = rand(0.6, 1);
+                    const p = new Part(x, y, ang, sp, color(alphaStart), grav, drag, life * rand(0.7, 1.3));
+                    p.spark = rand(0, 1) > 0.7;
+                    this.parts.push(p);
+                }
+            }
+            ring(x, y) {
+                const N = 140,
+                    color = this.palette();
+                for (let i = 0; i < N; i++) {
+                    const ang = (i / N) * TAU;
+                    const p = new Part(x, y, ang, rand(5.2, 5.8), color(0.9), 0.10, 0.99, 1.2);
+                    this.parts.push(p);
+                }
+            }
+            randomAuto() {
+                const x = rand(this.c.width * 0.15, this.c.width * 0.85);
+                const y = rand(this.c.height * 0.15, this.c.height * 0.45);
+                Math.random() > 0.35 ? this.burst(x, y) : this.ring(x, y);
+            }
+            start() {
+                if (this.running) return;
+                this.running = true;
+                this.last = performance.now();
+                const loop = (t) => {
+                    if (!this.running) return;
+                    const dt = clamp((t - this.last) / 1000, 0, 0.033);
+                    this.last = t;
+                    this.step(dt);
+                    this.draw();
+                    requestAnimationFrame(loop);
+                };
+                this._autoTick = setInterval(() => this.randomAuto(), 1800);
+                requestAnimationFrame(loop);
+            }
+            stop() {
+                this.running = false;
+                clearInterval(this._autoTick);
+            }
+            step(dt) {
+                for (const p of this.parts) p.step(dt);
+                this.parts = this.parts.filter(p => !p.dead);
+            }
+            draw() {
+                const ctx = this.ctx,
+                    w = this.c.width,
+                    h = this.c.height;
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.fillStyle = 'rgba(0,0,0,0.20)';
+                ctx.fillRect(0, 0, w, h);
+                ctx.globalCompositeOperation = 'lighter';
+                for (const p of this.parts) {
+                    const a = clamp(1 - p.t / p.life, 0, 1);
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 1.2 + a * 1.8, 0, TAU);
+                    ctx.fillStyle = p.col.replace(/[\d.]+\)$/i, `${a})`);
+                    ctx.fill();
+                    if (p.spark && Math.random() < 0.2) {
+                        ctx.fillRect(p.x, p.y, 1, 1);
+                    }
+                }
+            }
+        }
+
+        // bootstrap
+        const canvas = document.getElementById('fwCanvas');
+        if (canvas) {
+            const fw = new Fireworks(canvas);
+            // ให้ใช้ทั่วหน้า
+            window.__fw = {
+                start: () => fw.start(),
+                stop: () => fw.stop(),
+                burst: (x, y) => fw.burst(x || fw.c.width * 0.5, y || fw.c.height * 0.35),
+                ring: (x, y) => fw.ring(x || fw.c.width * 0.5, y || fw.c.height * 0.35),
+            };
+            // เริ่มทำงานอัตโนมัติ
+            fw.start();
+        }
+    })();
 </script>
