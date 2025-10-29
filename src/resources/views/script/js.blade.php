@@ -326,12 +326,9 @@
         const MAX_ITEMS = window.innerWidth < 640 ? 15 : 35;
         const typeImg = t => types?.[t]?.img || Object.values(types || {})[0]?.img || '';
 
-        // เลน
-        const TOTAL_LANES = window.innerWidth < 640 ? 1 : 2;
-
-        // เพิ่มระยะขอบบน–ล่างของแถวนานๆ เข้าไปเลย
-        const TOP_PAD = window.innerWidth < 640 ? 12 : 10;
-        const BOTTOM_PAD = window.innerWidth < 640 ? 12 : 10;
+        const TOTAL_LANES = 2;
+        const TOP_PAD = window.innerWidth < 640 ? 6 : 4;
+        const BOTTOM_PAD = window.innerWidth < 640 ? 6 : 4;
 
         // คำนวณพื้นที่ที่เหลือให้วางเลน
         const AVAILABLE = Math.max(0, WATER_BAND - TOP_PAD - BOTTOM_PAD);
