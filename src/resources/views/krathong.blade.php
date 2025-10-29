@@ -492,26 +492,17 @@
                         </div>
 
                         <script>
-                            // === ปรับค่าให้ตรงของคุณ ===
                             const STATUS_SLUG = "loykratong";
                             const MONITOR_ID = "34";
                             const ENDPOINT = `/kuma/heartbeat/${STATUS_SLUG}`;
-
-                            // ช่วง Recent 30 นาที
                             const RECENT_MS = 30 * 60 * 1000;
-
-                            // ล็อกสเกล Y กันเด้ง
-                            const Y_MIN = 0;
-                            const Y_MAX = 1000;
-
+                            const Y_MIN = 0,
+                                Y_MAX = 1000;
                             let pingChart;
-                            let loadedOnceForAbout = false; // กันโหลดซ้ำถ้าอยู่ในโมดัล
 
-                            function toDate(t) {
-                                if (typeof t === 'number') return new Date((t < 2e10 ? t * 1000 : t));
-                                if (typeof t === 'string') return new Date(t.replace(' ', 'T')); // "YYYY-MM-DD HH:mm:ss" -> local time
-                                return new Date(t);
-                            }
+                            const toDate = t =>
+                                typeof t === 'number' ? new Date((t < 2e10 ? t * 1000 : t)) :
+                                new Date(String(t).replace(' ', 'T'));
 
                             async function loadPingRecent() {
                                 const errEl = document.getElementById('pingErr');
@@ -523,26 +514,26 @@
                                     if (!res.ok) throw new Error(`HTTP ${res.status}`);
                                     const data = await res.json();
 
-                                    const all = (data.heartbeatList?.[MONITOR_ID] || [])
+                                    const now = Date.now();
+                                    // เตรียมข้อมูลเรียงเวลาและกรองเฉพาะ 30 นาทีล่าสุด
+                                    const series = (data.heartbeatList?.[MONITOR_ID] || [])
                                         .filter(h => Number.isFinite(h.ping) && h.ping > 0 && h.ping < 60000)
                                         .map(h => ({
                                             x: toDate(h.time),
-                                            y: h.ping
-                                        }));
+                                            y: Math.min(h.ping, Y_MAX)
+                                        }))
+                                        .filter(p => p.x.getTime() >= now - RECENT_MS)
+                                        .sort((a, b) => a.x - b.x);
 
-                                    const now = Date.now();
-                                    let recent = all.filter(p => p.x.getTime() >= now - RECENT_MS);
-
-                                    // ถ้าเงียบเกิน 30 นาที ให้ fallback เป็นจุดล่าสุดจำนวนหนึ่ง (เช่น 60 จุด)
-                                    if (recent.length === 0 && all.length) {
-                                        recent = all.slice(-60);
-                                    }
-
-                                    // clamp กันหลุดสเกล
-                                    const series = recent.map(p => ({
-                                        x: p.x,
-                                        y: Math.min(p.y, Y_MAX)
-                                    }));
+                                    // fallback ถ้าไม่มีจุดใน 30 นาที ให้เอาล่าสุดไม่กี่จุด
+                                    const data30 = series.length ? series :
+                                        (data.heartbeatList?.[MONITOR_ID] || [])
+                                        .slice(-60)
+                                        .map(h => ({
+                                            x: toDate(h.time),
+                                            y: Math.min(h.ping, Y_MAX)
+                                        }))
+                                        .sort((a, b) => a.x - b.x);
 
                                     const ctx = document.getElementById('pingChart');
                                     if (pingChart) pingChart.destroy();
@@ -552,15 +543,18 @@
                                         data: {
                                             datasets: [{
                                                 label: 'Ping',
-                                                data: series,
+                                                data: data30,
                                                 pointRadius: 0,
-                                                spanGaps: true
+                                                spanGaps: false
                                             }]
                                         },
                                         options: {
                                             responsive: true,
                                             maintainAspectRatio: false,
-                                            parsing: false,
+                                            parsing: {
+                                                xAxisKey: 'x',
+                                                yAxisKey: 'y'
+                                            }, // ให้จัดการคีย์ x/y
                                             animation: false,
                                             normalized: true,
                                             datasets: {
@@ -575,7 +569,14 @@
                                             },
                                             scales: {
                                                 x: {
-                                                    type: 'time'
+                                                    type: 'time',
+                                                    time: {
+                                                        unit: 'minute',
+                                                        tooltipFormat: 'Pp'
+                                                    },
+                                                    bounds: 'ticks',
+                                                    min: now - RECENT_MS, // บังคับช่วง 30 นาที
+                                                    max: now
                                                 },
                                                 y: {
                                                     min: Y_MIN,
@@ -601,34 +602,8 @@
                                     console.error(e);
                                 }
                             }
-
-                            // ใช้นอกโมดัล (โหลดทันที)
-                            if (!window.Alpine) {
-                                document.addEventListener('DOMContentLoaded', () => {
-                                    loadPingRecent();
-                                });
-                            }
-
-                            // ถ้าอยู่ในโมดัล "เกี่ยวกับ" ให้โหลดครั้งเดียวตอนเปิด
-                            document.addEventListener('alpine:init', () => {
-                                Alpine.effect(() => {
-                                    const open = Alpine.store('ui')?.aboutOpen;
-                                    if (open && !loadedOnceForAbout) {
-                                        loadedOnceForAbout = true;
-                                        setTimeout(() => {
-                                            loadPingRecent().then(() => {
-                                                try {
-                                                    pingChart?.resize();
-                                                } catch {}
-                                            });
-                                        }, 150);
-                                    }
-                                    if (!open && loadedOnceForAbout) {
-                                        loadedOnceForAbout = false; // ปิดแล้วเปิดใหม่ค่อยโหลดอีกครั้ง
-                                    }
-                                });
-                            });
                         </script>
+
 
                     </div>
 
