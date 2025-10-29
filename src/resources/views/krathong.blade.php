@@ -6,65 +6,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Loy Kratong Festival</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
-    <!-- Favicon / Manifest: กัน mixed content -->
-    <link rel="icon" href="{{ secure_asset('favicon.ico') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ secure_asset('favicon-32x32.png') }}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ secure_asset('favicon-16x16.png') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ secure_asset('apple-touch-icon.png') }}">
-    <link rel="manifest" href="{{ secure_asset('site.webmanifest') }}">
+    <!-- Favicon -->
+    <link rel="icon" href="/favicon.ico">
+    <link rel="icon" sizes="any" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
     <meta name="theme-color" content="#0b2e4a">
-
-    <!-- Tailwind, Alpine, Chart.js, Time adapter -->
+    <!-- Tailwind & Alpine -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
     <style>
         .ribbon-black {
             position: fixed;
             right: 0;
             top: 0;
-            z-index: 2568
-        }
-
-        [x-cloak] {
-            display: none !important
-        }
-
-        .krathong-item {
-            animation: floatY var(--floatDur, 3.2s) ease-in-out infinite, sway var(--swayDur, 5s) ease-in-out infinite;
-            will-change: transform
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px) scale(.95)
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1)
-            }
-        }
-
-        .modal-enter {
-            animation: slideUp .3s ease-out
-        }
-
-        .wrap {
-            max-width: 900px;
-            margin: 0.75rem auto
-        }
-
-        #pingChart {
-            width: 100%;
-            height: 260px
+            z-index: 2568;
         }
     </style>
-
     <script>
         tailwind.config = {
             theme: {
@@ -139,26 +98,57 @@
             }
         }
     </script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     <script>
         const rnd = (min, max) => Math.random() * (max - min) + min;
     </script>
     <style id="dyn-keyframes"></style>
+
+    <style>
+        [x-cloak] {
+            display: none !important
+        }
+
+        .krathong-item {
+            animation: floatY var(--floatDur, 3.2s) ease-in-out infinite, sway var(--swayDur, 5s) ease-in-out infinite;
+            will-change: transform
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(.95)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1)
+            }
+        }
+
+        .modal-enter {
+            animation: slideUp .3s ease-out
+        }
+    </style>
 </head>
 
 <body x-data="{}" class="min-h-screen bg-slate-950 text-slate-100 font-display overflow-hidden">
     <div class="ribbon-black">
-        <img src="https://roietonline.net/images/black-ribbon.png" alt="โบว์แสดงความอาลัย" class="img-responsive">
+        <img src="https://roietonline.net/images/black-ribbon.png" alt="โบว์แสดงความอาลัย"
+            title="ปวงพสกนิกรชาวไทยน้อมสำนึกในพระมหากรุณาธิคุณตราบนิจนิรันดร์" class="img-responsive">
     </div>
-
-    <!-- ป้ายเชิญด้านบน -->
+    <!-- ป้ายเชิญด้านบนตรงกลาง -->
     <div class="fixed top-3 left-1/2 -translate-x-1/2 z-40 select-none">
         <div
             class="px-5 sm:px-7 py-2.5 sm:py-3 rounded-2xl border border-white/15 bg-white/10 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.35)] text-center">
             <div
                 class="text-sm sm:text-base font-extrabold tracking-wide bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-transparent">
-                ลอยกระทงออนไลน์</div>
-            <div class="mt-0.5 text-[11px] sm:text-xs text-slate-200/80">ตั้งจิตอธิษฐาน
-                แล้วปล่อยความกังวลให้ลอยไปกับสายน้ำ</div>
+                ลอยกระทงออนไลน์
+            </div>
+            <div class="mt-0.5 text-[11px] sm:text-xs text-slate-200/80">
+                ตั้งจิตอธิษฐาน แล้วปล่อยความกังวลให้ลอยไปกับสายน้ำ
+            </div>
         </div>
     </div>
 
@@ -172,9 +162,9 @@
         });
     </script>
 
-    <!-- ปุ่มเปิดโมดัล -->
+    <!-- ปุ่มมุมซ้ายบน -->
     <button @click="$store.ui.open=true"
-        class="fixed left-4 top-4 z-40 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 px-5 py-3 font-semibold shadow-btn hover:scale-105 active:scale-100 transition-all">
+        class="fixed left-4 top-4 z-40 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 px-5 py-3 font-semibold shadow-btn hover:shadow-[0_15px_50px_rgba(34,211,238,0.55)] hover:scale-105 active:scale-100 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400/50">
         <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M4.5 12a7.5 7.5 0 0015 0m-15 0a7.5 7.5 0 0115 0M12 3v9" />
@@ -182,20 +172,24 @@
         <span class="hidden sm:inline">ลอยกระทงด้วย</span><span class="sm:hidden">ลอย</span>
     </button>
 
-    <button @click="$store.ui.aboutOpen=true" title="เกี่ยวกับ"
-        class="fixed right-4 bottom-4 z-40 w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 shadow-lg hover:scale-110 active:scale-100 transition-all flex items-center justify-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <!-- ปุ่มเกี่ยวกับ -->
+    <button @click="$store.ui.aboutOpen=true"
+        class="fixed right-4 bottom-4 z-40 w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 shadow-lg hover:shadow-purple-500/50 hover:scale-110 active:scale-100 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-purple-400/50 flex items-center justify-center group"
+        title="เกี่ยวกับ">
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-6 group-hover:rotate-12 transition-transform"
+            viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <circle cx="12" cy="12" r="10" stroke-width="2" />
             <path d="M12 16v-4M12 8h.01" stroke-width="2" stroke-linecap="round" />
         </svg>
     </button>
 
-    <!-- ฉากฟ้า/น้ำ และระบบกระทงของคุณ -->
+    <!-- ฉากฟ้า/น้ำ แบ่งโซนใหม่: ฟ้า 58% น้ำ 42% -->
     <main class="relative min-h-screen">
         <!-- SKY 58% -->
         <div class="absolute top-0 left-0 right-0 h-[58%]">
             <div class="absolute inset-0 bg-gradient-to-b from-[#020510] via-[#0a1628] to-[#0e2845]"></div>
 
+            <!-- เมฆบาง ๆ เคลื่อนไหว -->
             <div class="absolute inset-0 opacity-15">
                 <div
                     class="absolute top-[20%] left-0 w-[400%] h-32 bg-gradient-to-r from-transparent via-slate-300/20 to-transparent blur-3xl animate-[waves_65s_linear_infinite]">
@@ -205,6 +199,7 @@
                 </div>
             </div>
 
+            <!-- แสงฟ้า -->
             <div
                 class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_70%_40%,rgba(100,150,255,0.12),transparent_50%)] mix-blend-screen">
             </div>
@@ -212,6 +207,7 @@
                 class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_50%,rgba(180,140,255,0.08),transparent_45%)] mix-blend-soft-light">
             </div>
 
+            <!-- พระจันทร์ -->
             <div
                 class="absolute top-[18%] right-[10%] w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-[#fffef0] via-[#fff8dc] to-[#ffe4b5] animate-moonGlow pointer-events-none z-10 opacity-95 shadow-[0_0_60px_rgba(255,248,220,0.8),0_0_120px_rgba(255,248,220,0.4),inset_0_0_20px_rgba(255,255,255,0.3)]">
                 <div class="absolute inset-0 rounded-full overflow-hidden opacity-20">
@@ -227,10 +223,12 @@
                 </div>
             </div>
 
+            <!-- ลำแสง -->
             <div
                 class="absolute top-[18%] right-[10%] w-1 sm:w-1.5 h-[50vh] opacity-8 bg-gradient-to-b from-yellow-100/30 via-yellow-50/10 to-transparent blur-xl rotate-[8deg] pointer-events-none">
             </div>
 
+            <!-- ดาวระยิบ -->
             <div class="pointer-events-none absolute inset-0" x-data="{ stars: [] }" x-init="const count = Math.round(Math.min(180, 90 + window.innerWidth / 8));
             for (let i = 0; i < count; i++) {
                 const s = Math.random();
@@ -243,6 +241,7 @@
                 </template>
             </div>
 
+            <!-- ดาวพุ่ง -->
             <div class="pointer-events-none absolute inset-0" x-data="{ shooting: [] }" x-init="const add = () => {
                 const id = Date.now() + Math.random();
                 shooting.push({ id, top: Math.random() * 40, left: 20 + Math.random() * 60, duration: 1.5 + Math.random() * 1 });
@@ -258,10 +257,13 @@
             </div>
         </div>
 
+        <!-- HORIZON โค้ง -->
         <svg class="absolute left-0 right-0 top-[58%] h-20 pointer-events-none" viewBox="0 0 1440 160"
             preserveAspectRatio="none" aria-hidden="true">
+            <!-- เส้นไฮไลต์ -->
             <path d="M0,100 C360,140 1080,60 1440,100" stroke="rgba(255,255,255,0.40)" stroke-width="1"
                 fill="none" />
+            <!-- เงาแสงเหนือเส้น -->
             <path d="M0,100 C360,140 1080,60 1440,100 L1440,160 L0,160 Z" fill="rgba(255,255,255,0.08)" />
         </svg>
 
@@ -269,6 +271,7 @@
         <div class="absolute left-0 right-0 top-[58%] bottom-0 overflow-hidden">
             <div class="absolute inset-0 bg-gradient-to-b from-[#0b2e4a] via-[#082237] to-[#051827]"></div>
 
+            <!-- คลื่นพื้นผิว -->
             <div
                 class="absolute left-0 w-[220%] h-24 top-[8%] opacity-28 blur-2xl bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,.9)_0%,_transparent_60%)] animate-[waves_28s_linear_infinite]">
             </div>
@@ -297,6 +300,7 @@
                     </div>
                 </template>
 
+                <!-- เงามืดขอบล่าง -->
                 <div
                     class="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-slate-950/80 via-slate-950/40 to-transparent">
                 </div>
@@ -306,7 +310,9 @@
 
     <!-- Modal ฟอร์ม -->
     <div x-show="$store.ui.open" x-cloak class="fixed inset-0 z-50" @keydown.escape.window="$store.ui.open=false">
-        <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" @click="$store.ui.open=false"></div>
+        <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity"
+            @click="$store.ui.open=false">
+        </div>
 
         <div class="absolute inset-0 flex items-center justify-center p-4 sm:p-6 overflow-y-auto" @click.stop>
             <div class="w-full max-w-xl modal-enter backdrop-blur-2xl rounded-3xl border border-white/20 bg-slate-900/50 shadow-glass my-8"
@@ -318,7 +324,8 @@
                             ลอยกระทง</h2>
                         <p class="text-sm text-slate-300 mt-1.5">เลือกแบบ กรอกข้อมูล แล้วปล่อยลอยเลย</p>
                     </div>
-                    <button @click="$store.ui.open=false" class="rounded-xl p-2 hover:bg-white/10 focus:outline-none">
+                    <button @click="$store.ui.open=false"
+                        class="rounded-xl p-2 hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400/40">
                         <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -333,7 +340,7 @@
                         <div class="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
                             @foreach ($types as $key => $t)
                                 <label @click="form.type='{{ $key }}'"
-                                    class="group relative cursor-pointer rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-cyan-400/40 hover:scale-105 transition-all p-3 sm:p-4 flex flex-col items-center gap-2"
+                                    class="group relative cursor-pointer rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-cyan-400/40 hover:scale-105 transition-all duration-300 p-3 sm:p-4 flex flex-col items-center gap-2"
                                     :class="form.type === '{{ $key }}' ? 'ring-2 ring-cyan-400/80 bg-cyan-500/10' :
                                         'ring-0'">
                                     <input class="sr-only" type="radio" name="type" x-model="form.type"
@@ -341,7 +348,7 @@
                                     <img src="{{ $t['img'] }}" alt="{{ $t['label'] }}"
                                         class="w-10 h-10 sm:w-12 sm:h-12 drop-shadow-lg" loading="lazy">
                                     <span class="text-xs sm:text-sm font-medium">{{ $t['label'] }}</span>
-                                    <span class="absolute -top-2 -right-2 transition-all"
+                                    <span class="absolute -top-2 -right-2 transition-all duration-200"
                                         :class="form.type === '{{ $key }}' ? 'scale-100 opacity-100' :
                                             'scale-0 opacity-0'">
                                         <span
@@ -356,29 +363,28 @@
                         <div class="space-y-2">
                             <label class="text-sm font-semibold text-slate-200">ชื่อเล่น</label>
                             <input x-model="form.nickname" type="text" maxlength="50" required
-                                class="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/30 placeholder:text-slate-500"
+                                class="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/30 transition-all placeholder:text-slate-500"
                                 placeholder="เช่น โฟกัส">
                         </div>
                         <div class="space-y-2">
                             <label class="text-sm font-semibold text-slate-200">อายุ</label>
                             <input x-model.number="form.age" type="number" min="1" max="120" required
-                                class="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/30">
+                                class="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/30 transition-all">
                         </div>
                     </div>
 
                     <div class="space-y-2">
                         <label class="text-sm font-semibold text-slate-200">คำอธิษฐาน</label>
                         <textarea x-model="form.wish" maxlength="200" required rows="3"
-                            class="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/30 placeholder:text-slate-500 resize-none"
+                            class="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/30 transition-all placeholder:text-slate-500 resize-none"
                             placeholder="ขอให้..."></textarea>
-                        <div class="text-xs text-slate-400 flex justify-between">
-                            <span>ไม่เกิน 200 ตัวอักษร</span><span x-text="`${form.wish?.length||0}/200`"></span>
-                        </div>
+                        <div class="text-xs text-slate-400 flex justify-between"><span>ไม่เกิน 200 ตัวอักษร</span><span
+                                x-text="`${form.wish?.length||0}/200`"></span></div>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-3 pt-2">
                         <button type="submit"
-                            class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 px-6 py-3 font-semibold shadow-btn hover:scale-105 active:scale-100 transition-all">
+                            class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 px-6 py-3 font-semibold shadow-btn hover:shadow-[0_15px_50px_rgba(34,211,238,0.55)] hover:scale-105 active:scale-100 transition-all duration-300">
                             <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -397,19 +403,23 @@
         </div>
     </div>
 
-    <!-- Modal เกี่ยวกับ + กราฟ Ping -->
+    <!-- Modal เกี่ยวกับ -->
     <div x-show="$store.ui.aboutOpen" x-cloak class="fixed inset-0 z-50"
         @keydown.escape.window="$store.ui.aboutOpen=false">
-        <div class="absolute inset-0 bg-slate-950/85 backdrop-blur-md" @click="$store.ui.aboutOpen=false"></div>
+        <div class="absolute inset-0 bg-slate-950/85 backdrop-blur-md transition-opacity"
+            @click="$store.ui.aboutOpen=false"></div>
 
         <div class="absolute inset-0 flex items-center justify-center p-4" @click.stop>
             <div
                 class="w-full max-w-md modal-enter backdrop-blur-2xl rounded-3xl border border-purple-400/30 bg-gradient-to-br from-slate-900/80 to-purple-900/30 shadow-glass">
                 <div class="flex items-start justify-between p-6 border-b border-white/10">
-                    <h2
-                        class="text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-500 bg-clip-text text-transparent">
-                        เกี่ยวกับ</h2>
-                    <button @click="$store.ui.aboutOpen=false" class="rounded-xl p-2 hover:bg-white/10">
+                    <div>
+                        <h2
+                            class="text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-500 bg-clip-text text-transparent">
+                            เกี่ยวกับ</h2>
+                    </div>
+                    <button @click="$store.ui.aboutOpen=false"
+                        class="rounded-xl p-2 hover:bg-white/10 transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -435,40 +445,68 @@
                     <div class="h-px bg-gradient-to-r from-transparent via-purple-400/30 to-transparent"></div>
 
                     <div class="space-y-4">
-                        <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
-                            <div class="text-xs text-slate-400 mb-0.5">เวอร์ชัน</div>
-                            <div class="font-semibold text-white">1.0.1 • 29 ตุลาคม 2568</div>
-
-                            <div class="wrap mt-4">
-                                <h2 class="text-sm mb-2 text-slate-200">Ping (ms)</h2>
-                                <canvas id="pingChart"></canvas>
+                        <div
+                            class="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+                            <div
+                                class="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-white" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
                             </div>
-                            <p id="pingErr" class="text-xs text-rose-400"></p>
+                            <div class="flex-1">
+                                <div class="text-xs text-slate-400 mb-0.5">นักพัฒนา</div>
+                                <div class="font-semibold text-white">ปรัชญาพล จำปาลาด</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10">
+                            <div
+                                class="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-white" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"
+                                        stroke-width="2" />
+                                    <line x1="16" y1="2" x2="16" y2="6"
+                                        stroke-width="2" stroke-linecap="round" />
+                                    <line x1="8" y1="2" x2="8" y2="6"
+                                        stroke-width="2" stroke-linecap="round" />
+                                    <line x1="3" y1="10" x2="21" y2="10"
+                                        stroke-width="2" />
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-xs text-slate-400 mb-0.5">เวอร์ชัน</div>
+                                <div class="font-semibold text-white">1.0.1 29 ตุลาคม 2568</div>
+                            </div>
                         </div>
                     </div>
 
                     <div class="text-center pt-2">
-                        <p class="text-xs text-slate-400">© 2025 สงวนลิขสิทธิ์ PCNONE GROUP</p>
+                        <p class="text-xs text-slate-400">© 2025 สงวนลิขสิทธิ์ PCNONE GROUP </p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Utils -->
     <script>
         const readCookie = n => decodeURIComponent((document.cookie.split('; ').find(x => x.startsWith(n + '=')) || '')
             .split('=')[1] || '');
+
+        // คุม timer
         const __timers = new Set();
         const __schedule = (fn, ms) => {
             const t = setTimeout(fn, ms);
             __timers.add(t);
             return t;
-        }
-        window.addEventListener('beforeunload', () => {
+        };
+        const __clearAll = () => {
             for (const t of __timers) clearTimeout(t);
             __timers.clear();
-        });
+        };
+        window.addEventListener('beforeunload', __clearAll);
 
         function ensureKeyframeSheet() {
             let el = document.getElementById('dyn-keyframes');
@@ -487,15 +525,19 @@
             return el.sheet;
         }
 
-        // วนลูปใหม่→เก่าเป็นรอบ ๆ
+        // วนลูปใหม่→เก่าเป็นรอบ ๆ ไม่ว่าง ไม่ซ้ำภายในรอบเดียว และแสดงใหม่ทันที
         function riverScene(types, recent) {
-            const WATER_TOP = 25,
-                WATER_BAND = 28;
+            const WATER_TOP = 25; // เริ่มน้ำที่ 58% ของจอ
+            const WATER_BAND = 28;
+            // ชุดแรก
             const DUR_INIT_MIN = 22,
-                DUR_INIT_MAX = 34,
-                DUR_LOOP_MIN = 18,
+                DUR_INIT_MAX = 34;
+            // รอบต่อไป
+            const DUR_LOOP_MIN = 18,
                 DUR_LOOP_MAX = 28;
+
             const typeImg = t => types?.[t]?.img || Object.values(types || {})[0]?.img || '';
+
             const makeStyle = (dur, delay, top) => {
                 const name = `drift_${Math.random().toString(36).slice(2)}`;
                 const sheet = ensureKeyframeSheet();
@@ -504,6 +546,7 @@
                     sheet.cssRules.length);
                 return `top:${top}%;left:-20%;--floatDur:${rnd(2.8,4.4)}s;--swayDur:${rnd(4.5,6.5)}s;animation:${name} ${dur}s linear ${delay}s forwards,var(--_dummy,0s);`;
             };
+
             const mkItem = (r, init = false) => {
                 const dur = init ? rnd(DUR_INIT_MIN, DUR_INIT_MAX) : rnd(DUR_LOOP_MIN, DUR_LOOP_MAX);
                 const delay = init ? rnd(0, 12) : 0;
@@ -517,12 +560,14 @@
                     __life: (dur + delay) * 1000
                 };
             };
+
             const scheduleRemoval = (vm, clientId, ms) => {
                 __schedule(() => {
                     const i = vm.items.findIndex(x => x.clientId === clientId);
                     if (i > -1) vm.items.splice(i, 1);
                 }, ms + 30);
             };
+
             const base = Array.from(new Map((recent || []).map(r => [r.id, r])).values()).sort((a, b) => b.id - a.id);
 
             return {
@@ -530,6 +575,7 @@
                 order: base,
                 seenInCycle: new Set(),
                 idx: 0,
+
                 init() {
                     const initCount = Math.min(24, this.order.length);
                     for (let k = 0; k < initCount; k++) this._spawnNext(true);
@@ -539,6 +585,7 @@
                     };
                     __schedule(tick, 900);
                 },
+
                 _spawnNext(isInitial) {
                     if (!this.order.length) return;
                     if (this.seenInCycle.size >= this.order.length) {
@@ -559,7 +606,8 @@
                     if (this.items.length > 100) this.items.splice(100);
                     scheduleRemoval(this, item.clientId, item.__life);
                 },
-                spawnFromRecord(r) {
+
+                spawnFromRecord(r) { // เผื่อใช้ที่อื่น
                     this.order = [r, ...this.order.filter(x => x.id !== r.id)].sort((a, b) => b.id - a.id);
                     this.seenInCycle.clear();
                     this.idx = 0;
@@ -568,6 +616,7 @@
                     if (this.items.length > 100) this.items.splice(100);
                     scheduleRemoval(this, item.clientId, item.__life);
                 },
+
                 spawnNew(p) {
                     const r = {
                         id: p.id ?? Date.now(),
@@ -576,7 +625,7 @@
                         age: p.age,
                         wish: p.wish
                     };
-                    this.spawnFromRecord(r);
+                    this.spawnFromRecord(r); // โชว์ทันทีและดันเข้าหัวคิว
                 }
             }
         }
@@ -614,7 +663,7 @@
                             try {
                                 const j = await res.json();
                                 msg = j.message || msg;
-                            } catch {}
+                            } catch (_) {}
                             throw new Error(msg);
                         }
                         const data = await res.json();
@@ -634,120 +683,6 @@
         }
     </script>
 
-    <!-- กราฟ Ping ผ่าน Laravel proxy -->
-    <script>
-        const STATUS_SLUG = "loykratong";
-        const MONITOR_ID = "34"; // แก้ให้ตรงของจริง
-        const ENDPOINT = `/kuma/heartbeat/${STATUS_SLUG}`;
-
-        let pingChart;
-        let aboutWasOpen = false; // guard ป้องกันโหลดซ้ำ
-        const Y_MIN = 0;
-        const Y_MAX = 1000; // ล็อกเพดานคงที่ (ปรับตาม SLA)
-
-        function toDate(t) {
-            return typeof t === 'number' ? new Date((t < 2e10 ? t * 1000 : t)) : new Date(t);
-        }
-
-        async function loadPingOnce() {
-            const errEl = document.getElementById('pingErr');
-            errEl.textContent = '';
-            try {
-                const res = await fetch(ENDPOINT, {
-                    credentials: 'same-origin'
-                });
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const data = await res.json();
-
-                // ดึงและกรองค่า ping ผิดปกติ
-                const list = (data.heartbeatList?.[MONITOR_ID] || [])
-                    .filter(h => Number.isFinite(h.ping) && h.ping > 0 && h.ping < 60000)
-                    .map(h => ({
-                        x: toDate(h.time),
-                        y: Math.min(h.ping, Y_MAX)
-                    })); // clamp กันหลุดสเกล
-
-                const ctx = document.getElementById('pingChart');
-                if (pingChart) pingChart.destroy();
-
-                pingChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        datasets: [{
-                            label: 'Ping',
-                            data: list,
-                            pointRadius: 0,
-                            spanGaps: true
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        parsing: false,
-                        animation: false, // ไม่ให้เด้ง
-                        normalized: true,
-                        datasets: {
-                            line: {
-                                tension: 0,
-                                cubicInterpolationMode: 'monotone'
-                            }
-                        }, // ไม่ overshoot
-                        interaction: {
-                            mode: 'index',
-                            intersect: false
-                        },
-                        scales: {
-                            x: {
-                                type: 'time'
-                            },
-                            y: {
-                                min: Y_MIN,
-                                max: Y_MAX,
-                                ticks: {
-                                    precision: 0
-                                },
-                                title: {
-                                    display: true,
-                                    text: 'ms'
-                                }
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        }
-                    }
-                });
-            } catch (e) {
-                errEl.textContent = `โหลดกราฟไม่สำเร็จ: ${e.message}`;
-                console.error(e);
-            }
-        }
-
-        // โหลดครั้งเดียวเมื่อโมดัล "เกี่ยวกับ" เปลี่ยนจากปิด -> เปิด
-        document.addEventListener('alpine:init', () => {
-            Alpine.effect(() => {
-                const open = Alpine.store('ui')?.aboutOpen;
-                if (open && !aboutWasOpen) {
-                    aboutWasOpen = true;
-                    setTimeout(() => {
-                        loadPingOnce().then(() => {
-                            try {
-                                pingChart?.resize();
-                            } catch {}
-                        });
-                    }, 200);
-                }
-                if (!open && aboutWasOpen) {
-                    aboutWasOpen = false; // รีเซ็ตให้พร้อมโหลดรอบหน้า
-                }
-            });
-        });
-    </script>
-
-
-
     <!-- keyframes ดาวพุ่ง -->
     <style>
         @keyframes shootingStar {
@@ -762,6 +697,7 @@
             }
         }
     </style>
+
 </body>
 
 </html>
