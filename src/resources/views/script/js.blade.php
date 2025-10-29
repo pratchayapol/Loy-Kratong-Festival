@@ -330,7 +330,7 @@
         const TOTAL_LANES = window.innerWidth < 640 ? 1 : 2;
 
         // เพิ่มระยะขอบบน–ล่างของแถวนานๆ เข้าไปเลย
-        const TOP_PAD = window.innerWidth < 640 ? 14 : 12; // ยิ่งเยอะ ยิ่งห่างขอบบน
+        const TOP_PAD = window.innerWidth < 640 ? 20 : 18; // ยิ่งเยอะ ยิ่งห่างขอบบน
         const BOTTOM_PAD = window.innerWidth < 640 ? 14 : 12; // ยิ่งเยอะ ยิ่งห่างขอบล่าง
 
         // คำนวณพื้นที่ที่เหลือให้วางเลน
