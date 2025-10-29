@@ -575,6 +575,65 @@
                                 <p id="pingErr" class="text-xs text-rose-400 mt-1"></p>
                             </div>
                         </div>
+                        <div class="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10 w-full">
+                            <h1>CPU %</h1>
+                            <canvas id="cpuChart"></canvas>
+                        </div>
+                        
+                        <script>
+                            // ดึง node และ vmid จาก URL /ct/{node}/{vmid}
+                            const parts = location.pathname.split('/').filter(Boolean);
+                            const node = parts[1];
+                            const vmid = parts[2];
+
+                            async function render() {
+                                const r = await fetch(
+                                    `/metrics/${encodeURIComponent(node)}/${encodeURIComponent(vmid)}/cpu.json?timeframe=day&type=lxc`);
+                                const {
+                                    points
+                                } = await r.json();
+
+                                const ctx = document.getElementById('cpuChart');
+                                new Chart(ctx, {
+                                    type: 'line',
+                                    data: {
+                                        labels: points.map(p => new Date(p.t)),
+                                        datasets: [{
+                                            label: 'CPU %',
+                                            data: points.map(p => p.cpuPct),
+                                            fill: false,
+                                            tension: 0.2
+                                        }]
+                                    },
+                                    options: {
+                                        animation: false,
+                                        parsing: false,
+                                        scales: {
+                                            x: {
+                                                type: 'time',
+                                                time: {
+                                                    unit: 'hour'
+                                                }
+                                            },
+                                            y: {
+                                                min: 0,
+                                                max: 100,
+                                                title: {
+                                                    display: true,
+                                                    text: 'Percent'
+                                                }
+                                            }
+                                        },
+                                        plugins: {
+                                            legend: {
+                                                display: true
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                            render();
+                        </script>
 
                         <script>
                             // === Config ===

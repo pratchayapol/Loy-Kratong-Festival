@@ -3,6 +3,7 @@ use Illuminate\Support\Facades\Http;
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\KrathongController;
+use App\Http\Controllers\ProxmoxMetricsController;
 
 Route::get('/', [KrathongController::class,'show'])->name('krathong.show');
 Route::post('/krathongs', [KrathongController::class,'store'])->name('krathongs.store');
@@ -15,3 +16,8 @@ Route::get('/kuma/heartbeat/{slug}', function (string $slug) {
     abort_unless($r->ok(), $r->status(), $r->body());
     return response($r->body(), 200)->header('Content-Type', 'application/json');
 });
+
+Route::get('/metrics/{node}/{vmid}/cpu.json', [ProxmoxMetricsController::class, 'cpuJson']);
+Route::get('/metrics/{node}/{vmid}/cpu.png',  [ProxmoxMetricsController::class, 'cpuPng']);
+
+Route::view('/ct/{node}/{vmid}', 'ct'); // หน้าแสดงกราฟ
