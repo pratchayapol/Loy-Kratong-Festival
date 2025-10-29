@@ -318,29 +318,29 @@
         return el.sheet;
     }
 
-    // ฉากแม่น้ำลอยกระทง — ไม่สุ่ม, ใหม่→เก่า, เว้นระยะมาก, ฟันปลา, ไม่ซ้อน
+    // ฉากแม่น้ำลอยกระทง — ปรับปรุงให้ลอยเป็นธรรมชาติ ไม่ซ้อน เว้นระยะชัดเจน
     function riverScene(types, recent) {
         const WATER_TOP = 25; // %
         const WATER_BAND = 28; // %
-        const DUR = 26; // s ความยาวการลอยต่อชิ้น (คงที่ทุกชิ้น เพื่อตีระยะให้เนียน)
-        const MAX_ITEMS = window.innerWidth < 640 ? 40 : 100;
+        const DUR = 35; // s เพิ่มเวลาให้ลอยช้าลง เป็นธรรมชาติขึ้น
+        const MAX_ITEMS = window.innerWidth < 640 ? 30 : 80;
         const typeImg = t => types?.[t]?.img || Object.values(types || {})[0]?.img || '';
 
-        // เลนคงที่
-        const TOTAL_LANES = window.innerWidth < 640 ? 6 : 12;
+        // เพิ่มจำนวนเลนและเว้นระยะระหว่างเลนมากขึ้น
+        const TOTAL_LANES = window.innerWidth < 640 ? 5 : 10;
+        const LANE_SPACING = (WATER_BAND - 8) / Math.max(1, TOTAL_LANES - 1);
         const laneTops = Array.from({
                 length: TOTAL_LANES
             }, (_, i) =>
-            WATER_TOP + 6 + (i * (WATER_BAND - 6) / Math.max(1, TOTAL_LANES - 1))
+            WATER_TOP + 8 + (i * LANE_SPACING)
         );
 
-        // เว้นระยะหัวชนแนวนอน “มากขึ้น” แบบคงที่
-        // เส้นทาง -20% → 120% = 140% viewport
-        const TRACK_WIDTH = 140;
-        const MIN_GAP_X = window.innerWidth < 640 ? 38 : 42; // เพิ่ม spacing ชัดเจน
+        // เพิ่มระยะห่างระหว่างกระทงในแนวนอนให้มากขึ้น
+        const TRACK_WIDTH = 140; // -20% → 120%
+        const MIN_GAP_X = window.innerWidth < 640 ? 50 : 65; // เพิ่มช่องว่างมาก
         const HEADWAY_MS = (MIN_GAP_X / TRACK_WIDTH) * DUR * 1000;
 
-        // ทำฟันปลา: ครึ่งช่วงให้แถวล่างตั้งต้นช้ากว่า
+        // แบ่งเลนเป็นบน-ล่าง แบบฟันปลา
         const HALF = Math.floor(TOTAL_LANES / 2);
         const upperIdx = Array.from({
             length: HALF
@@ -349,20 +349,17 @@
             length: TOTAL_LANES - HALF
         }, (_, i) => HALF + i);
 
-        // next time ต่อเลน
         const now = () => performance.now();
         const laneNext = new Array(TOTAL_LANES).fill(0);
-        const PHASE_MS = HEADWAY_MS / 2;
-        for (const li of lowerIdx) laneNext[li] = now() + PHASE_MS; // phase shift แถวล่าง → ฟันปลา
+        const PHASE_MS = HEADWAY_MS * 0.6; // ปรับ phase shift
+        for (const li of lowerIdx) laneNext[li] = now() + PHASE_MS;
 
-        // เดินคิว lane แบบ round-robin (ลดโอกาสเกาะกลุ่ม)
         let upPtr = 0,
             loPtr = 0,
             useUpper = true;
 
         function pickLane() {
             const t = now();
-            // ลอง band ตามคิวก่อน ถ้าไม่ว่างค่อยสลับ
             const tryBand = (band, ptrRef) => {
                 if (band.length === 0) return -1;
                 let ptr = (ptrRef === 'up' ? upPtr : loPtr);
@@ -383,33 +380,54 @@
             return useUpper ? tryBand(upperIdx, 'up') : tryBand(lowerIdx, 'lo');
         }
 
-        // สร้าง keyframes + style คงที่
-        const makeStyle = (topPct) => {
+        // สร้าง animation ที่มีการโยกไปมาเหมือนลอยน้ำจริง
+        const makeStyle = (topPct, laneIdx) => {
             const name = `drift_${Math.random().toString(36).slice(2)}`;
             const sheet = ensureKeyframeSheet();
+
+            // สร้างการเคลื่อนที่แบบคลื่นน้ำ
+            const waveAmp = window.innerWidth < 640 ? 1.5 : 2.5; // ความสูงของคลื่น (%)
+            const waveFreq = 3 + Math.random() * 2; // จำนวนคลื่นตลอดการเดินทาง
+
+            // สร้าง keyframes ที่มีการโยกขึ้นลง
+            const steps = 10;
+            let keyframeRules = '';
+            for (let i = 0; i <= steps; i++) {
+                const progress = (i / steps) * 100;
+                const xPos = -20 + (progress / 100) * 140; // -20% → 120%
+                const yOffset = Math.sin((i / steps) * Math.PI * 2 * waveFreq) * waveAmp;
+                const opacity = progress < 8 ? progress / 8 : (progress > 92 ? (100 - progress) / 8 : 1);
+                const rotate = Math.sin((i / steps) * Math.PI * 2 * waveFreq) * 3; // โยกเอียงเล็กน้อย
+
+                keyframeRules += `${progress.toFixed(1)}%{
+                left:${xPos.toFixed(2)}%;
+                top:calc(${topPct}% + ${yOffset.toFixed(2)}%);
+                opacity:${opacity.toFixed(3)};
+                transform:rotate(${rotate.toFixed(2)}deg) scale(${0.95 + Math.random() * 0.1});
+            }`;
+            }
+
             sheet.insertRule(
-                `@keyframes ${name}{0%{left:-20%;opacity:0}10%{opacity:1}90%{opacity:1}100%{left:120%;opacity:0}}`,
+                `@keyframes ${name}{${keyframeRules}}`,
                 sheet.cssRules.length
             );
-            // ไม่มี animation-delay เพิ่ม เพราะจัด phase ด้วย laneNext แล้ว
-            return `top:${topPct}%;left:-20%;animation:${name} ${DUR}s linear 0s forwards;`;
+
+            return `animation:${name} ${DUR}s ease-in-out forwards;will-change:left,top,opacity,transform;`;
         };
 
-        // ลิสต์ข้อมูลเรียงใหม่→เก่าแบบคงที่
         const order = Array
             .from(new Map((recent || []).map(r => [r.id, r])).values())
             .sort((a, b) => b.id - a.id);
 
-        // สร้างชิ้น
         const mkItem = (rec) => {
             const li = pickLane();
-            if (li === -1) return null; // ยังไม่มีเลนว่าง
+            if (li === -1) return null;
             return {
                 id: rec.id,
                 clientId: `item_${rec.id}_${Math.random().toString(36).slice(2)}`,
                 img: typeImg(rec.type),
                 wish: `${rec.nickname} : ${rec.wish}`,
-                style: makeStyle(laneTops[li]),
+                style: makeStyle(laneTops[li], li),
                 show: false,
                 paused: false,
                 __life: DUR * 1000,
@@ -417,7 +435,6 @@
             };
         };
 
-        // ตั้งลบ
         const scheduleRemoval = (vm, item, ms) => {
             if (item.__tid) {
                 clearTimeout(item.__tid);
@@ -431,7 +448,6 @@
             }, ms + 30);
         };
 
-        // ตัวเดินลูป deterministic ใหม่→เก่า วนต่อเนื่อง
         let recPtr = 0;
 
         function nextRecord() {
@@ -440,16 +456,15 @@
             return r;
         }
 
-        // ตัวคำนวณ “เวลาถัดไปที่สามารถยิงได้” จากทุกเลน เพื่อไม่ยิงถี่เกิน
         function nextFeasibleDelayMs() {
             const t = now();
             const soonest = Math.min(...laneNext);
-            return Math.max(120, soonest - t); // อย่างน้อย 120ms กัน tight loop
+            return Math.max(200, soonest - t); // เพิ่มเป็น 200ms
         }
 
         return {
             items: [],
-            order, // คงไว้เผื่อ UI อื่นใช้อ่าน
+            order,
             pause(k) {
                 if (!k || k.paused) return;
                 k.paused = true;
@@ -468,8 +483,8 @@
             },
 
             init() {
-                // เติมล็อตแรกแบบคงที่ พอดีช่อง ไม่สุ่ม
-                const initCount = Math.min(24, order.length);
+                // เริ่มต้นด้วยจำนวนน้อย ค่อยๆ เพิ่ม
+                const initCount = Math.min(18, order.length);
                 let spawned = 0;
                 const pump = () => {
                     if (spawned >= initCount) {
@@ -482,7 +497,7 @@
                         if (this.items.length > MAX_ITEMS) this.items.splice(MAX_ITEMS);
                         scheduleRemoval(this, item, item.__life);
                         spawned++;
-                        __schedule(pump, nextFeasibleDelayMs());
+                        __schedule(pump, nextFeasibleDelayMs() * 1.5); // เพิ่มระยะห่างตอนเริ่มต้น
                     } else {
                         __schedule(pump, nextFeasibleDelayMs());
                     }
@@ -498,17 +513,15 @@
                         if (this.items.length > MAX_ITEMS) this.items.splice(MAX_ITEMS);
                         scheduleRemoval(this, item, item.__life);
                     }
-                    __schedule(tick, nextFeasibleDelayMs()); // ยิงเมื่อเลนพร้อมเท่านั้น
+                    __schedule(tick, nextFeasibleDelayMs());
                 };
                 tick();
             },
 
-            // แทรกของใหม่ไว้ต้นลิสต์ และระบบจะหยิบตามคิวเอง
             spawnFromRecord(r) {
                 const fresh = [r, ...order.filter(x => x.id !== r.id)].sort((a, b) => b.id - a.id);
                 order.length = 0;
                 order.push(...fresh);
-                // recPtr ไม่รีเซ็ต เพื่อคงความต่อเนื่อง
             },
             spawnNew(p) {
                 this.spawnFromRecord({
@@ -521,7 +534,6 @@
             }
         }
     }
-
     // ฟอร์มลอยกระทง
     function krathongForm() {
         return {
