@@ -205,7 +205,7 @@
             }
         }
 
-        .body {
+        body {
             touch-action: manipulation;
             font-family: "Sarabun", "TH Sarabun New", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Thai", Tahoma, Arial, sans-serif;
         }
