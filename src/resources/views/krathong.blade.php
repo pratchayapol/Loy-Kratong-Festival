@@ -180,6 +180,12 @@
             </div>
         </div>
 
+        <!-- HORIZON โค้ง -->
+        <svg class="absolute left-0 right-0 top-[60%] sm:top-[58%] h-20 pointer-events-none" viewBox="0 0 1440 160"
+            preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0,100 C360,140 1080,60 1440,100" stroke="rgba(255,255,255,0.40)" stroke-width="1" fill="none" />
+            <path d="M0,100 C360,140 1080,60 1440,100 L1440,160 L0,160 Z" fill="rgba(255,255,255,0.08)" />
+        </svg>
 
         <!-- WATER -->
         <div class="absolute left-0 right-0 top-[60%] sm:top-[58%] bottom-0 overflow-hidden">
