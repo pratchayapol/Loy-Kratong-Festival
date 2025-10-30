@@ -3,7 +3,7 @@
 
 @section('content')
     <!-- ป้ายเชิญด้านบนตรงกลาง: ซ่อนบนมือถือ -->
-    <div class="hidden sm:fixed sm:top-4 sm:left-1/2 sm:-translate-x-1/2 sm:z-40 sm:select-none">
+    <div class="hidden sm:block sm:fixed sm:top-4 sm:left-1/2 sm:-translate-x-1/2 sm:z-40 sm:select-none">
         <!-- กรอบไล่สีรอบนอก -->
         <div
             class="relative p-[1px] rounded-3xl bg-gradient-to-r from-cyan-400/40 via-blue-400/40 to-purple-400/40 shadow-[0_20px_50px_rgba(0,0,0,0.45)]">
@@ -71,6 +71,7 @@
             </div>
         </div>
     </div>
+
 
 
 
