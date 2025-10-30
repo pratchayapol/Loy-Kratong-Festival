@@ -1,5 +1,13 @@
 <head>
     <meta charset="utf-8" />
+    <meta name="description" content="ลอยกระทงออนไลน์ 68 เว็บไซต์ร่วมประเพณีไทย ปี 2568 ส่งคำอธิษฐานผ่านกระทงออนไลน์ ต้อนรับ Loy Krathong Festival 2025">
+    <meta name="keywords" content="ลอยกระทง, ลอยกระทงออนไลน์68, ลอยกระทง2568, Loy Krathong 2025, ประเพณีไทย, กระทง, งานลอยกระทง">
+
+    <meta property="og:title" content="ลอยกระทงออนไลน์ 68 | ลอยกระทงปี 2568">
+    <meta property="og:description" content="ร่วมประเพณีไทย ลอยกระทงออนไลน์ปี 2568 ส่งคำอธิษฐานผ่านเว็บไซต์กับเรา">
+    <meta property="og:image" content="https://loykrathong.pcnone.com/images/krathongs/banana.png">
+    <meta property="og:url" content="https://loykrathong.pcnone.com">
+
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Loy Krathong Festival</title>
     <meta name="csrf-token" content="{{ csrf_token() }}" />
