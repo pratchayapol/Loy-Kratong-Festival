@@ -27,7 +27,7 @@ class KrathongController extends Controller
         'elephant'    => ['label' => 'กระทงช้าง', 'img' => '/images/krathongs/elephant.png'],
         'hippo'    => ['label' => 'กระทงฮิปโป', 'img' => '/images/krathongs/hippo.png'],
         'pik'    => ['label' => 'กระทงหมู', 'img' => '/images/krathongs/pik.png'],
-        'katai'    => ['label' => 'กระทงกระต่าง', 'img' => '/images/krathongs/katai.png'],
+        'katai'    => ['label' => 'กระทงกระต่าย', 'img' => '/images/krathongs/katai.png'],
         'tao'    => ['label' => 'กระทงเต่า', 'img' => '/images/krathongs/tao.png'],
         'tao'    => ['label' => 'กระทงเต่า', 'img' => '/images/krathongs/tao.png'],
         'juad'    => ['label' => 'กระทงบั้งไฟ', 'img' => '/images/krathongs/juad.png'],
