@@ -32,7 +32,7 @@ class KrathongController extends Controller
         'tao'    => ['label' => 'กระทงเต่า', 'img' => '/images/krathongs/tao.png'],
         'juad'    => ['label' => 'กระทงบั้งไฟ', 'img' => '/images/krathongs/juad.png'],
         'GateA'    => ['label' => 'กระทงเกรด A', 'img' => '/images/krathongs/GateA.png'],
-        'GateF'    => ['label' => 'กระทงเกรด F', 'img' => '/images/krathongs/GateF.png'],
+        'GateF'    => ['label' => 'กระทงพ้น F', 'img' => '/images/krathongs/GateF.png'],
     ];
 
     public function metrics()
