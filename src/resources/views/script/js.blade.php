@@ -354,9 +354,9 @@
         const SAFE_GAP_PCT = KRATHONG_WIDTH_PCT * 1.25;
         const TIME_GAP_MS = (SAFE_GAP_PCT / TRACK_WIDTH) * DUR * 1000;
 
-        console.log(
-            `Config: ${TOTAL_LANES} lanes, padTop:${TOP_PAD}%, padBot:${BOTTOM_PAD}%, avail:${AVAILABLE.toFixed(1)}%, gap:${(TIME_GAP_MS/1000).toFixed(1)}s`
-        );
+        // console.log(
+        //     `Config: ${TOTAL_LANES} lanes, padTop:${TOP_PAD}%, padBot:${BOTTOM_PAD}%, avail:${AVAILABLE.toFixed(1)}%, gap:${(TIME_GAP_MS/1000).toFixed(1)}s`
+        // );
 
         const laneNextTime = new Array(TOTAL_LANES).fill(0);
         let currentLaneIndex = 0;
@@ -667,7 +667,8 @@
                 const el = document.getElementById('totalCount');
                 if (el) el.textContent = Number(total).toLocaleString();
             } catch (e) {
-                /* เงียบไว้พอ */ }
+                /* เงียบไว้พอ */
+            }
         }
 
         // ดึงทุก 3 วินาทีพอ ไม่โหดเกิน
@@ -695,4 +696,3 @@
     });
     document.addEventListener('DOMContentLoaded', setVH);
 </script>
-
