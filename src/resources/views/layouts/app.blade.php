@@ -12,11 +12,11 @@
     <link rel="manifest" href="{{ secure_asset('site.webmanifest') }}" />
     <meta name="theme-color" content="#0b2e4a" />
 
-    {{-- Google Fonts: Sarabun --}}
+    {{-- Google Fonts: Charm --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@200;300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Charm:wght@400;700&display=swap" rel="stylesheet">
+
 
     <!-- อยู่ใน <head> -->
     <style type="text/tailwindcss">
@@ -34,8 +34,7 @@
                 theme: {
                     extend: {
                         fontFamily: {
-                            sans: ['"Sarabun"', 'ui-sans-serif', 'system-ui'],
-                            display: ['"Sarabun"', 'ui-sans-serif', 'system-ui'],
+                            charm: ['Charm', 'sans-serif'],
                         },
                         keyframes: {
                             floatY: {
@@ -97,10 +96,8 @@
 
     <!-- Base styles for layout & chart -->
     <style>
-        html,
-        html,
         body {
-            font-family: "Sarabun", "TH Sarabun New", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Thai", Tahoma, Arial, sans-serif;
+            font-family: 'Charm', sans-serif;
         }
 
         button,
@@ -243,7 +240,7 @@
     @stack('head')
 </head>
 
-<body class="min-h-screen bg-slate-950 text-slate-100 font-sans overflow-hidden" x-data="{}">
+<body class="font-charm min-h-screen bg-slate-950 text-slate-100 overflow-hidden" x-data="{}">
 
     {{-- เนื้อหาหน้า --}}
     @yield('content')
