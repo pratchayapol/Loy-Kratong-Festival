@@ -185,11 +185,12 @@
 
             <!-- Instagram -->
             <a href="instagram://camera"
+                onclick="setTimeout(() => { window.open('https://www.instagram.com/?app=1', '_blank'); }, 800);"
                 class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl
-                  bg-gradient-to-br from-[#F58529] via-[#DD2A7B] to-[#8134AF]
-                  text-white text-sm font-semibold
-                  shadow-md hover:shadow-lg hover:brightness-110
-                  transition w-full sm:w-auto justify-center sm:justify-start">
+           bg-gradient-to-br from-[#F58529] via-[#DD2A7B] to-[#8134AF]
+           text-white text-sm font-semibold
+           shadow-md hover:shadow-lg hover:brightness-110
+           transition w-full sm:w-auto justify-center sm:justify-start">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                     <path
                         d="M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4Zm5 5.5A3.5 3.5 0 1 0 15.5 12 3.5 3.5 0 0 0 12 8.5Zm4.75-2.25a1 1 0 1 0 1 1 1 1 0 0 0-1-1Z" />
