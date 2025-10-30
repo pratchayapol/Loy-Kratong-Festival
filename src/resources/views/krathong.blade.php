@@ -124,7 +124,6 @@
                 <path d="M12 16v-4M12 8h.01" stroke-width="2" stroke-linecap="round" />
             </svg>
             <span class="hidden sm:inline">เกี่ยวกับ</span>
-            <span class="sm:hidden">เกี่ยวกับ</span>
         </button>
     </div>
     <!-- ฉากฟ้า/น้ำ แบบ responsive: ฟ้า 60% มือถือ, 58% บน sm+ -->
