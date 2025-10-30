@@ -332,10 +332,15 @@
     @stack('head')
 </head>
 
-<body class="font-k2d min-h-screen bg-slate-950 text-slate-100 overflow-hidden" x-data="{}">
+<body
+    class="font-k2d min-h-screen bg-slate-950 text-slate-100
+         overflow-hidden md:overflow-hidden
+         [@supports(height:100dvh)]:min-h-[100dvh]">
 
     {{-- เนื้อหาหน้า --}}
-    @yield('content')
+    <div class="h-screen md:h-screen overflow-y-auto md:overflow-y-visible px-4 py-4">
+        @yield('content')
+    </div>
 
     {{-- ช่องให้เพจยัดสคริปต์ท้ายหน้า --}}
     @stack('scripts')

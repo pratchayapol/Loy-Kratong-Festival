@@ -19,6 +19,3 @@ Route::get('/kuma/heartbeat/{slug}', function (string $slug) {
 
 Route::get('/krathong/metrics', [KrathongController::class, 'metrics'])->name('krathong.metrics');
 
-Route::get('/browser', function () {
-    return view('browser.index');
-});
