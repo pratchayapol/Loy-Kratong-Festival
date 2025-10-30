@@ -14,7 +14,7 @@
                 <!-- หัวเรื่อง -->
                 <div
                     class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-wide bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-transparent">
-                    Loy Krathong Festival
+                    Loy Krathong Festival 2025
                 </div>
 
                 <!-- คำโปรย -->
