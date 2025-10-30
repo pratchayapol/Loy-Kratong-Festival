@@ -111,13 +111,15 @@
         <!-- ปุ่มเกี่ยวกับ -->
         <button @click="$store.ui.aboutOpen=true"
             class="inline-flex items-center justify-center sm:justify-start gap-2
-           min-h-12 px-5 py-3
-           bg-gradient-to-r from-purple-500 to-pink-600
-           font-semibold shadow-btn
-           hover:shadow-purple-500/50
-           hover:scale-105 active:scale-100
-           transition-all duration-300
-           focus:outline-none focus:ring-2 focus:ring-purple-400/50"
+               rounded-2xl
+               min-h-12 px-5 py-3
+               bg-gradient-to-r from-purple-500 to-pink-600
+               font-semibold shadow-btn
+               hover:shadow-purple-500/50
+               hover:scale-105 active:scale-100
+               transition-all duration-300
+               focus:outline-none focus:ring-2 focus:ring-purple-400/50
+               w-[150px] sm:w-auto"
             title="เกี่ยวกับ">
             <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <circle cx="12" cy="12" r="10" stroke-width="2" />
@@ -126,6 +128,7 @@
             <span class="hidden sm:inline">เกี่ยวกับ</span>
         </button>
     </div>
+
 
     <!-- ฉากฟ้า/น้ำ แบบ responsive: ฟ้า 60% มือถือ, 58% บน sm+ -->
     <main class="relative min-h-[calc(var(--vh,1vh)*100)] sm:min-h-screen less-anim">
