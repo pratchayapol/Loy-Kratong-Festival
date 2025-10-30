@@ -330,7 +330,7 @@
                             x-text="k.wish"></div>
 
                         <!-- popup ข้อความเต็ม -->
-                        <div x-show="k.show" x-transition.opacity.duration.120ms class="krathong-pop">
+                        <div x-show="k.show" x-transition.opacity.duration.120ms class="krathong-pop z-[60]">
                             <div class="text-[11px] leading-5 sm:text-sm text-slate-100" x-text="k.wish"></div>
                         </div>
 
