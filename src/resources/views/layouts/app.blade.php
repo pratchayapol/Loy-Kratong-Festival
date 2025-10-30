@@ -12,20 +12,13 @@
     <link rel="manifest" href="{{ secure_asset('site.webmanifest') }}" />
     <meta name="theme-color" content="#0b2e4a" />
 
-    {{-- Google Fonts: Charm --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Charm:wght@400;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=K2D:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap"
+        rel="stylesheet">
 
 
-    <!-- อยู่ใน <head> -->
-    <style type="text/tailwindcss">
-        @layer base {
-            html {
-                @apply font-sans;
-            }
-        }
-    </style>
 
     <!-- Tailwind config BEFORE CDN -->
     <script>
@@ -34,7 +27,8 @@
                 theme: {
                     extend: {
                         fontFamily: {
-                            charm: ['Charm', 'sans-serif'],
+                            k2d: ['K2D', 'sans-serif'],
+                            sans: ['K2D', 'ui-sans-serif', 'system-ui', 'sans-serif']
                         },
                         keyframes: {
                             floatY: {
@@ -97,7 +91,7 @@
     <!-- Base styles for layout & chart -->
     <style>
         body {
-            font-family: 'Charm', sans-serif;
+            font-family: 'K2D', Arial, sans-serif;
         }
 
         button,
@@ -240,7 +234,7 @@
     @stack('head')
 </head>
 
-<body class="font-charm min-h-screen bg-slate-950 text-slate-100 overflow-hidden" x-data="{}">
+<body class="font-k2d min-h-screen bg-slate-950 text-slate-100 overflow-hidden" x-data="{}">
 
     {{-- เนื้อหาหน้า --}}
     @yield('content')
