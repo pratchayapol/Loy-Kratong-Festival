@@ -184,6 +184,53 @@
         <!-- ชั้นวางพลุ -->
         <div id="firework-layer" class="pointer-events-none fixed inset-0 z-[35]"></div>
 
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const layer = document.getElementById('firework-layer');
+                if (!layer) return; // กันพลาดอีกชั้น
+
+                const isMobile = window.matchMedia('(max-width: 640px)').matches;
+                const maxBurst = isMobile ? 6 : 12;
+                const interval = isMobile ? 1400 : 900;
+
+                const colors = [
+                    '#ff5c5c',
+                    '#ffe066',
+                    '#6ee7b7',
+                    '#60a5fa',
+                    '#a855f7',
+                    '#ffffff'
+                ];
+
+                function spawnFirework() {
+                    if (!layer) return;
+                    if (layer.children.length >= maxBurst) return;
+
+                    const fw = document.createElement('div');
+                    fw.className = 'js-firework';
+
+                    const x = Math.random() * 100;
+                    const y = Math.random() * 35 + 5;
+
+                    fw.style.left = x + '%';
+                    fw.style.top = y + '%';
+
+                    const baseColor = colors[Math.floor(Math.random() * colors.length)];
+                    fw.style.setProperty('--fw-color', baseColor);
+
+                    const scale = 0.7 + Math.random() * 0.8;
+                    fw.style.setProperty('--fw-scale', scale);
+
+                    layer.appendChild(fw);
+
+                    setTimeout(() => fw.remove(), 1800);
+                }
+
+                spawnFirework();
+                setInterval(spawnFirework, interval);
+            });
+        </script>
+
         <!-- HORIZON โค้ง -->
         <div class="pointer-events-none absolute inset-x-0 top-[62%] sm:top-[58%] max-w-full overflow-hidden">
             <svg class="w-full h-16 sm:h-20" viewBox="0 0 1440 160" preserveAspectRatio="none" aria-hidden="true">
