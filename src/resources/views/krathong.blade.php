@@ -365,8 +365,7 @@
         <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity" @click="$store.ui.open=false">
         </div>
 
-        <div class="absolute inset-0 flex items-start sm:items-center justify-center p-0 sm:p-6 pt-6 overflow-y-auto"
-            @click.stop>
+        <div class="absolute inset-0 flex items-start justify-center p-0 sm:p-6 overflow-y-auto pt-6" @click.stop>
 
             <div class="w-full max-w-full sm:max-w-xl modal-enter backdrop-blur-2xl rounded-none sm:rounded-3xl border border-white/20 bg-slate-900/50 shadow-glass h-[calc(var(--vh,1vh)*100)] sm:h-auto flex flex-col pb-safe pt-safe"
                 x-data="krathongForm()">
