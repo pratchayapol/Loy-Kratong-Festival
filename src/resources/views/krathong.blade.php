@@ -385,27 +385,19 @@
 
     <!-- Modal ฟอร์ม -->
     <div x-show="$store.ui.open" x-cloak class="fixed inset-0 z-50" @keydown.escape.window="$store.ui.open=false">
-        <!-- ฉาก -->
         <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" @click="$store.ui.open=false"></div>
 
-        <!-- กล่อง modal ที่เลื่อนได้ -->
-        <div class="absolute inset-0 flex items-start justify-center p-0 sm:p-6 overflow-y-auto pt-6"
-            style="--safe-bottom: env(safe-area-inset-bottom, 16px);" @click.stop>
-            <div class="w-full max-w-full sm:max-w-xl modal-enter backdrop-blur-2xl
-                   rounded-none sm:rounded-3xl border border-white/20 bg-slate-900/50 shadow-glass
-                   h-[calc(var(--vh,1vh)*100)] sm:h-auto
-                   flex flex-col
-                   pt-safe pb-safe
-                   pb-[var(--safe-bottom)]"
+        <div class="absolute inset-0 flex items-start justify-center p-0 sm:p-6 overflow-y-auto pt-6" @click.stop>
+
+            <div class="w-full max-w-full sm:max-w-xl ... max-h-[calc(var(--vh,1vh)*100)] sm:h-auto flex flex-col">
+
                 x-data="krathongForm()">
-                <!-- header -->
                 <div
                     class="flex items-start justify-between px-5 sm:px-6 pb-4 sm:pb-0 pt-2 sm:pt-6 border-b border-white/10">
                     <div>
                         <h2
                             class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-                            ลอยกระทง
-                        </h2>
+                            ลอยกระทง</h2>
                         <p class="text-sm text-slate-300 mt-1.5">เลือกแบบ กรอกข้อมูล แล้วปล่อยลอยเลย</p>
                     </div>
                     <button @click="$store.ui.open=false"
@@ -418,10 +410,7 @@
                     </button>
                 </div>
 
-                <!-- body -->
-                <form @submit.prevent="submit"
-                    class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5
-                       pb-[calc(var(--safe-bottom)+0.75rem)]">
+                <form @submit.prevent="submit" class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 pb-24">
                     <div>
                         <label class="text-sm font-semibold text-slate-200">เลือกแบบกระทง</label>
                         <div class="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -466,10 +455,8 @@
                         <textarea x-model="form.wish" maxlength="200" required rows="3"
                             class="min-h-12 w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/30 transition-all placeholder:text-slate-500 resize-none"
                             placeholder="ขอให้..."></textarea>
-                        <div class="text-xs text-slate-400 flex justify-between">
-                            <span>ไม่เกิน 200 ตัวอักษร</span>
-                            <span x-text="`${form.wish?.length||0}/200`"></span>
-                        </div>
+                        <div class="text-xs text-slate-400 flex justify-between"><span>ไม่เกิน 200 ตัวอักษร</span><span
+                                x-text="`${form.wish?.length||0}/200`"></span></div>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-3 pt-2">
@@ -483,9 +470,7 @@
                             ลอยเลย
                         </button>
                         <button type="button" @click="$store.ui.open=false"
-                            class="min-h-12 rounded-xl border border-white/20 px-5 py-3 hover:bg-white/10 transition-colors font-medium">
-                            ปิด
-                        </button>
+                            class="min-h-12 rounded-xl border border-white/20 px-5 py-3 hover:bg-white/10 transition-colors font-medium">ปิด</button>
                         <span x-show="ok" x-text="ok"
                             class="text-emerald-400 text-sm font-semibold animate-pulse"></span>
                         <span x-show="error" x-text="error" class="text-rose-400 text-sm font-semibold"></span>
