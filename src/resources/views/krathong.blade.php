@@ -88,27 +88,44 @@
         });
     </script>
 
-    <!-- ปุ่มมุมซ้ายบน -->
-    <button @click="$store.ui.open=true"
-        class="fixed left-4 top-4 z-40 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 px-5 py-3 font-semibold shadow-btn hover:shadow-[0_15px_50px_rgba(34,211,238,0.55)] hover:scale-105 active:scale-100 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400/50">
-        <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M4.5 12a7.5 7.5 0 0015 0m-15 0a7.5 7.5 0 0115 0M12 3v9" />
-        </svg>
-        <span class="hidden sm:inline">ลอยกระทงด้วย</span><span class="sm:hidden">ลอย</span>
-    </button>
+    <!-- กล่องรวมปุ่มมุมซ้ายบน -->
+    <div class="fixed left-4 top-4 z-40 flex flex-col gap-3">
+        <!-- ปุ่มลอยกระทง -->
+        <button @click="$store.ui.open=true"
+            class="inline-flex items-center gap-2 rounded-2xl
+               bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600
+               px-5 py-3 font-semibold shadow-btn
+               hover:shadow-[0_15px_50px_rgba(34,211,238,0.55)]
+               hover:scale-105 active:scale-100
+               transition-all duration-300
+               focus:outline-none focus:ring-2 focus:ring-cyan-400/50">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4.5 12a7.5 7.5 0 0015 0m-15 0a7.5 7.5 0 0115 0M12 3v9" />
+            </svg>
+            <span class="hidden sm:inline">ลอยกระทงด้วย</span>
+            <span class="sm:hidden">ลอย</span>
+        </button>
 
-    <!-- ปุ่มเกี่ยวกับ -->
-    <button @click="$store.ui.aboutOpen=true"
-        class="fixed right-4 bottom-4 z-40 w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 shadow-lg hover:shadow-purple-500/50 hover:scale-110 active:scale-100 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-purple-400/50 flex items-center justify-center group"
-        title="เกี่ยวกับ">
-        <svg xmlns="http://www.w3.org/2000/svg" class="size-6 group-hover:rotate-12 transition-transform"
-            viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <circle cx="12" cy="12" r="10" stroke-width="2" />
-            <path d="M12 16v-4M12 8h.01" stroke-width="2" stroke-linecap="round" />
-        </svg>
-    </button>
-
+        <!-- ปุ่มเกี่ยวกับ -->
+        <button @click="$store.ui.aboutOpen=true"
+            class="inline-flex items-center justify-center gap-2 rounded-2xl
+               bg-gradient-to-br from-purple-500 to-pink-600
+               w-12 h-12 sm:w-auto sm:h-auto sm:px-4 sm:py-2
+               shadow-lg hover:shadow-purple-500/50
+               hover:scale-105 active:scale-100
+               transition-all duration-300
+               focus:outline-none focus:ring-2 focus:ring-purple-400/50"
+            title="เกี่ยวกับ">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                class="size-6 sm:size-5 sm:mr-1 group-hover:rotate-12 transition-transform" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor">
+                <circle cx="12" cy="12" r="10" stroke-width="2" />
+                <path d="M12 16v-4M12 8h.01" stroke-width="2" stroke-linecap="round" />
+            </svg>
+            <span class="hidden sm:inline">เกี่ยวกับ</span>
+        </button>
+    </div>
     <!-- ฉากฟ้า/น้ำ แบบ responsive: ฟ้า 60% มือถือ, 58% บน sm+ -->
     <main class="relative min-h-[calc(var(--vh,1vh)*100)] sm:min-h-screen less-anim">
         <!-- SKY -->
@@ -368,7 +385,7 @@
     <!-- Modal ฟอร์ม -->
     <div x-show="$store.ui.open" x-cloak class="fixed inset-0 z-50" @keydown.escape.window="$store.ui.open=false">
         <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" @click="$store.ui.open=false"></div>
-        
+
         <div class="absolute inset-0 flex items-start justify-center p-0 sm:p-6 overflow-y-auto pt-6" @click.stop>
 
             <div class="w-full max-w-full sm:max-w-xl modal-enter backdrop-blur-2xl rounded-none sm:rounded-3xl border border-white/20 bg-slate-900/50 shadow-glass h-[calc(var(--vh,1vh)*100)] sm:h-auto flex flex-col pb-safe pt-safe"
