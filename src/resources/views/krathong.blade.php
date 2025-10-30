@@ -36,7 +36,7 @@
                                 d="M12 2.5c4.2 5.1 6.3 8.6 6.3 11.3 0 3.5-2.8 6.3-6.3 6.3s-6.3-2.8-6.3-6.3C5.7 11.1 7.8 7.6 12 2.5z" />
                         </svg>
 
-                        <span class="text-slate-200/90">จำนวนกระทงทั้งหมด</span>
+                        <span class="text-slate-200/90">จำนวนกระทงล่าสุด</span>
 
                         <span class="mx-1 h-1 w-1 rounded-full bg-white/30"></span>
 
@@ -64,7 +64,8 @@
                                 class="absolute inline-flex h-full w-full rounded-full bg-emerald-300/60 animate-ping"></span>
                             <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-300"></span>
                         </span>
-                        <span>กำลังอัปเดตอัตโนมัติ</span>
+                        <span>Online
+                        </span>
                     </div>
 
                 </div>
@@ -181,11 +182,16 @@
         </div>
 
         <!-- HORIZON โค้ง -->
-        <svg class="absolute left-0 right-0 top-[60%] sm:top-[58%] h-20 pointer-events-none" viewBox="0 0 1440 160"
-            preserveAspectRatio="none" aria-hidden="true">
-            <path d="M0,100 C360,140 1080,60 1440,100" stroke="rgba(255,255,255,0.40)" stroke-width="1" fill="none" />
-            <path d="M0,100 C360,140 1080,60 1440,100 L1440,160 L0,160 Z" fill="rgba(255,255,255,0.08)" />
-        </svg>
+        <div class="pointer-events-none absolute inset-x-0 top-[62%] sm:top-[58%] max-w-full overflow-hidden">
+            <svg class="w-full h-16 sm:h-20" viewBox="0 0 1440 160" preserveAspectRatio="none" aria-hidden="true">
+                <!-- เส้นโค้ง -->
+                <path d="M0,100 C360,140 1080,60 1440,100" stroke="rgba(255,255,255,0.40)" stroke-width="1"
+                    fill="none" />
+                <!-- พื้นด้านล่าง -->
+                <path d="M0,100 C360,140 1080,60 1440,100 L1440,160 L0,160 Z" fill="rgba(255,255,255,0.08)" />
+            </svg>
+        </div>
+
 
         <!-- WATER -->
         <div class="absolute left-0 right-0 top-[60%] sm:top-[58%] bottom-0 overflow-hidden">
