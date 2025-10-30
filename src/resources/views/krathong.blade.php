@@ -130,6 +130,52 @@
     </div>
 
 
+    <!-- ปุ่มแชร์ -->
+<div class="flex flex-wrap gap-3">
+    <!-- Facebook -->
+    <a
+        href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode($shareUrl) }}"
+        target="_blank" rel="noopener"
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-[#1877F2] text-white text-sm font-semibold hover:opacity-90 transition">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M22 12a10 10 0 1 0-11.5 9.9v-7h-2v-3h2v-2.3c0-2 1.2-3.1 3-3.1.9 0 1.8.2 1.8.2v2h-1c-1 0-1.3.6-1.3 1.2V12h2.2l-.4 3h-1.8v7A10 10 0 0 0 22 12Z" />
+        </svg>
+        Facebook
+    </a>
+
+    <!-- Line -->
+    <a
+        href="https://line.me/R/msg/text/?{{ urlencode($shareTitle ?? 'ชวนมาลอยกระทง') }}%0A{{ urlencode($shareUrl) }}"
+        target="_blank" rel="noopener"
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-[#06C755] text-white text-sm font-semibold hover:opacity-90 transition">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20 10.5C20 6.9 16.9 4 13 4H11C7.1 4 4 6.9 4 10.5 4 13 5.7 15.1 8.2 16.2L7.5 19l3.1-2.4h2.4c3.9 0 7-2.9 7-6.1Z" />
+        </svg>
+        LINE
+    </a>
+
+    <!-- X / Twitter -->
+    <a
+        href="https://twitter.com/intent/tweet?url={{ urlencode($shareUrl) }}&text={{ urlencode($shareTitle ?? 'ลอยกระทงออนไลน์กัน') }}"
+        target="_blank" rel="noopener"
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-black text-white text-sm font-semibold hover:opacity-90 transition">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M3 3h4.5l4.1 5.6L15.8 3H21l-6.8 8.1L21 21h-4.5l-4.4-6-5 6H3l7-8.5L3 3Z" />
+        </svg>
+        X
+    </a>
+
+    <!-- Instagram: ไปหน้า insta หรือเปิดแอป -->
+    <a
+        href="instagram://camera"
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-gradient-to-r from-pink-500 via-red-500 to-yellow-400 text-white text-sm font-semibold hover:opacity-90 transition">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4Zm5 5.5A3.5 3.5 0 1 0 15.5 12 3.5 3.5 0 0 0 12 8.5Zm4.75-2.25a1 1 0 1 0 1 1 1 1 0 0 0-1-1Z" />
+        </svg>
+        Instagram
+    </a>
+</div>
+
     <!-- ฉากฟ้า/น้ำ แบบ responsive: ฟ้า 60% มือถือ, 58% บน sm+ -->
     <main class="relative min-h-[calc(var(--vh,1vh)*100)] sm:min-h-screen less-anim">
         <!-- SKY -->
