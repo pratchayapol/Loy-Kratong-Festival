@@ -387,7 +387,9 @@
     <div x-show="$store.ui.open" x-cloak class="fixed inset-0 z-50" @keydown.escape.window="$store.ui.open=false">
         <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" @click="$store.ui.open=false"></div>
 
-        <div class="absolute inset-0 flex items-start justify-center p-0 sm:p-6 overflow-y-auto pt-6 pb-24 sm:pb-10" @click.stop>
+        <!-- wrapper ที่เลื่อน -->
+        <div class="absolute inset-0 flex items-start justify-center p-0 sm:p-6 overflow-y-auto pt-6 pb-28 sm:pt-8 sm:pb-10"
+            @click.stop>
 
             <div class="w-full max-w-full sm:max-w-xl modal-enter backdrop-blur-2xl rounded-none sm:rounded-3xl border border-white/20 bg-slate-900/50 shadow-glass h-[calc(var(--vh,1vh)*100)] sm:h-auto flex flex-col pb-safe pt-safe"
                 x-data="krathongForm()">
@@ -409,7 +411,8 @@
                     </button>
                 </div>
 
-                <form @submit.prevent="submit" class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 pb-50 sm:pb-6">
+                <!-- ฟอร์ม -->
+                <form @submit.prevent="submit" class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 pb-28 sm:pb-6">
                     <div>
                         <label class="text-sm font-semibold text-slate-200">เลือกแบบกระทง</label>
                         <div class="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -454,8 +457,10 @@
                         <textarea x-model="form.wish" maxlength="200" required rows="3"
                             class="min-h-12 w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/30 transition-all placeholder:text-slate-500 resize-none"
                             placeholder="ขอให้..."></textarea>
-                        <div class="text-xs text-slate-400 flex justify-between"><span>ไม่เกิน 200 ตัวอักษร</span><span
-                                x-text="`${form.wish?.length||0}/200`"></span></div>
+                        <div class="text-xs text-slate-400 flex justify-between">
+                            <span>ไม่เกิน 200 ตัวอักษร</span>
+                            <span x-text="`${form.wish?.length||0}/200`"></span>
+                        </div>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-3 pt-2">
@@ -478,6 +483,7 @@
             </div>
         </div>
     </div>
+
 
     <!-- Modal เกี่ยวกับ -->
     <div x-show="$store.ui.aboutOpen" x-cloak class="fixed inset-0 z-50"
