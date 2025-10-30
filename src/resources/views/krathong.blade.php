@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@php
+    $shareUrl = $shareUrl ?? url()->current();
+    $shareTitle = $shareTitle ?? 'ชวนมาลอยกระทง';
+@endphp
 
 @section('content')
     <!-- ป้ายเชิญด้านบนตรงกลาง: ซ่อนบนมือถือ -->

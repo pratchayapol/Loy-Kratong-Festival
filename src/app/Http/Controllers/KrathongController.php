@@ -16,7 +16,7 @@ class KrathongController extends Controller
         'silver'  => ['label' => 'กระทงเงิน', 'img' => '/images/krathongs/silver.png'],
         'gold'    => ['label' => 'กระทงทอง', 'img' => '/images/krathongs/gold.png'],
         'kurab'    => ['label' => 'กระทงกุหลาบ', 'img' => '/images/krathongs/kurab.png'],
-        
+
         'dog'    => ['label' => 'กระทงสุนัข', 'img' => '/images/krathongs/dog.png'],
         'cat'    => ['label' => 'กระทงเหมียว', 'img' => '/images/krathongs/cat.png'],
         'baar'    => ['label' => 'กระทงหมี', 'img' => '/images/krathongs/baar.png'],
@@ -55,6 +55,8 @@ class KrathongController extends Controller
             'types'  => $this->types,
             'recent' => $recent,
             'total'  => $total,
+            'shareUrl' => url()->current(),
+            'shareTitle' => 'ชวนมาลอยกระทง',
         ]);
     }
 
