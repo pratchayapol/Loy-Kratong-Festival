@@ -183,7 +183,7 @@
                 <span class="hidden sm:inline">X</span>
             </a>
 
-            <!-- Instagram -->
+            {{-- <!-- Instagram -->
             <a href="instagram://camera"
                 onclick="setTimeout(() => { window.open('https://www.instagram.com/?app=1', '_blank'); }, 800);"
                 class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl
@@ -197,7 +197,7 @@
                 </svg>
                 <span class="hidden sm:inline">Instagram</span>
                 <span class="sm:hidden">IG</span>
-            </a>
+            </a> --}}
         </div>
     </div>
 
