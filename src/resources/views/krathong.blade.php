@@ -136,16 +136,16 @@
     <!-- กล่องรวมปุ่มมุมขวาบน -->
     <div class="fixed right-4 top-4 z-40 flex flex-col gap-3 items-end">
         <!-- ปุ่มแชร์ -->
-        <div class="flex flex-wrap gap-2 justify-end">
+        <div class="flex flex-col sm:flex-row gap-2 justify-end items-end sm:items-center">
 
             <!-- Facebook -->
             <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode($shareUrl ?? url()->current()) }}"
                 target="_blank" rel="noopener"
                 class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl
-                   bg-gradient-to-r from-[#1877F2] to-[#0E5AD5]
-                   text-white text-sm font-semibold
-                   shadow-md hover:shadow-lg hover:brightness-110
-                   transition">
+                  bg-gradient-to-r from-[#1877F2] to-[#0E5AD5]
+                  text-white text-sm font-semibold
+                  shadow-md hover:shadow-lg hover:brightness-110
+                  transition w-full sm:w-auto justify-center sm:justify-start">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                     <path
                         d="M22 12.06C22 6.51 17.52 2 12 2S2 6.51 2 12.06c0 4.52 3.29 8.27 7.59 9v-6.37H7.3v-2.63h2.29v-2c0-2.26 1.34-3.51 3.39-3.51.98 0 2 .18 2 .18v2.21h-1.13c-1.11 0-1.46.7-1.46 1.42v1.7h2.49l-.4 2.63h-2.09V21C18.71 20.33 22 16.58 22 12.06Z" />
@@ -158,10 +158,10 @@
             <a href="https://line.me/R/msg/text/?{{ urlencode($shareTitle ?? 'ชวนมาลอยกระทง') }}%0A{{ urlencode($shareUrl ?? url()->current()) }}"
                 target="_blank" rel="noopener"
                 class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl
-                   bg-gradient-to-r from-[#06C755] to-[#00AA44]
-                   text-white text-sm font-semibold
-                   shadow-md hover:shadow-lg hover:brightness-110
-                   transition">
+                  bg-gradient-to-r from-[#06C755] to-[#00AA44]
+                  text-white text-sm font-semibold
+                  shadow-md hover:shadow-lg hover:brightness-110
+                  transition w-full sm:w-auto justify-center sm:justify-start">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                     <path
                         d="M20.5 10.5c0-3.63-3.42-6.5-7.57-6.5h-1.83C6.95 4 4 6.87 4 10.5c0 2.52 1.57 4.25 3.97 5.25L7.5 20l3.04-2.49h2.13c4.12 0 7.83-2.8 7.83-7.01Z" />
@@ -173,23 +173,23 @@
             <a href="https://twitter.com/intent/tweet?url={{ urlencode($shareUrl ?? url()->current()) }}&text={{ urlencode($shareTitle ?? 'ลอยกระทงออนไลน์กัน') }}"
                 target="_blank" rel="noopener"
                 class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl
-                   bg-gradient-to-r from-black to-[#1A1A1A]
-                   text-white text-sm font-semibold
-                   shadow-md hover:shadow-lg hover:brightness-110
-                   transition">
+                  bg-gradient-to-r from-black to-[#1A1A1A]
+                  text-white text-sm font-semibold
+                  shadow-md hover:shadow-lg hover:brightness-110
+                  transition w-full sm:w-auto justify-center sm:justify-start">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M3 3h4.5l4.12 5.62L15.8 3H21l-6.79 8.05L21 21h-4.5l-4.28-5.87L7.9 21H3l6.79-8.13L3 3Z" />
                 </svg>
                 <span class="hidden sm:inline">X</span>
             </a>
 
-            <!-- Instagram (เปิดแอป) -->
+            <!-- Instagram -->
             <a href="instagram://camera"
                 class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl
-                   bg-gradient-to-br from-[#F58529] via-[#DD2A7B] to-[#8134AF]
-                   text-white text-sm font-semibold
-                   shadow-md hover:shadow-lg hover:brightness-110
-                   transition">
+                  bg-gradient-to-br from-[#F58529] via-[#DD2A7B] to-[#8134AF]
+                  text-white text-sm font-semibold
+                  shadow-md hover:shadow-lg hover:brightness-110
+                  transition w-full sm:w-auto justify-center sm:justify-start">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                     <path
                         d="M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4Zm5 5.5A3.5 3.5 0 1 0 15.5 12 3.5 3.5 0 0 0 12 8.5Zm4.75-2.25a1 1 0 1 0 1 1 1 1 0 0 0-1-1Z" />
@@ -199,6 +199,7 @@
             </a>
         </div>
     </div>
+
 
 
 
