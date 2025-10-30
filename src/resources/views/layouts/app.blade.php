@@ -1,7 +1,9 @@
 <head>
     <meta charset="utf-8" />
-    <meta name="description" content="ลอยกระทงออนไลน์ 68 เว็บไซต์ร่วมประเพณีไทย ปี 2568 ส่งคำอธิษฐานผ่านกระทงออนไลน์ ต้อนรับ Loy Krathong Festival 2025">
-    <meta name="keywords" content="ลอยกระทง, ลอยกระทงออนไลน์68, ลอยกระทง2568, Loy Krathong 2025, ประเพณีไทย, กระทง, งานลอยกระทง">
+    <meta name="description"
+        content="ลอยกระทงออนไลน์ 68 เว็บไซต์ร่วมประเพณีไทย ปี 2568 ส่งคำอธิษฐานผ่านกระทงออนไลน์ ต้อนรับ Loy Krathong Festival 2025">
+    <meta name="keywords"
+        content="ลอยกระทง, ลอยกระทงออนไลน์68, ลอยกระทง2568, Loy Krathong 2025, ประเพณีไทย, กระทง, งานลอยกระทง">
 
     <meta property="og:title" content="ลอยกระทงออนไลน์ 68 | ลอยกระทงปี 2568">
     <meta property="og:description" content="ร่วมประเพณีไทย ลอยกระทงออนไลน์ปี 2568 ส่งคำอธิษฐานผ่านเว็บไซต์กับเรา">
@@ -98,6 +100,47 @@
 
     <!-- Base styles for layout & chart -->
     <style>
+        .js-firework {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 9999px;
+            animation: fw-burst-js 1.6s ease-out forwards;
+            filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.35));
+        }
+
+        @keyframes fw-burst-js {
+            0% {
+                opacity: 1;
+                transform: scale(calc(var(--fw-scale, 1) * 0.5));
+                /* ยิงออกหลายทิศด้วยสีหลัก */
+                box-shadow:
+                    0 0 0 0 var(--fw-color, #fff),
+                    0 0 0 0 rgba(255, 255, 255, 0.9),
+                    0 0 0 0 rgba(255, 255, 255, 0.6);
+            }
+
+            40% {
+                opacity: 1;
+                transform: scale(calc(var(--fw-scale, 1) * 1.2));
+                box-shadow:
+                    28px -38px 0 0 rgba(255, 255, 255, 0),
+                    -30px -35px 0 0 rgba(255, 255, 255, 0),
+                    0 46px 0 0 rgba(255, 255, 255, 0);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(calc(var(--fw-scale, 1) * 0.8));
+            }
+        }
+
+        @media (max-width: 640px) {
+            .js-firework {
+                animation-duration: 1.9s;
+            }
+        }
+
         body {
             font-family: 'K2D', Arial, sans-serif;
         }

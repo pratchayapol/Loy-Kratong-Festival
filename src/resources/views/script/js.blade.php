@@ -667,7 +667,8 @@
                 const el = document.getElementById('totalCount');
                 if (el) el.textContent = Number(total).toLocaleString();
             } catch (e) {
-                /* เงียบไว้พอ */ }
+                /* เงียบไว้พอ */
+            }
         }
 
         // ดึงทุก 3 วินาทีพอ ไม่โหดเกิน
@@ -694,4 +695,55 @@
         passive: true
     });
     document.addEventListener('DOMContentLoaded', setVH);
+
+    (function() {
+        const layer = document.getElementById('firework-layer');
+        const isMobile = window.matchMedia('(max-width: 640px)').matches;
+        const maxBurst = isMobile ? 6 : 12; // จำนวนพลุสูงสุดที่อยู่พร้อมกัน
+        const interval = isMobile ? 1400 : 900; // ความถี่ในการยิง
+
+        const colors = [
+            '#ff5c5c',
+            '#ffe066',
+            '#6ee7b7',
+            '#60a5fa',
+            '#a855f7',
+            '#ffffff'
+        ];
+
+        function spawnFirework() {
+            // กันล้นจำนวน
+            if (layer.children.length >= maxBurst) return;
+
+            const fw = document.createElement('div');
+            fw.className = 'js-firework';
+
+            // สุ่มจุด (ยิงบนๆ หน่อย)
+            const x = Math.random() * 100;
+            const y = Math.random() * 35 + 5; // 5% - 40%
+
+            fw.style.left = x + '%';
+            fw.style.top = y + '%';
+
+            // สุ่มสีหลัก
+            const baseColor = colors[Math.floor(Math.random() * colors.length)];
+            fw.style.setProperty('--fw-color', baseColor);
+
+            // สุ่ม scale
+            const scale = 0.7 + Math.random() * 0.8; // 0.7 - 1.5
+            fw.style.setProperty('--fw-scale', scale);
+
+            layer.appendChild(fw);
+
+            // ลบหลังจบอนิเมะ
+            setTimeout(() => {
+                fw.remove();
+            }, 1800);
+        }
+
+        // ยิงแรก
+        spawnFirework();
+        // ยิงต่อเนื่อง
+        setInterval(spawnFirework, interval);
+    })();
 </script>

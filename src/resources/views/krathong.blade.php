@@ -181,17 +181,8 @@
             </div>
         </div>
 
-        <!-- พลุ -->
-        <div class="pointer-events-none fixed inset-0 overflow-hidden z-[35]">
-            <!-- ดอก 1 -->
-            <div class="firework firework-1"></div>
-            <!-- ดอก 2 -->
-            <div class="firework firework-2"></div>
-            <!-- ดอก 3 -->
-            <div class="firework firework-3"></div>
-            <!-- ดอก 4 -->
-            <div class="hidden sm:block firework firework-4"></div>
-        </div>
+        <!-- ชั้นวางพลุ -->
+        <div id="firework-layer" class="pointer-events-none fixed inset-0 z-[35]"></div>
 
         <!-- HORIZON โค้ง -->
         <div class="pointer-events-none absolute inset-x-0 top-[62%] sm:top-[58%] max-w-full overflow-hidden">
