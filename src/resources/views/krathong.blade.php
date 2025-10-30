@@ -265,6 +265,30 @@
                 // ยิงต่อ
                 setInterval(spawnFirework, interval);
             });
+
+            document.addEventListener('click', function(e) {
+                const layer = document.getElementById('firework-layer');
+                if (!layer) return;
+                // แปลงตำแหน่งคลิก
+                const x = e.clientX;
+                const y = e.clientY;
+                // ยิงตรงจุด
+                const evt = new CustomEvent('manual-firework', {
+                    detail: {
+                        x,
+                        y
+                    }
+                });
+                window.dispatchEvent(evt);
+            });
+            window.addEventListener('manual-firework', function(e) {
+                const {
+                    x,
+                    y
+                } = e.detail;
+                // reuse
+                // เรียก createBurst โดยต้องย้ายออกไปไว้ด้านนอกถ้าจะใช้แบบนี้
+            });
         </script>
 
 
