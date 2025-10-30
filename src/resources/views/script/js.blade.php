@@ -354,14 +354,10 @@
         const SAFE_GAP_PCT = KRATHONG_WIDTH_PCT * 1.25;
         const TIME_GAP_MS = (SAFE_GAP_PCT / TRACK_WIDTH) * DUR * 1000;
 
-        // console.log(
-        //     `Config: ${TOTAL_LANES} lanes, padTop:${TOP_PAD}%, padBot:${BOTTOM_PAD}%, avail:${AVAILABLE.toFixed(1)}%, gap:${(TIME_GAP_MS/1000).toFixed(1)}s`
-        // );
-
         const laneNextTime = new Array(TOTAL_LANES).fill(0);
         let currentLaneIndex = 0;
 
-        function pickLane() {
+        function pickLane(force = false) {
             const now = performance.now();
             for (let attempt = 0; attempt < TOTAL_LANES; attempt++) {
                 const laneIdx = (currentLaneIndex + attempt) % TOTAL_LANES;
@@ -371,8 +367,19 @@
                     return laneIdx;
                 }
             }
+            if (force) {
+                // ถ้าบังคับ ให้เลือกเลนที่ว่างเร็วสุด
+                let minIdx = 0;
+                for (let i = 1; i < TOTAL_LANES; i++) {
+                    if (laneNextTime[i] < laneNextTime[minIdx]) minIdx = i;
+                }
+                laneNextTime[minIdx] = now + TIME_GAP_MS;
+                currentLaneIndex = (minIdx + 1) % TOTAL_LANES;
+                return minIdx;
+            }
             return -1;
         }
+
         // สร้าง animation ที่นุ่มนวล
         const makeStyle = (topPct, laneIdx) => {
             const name = `drift_${Math.random().toString(36).slice(2)}`;
@@ -408,8 +415,8 @@
             .from(new Map((recent || []).map(r => [r.id, r])).values())
             .sort((a, b) => b.id - a.id);
 
-        const mkItem = (rec) => {
-            const li = pickLane();
+        const mkItem = (rec, force = false) => {
+            const li = pickLane(force);
             if (li === -1) return null;
 
             return {
@@ -557,15 +564,24 @@
                 spawn();
             },
 
-            spawnFromRecord(r) {
-                if (usedIds.has(r.id)) return;
+            // ปรับให้รองรับการลอยสด แล้วบังคับลงเลน ถ้ายังไม่ว่างให้รีทราย
+            spawnFromRecord(r, force = false) {
+                // ถ้าเป็น data เก่า ให้กันซ้ำเหมือนเดิม
+                if (!force && usedIds.has(r.id)) return;
 
                 const fresh = [r, ...order.filter(x => x.id !== r.id)].sort((a, b) => b.id - a.id);
                 order.length = 0;
                 order.push(...fresh);
 
-                const item = mkItem(r);
-                if (item) {
+                const trySpawn = (retry = 0) => {
+                    const item = mkItem(r, force);
+                    if (!item) {
+                        if (retry < 3) {
+                            __schedule(() => trySpawn(retry + 1), 350);
+                        }
+                        return;
+                    }
+
                     usedIds.add(item.id);
                     this.items.unshift(item);
                     if (this.items.length > MAX_ITEMS) {
@@ -577,9 +593,12 @@
                         usedIds.delete(removed.id);
                     }
                     scheduleRemoval(this, item, item.__life);
-                }
+                };
+
+                trySpawn();
             },
 
+            // ใช้ตอนโพสต์จากฟอร์ม ต้องให้ขึ้นชัวร์
             spawnNew(p) {
                 this.spawnFromRecord({
                     id: p.id ?? Date.now(),
@@ -587,7 +606,7 @@
                     nickname: p.nickname,
                     age: p.age,
                     wish: p.wish
-                });
+                }, true); // force
             }
         }
     }
@@ -633,7 +652,7 @@
                     this.ok = 'ลอยแล้ว ✨';
                     window.__fw?.burst();
                     const api = Alpine.$data(document.getElementById('river'));
-                    api?.spawnNew?.(data); // แสดงกระทงที่เพิ่งลอยทันที
+                    api?.spawnNew?.(data); // แสดงกระทงที่เพิ่งลอยทันที แบบ force
                     this.form.wish = '';
                     setTimeout(() => {
                         Alpine.store('ui').open = false;
