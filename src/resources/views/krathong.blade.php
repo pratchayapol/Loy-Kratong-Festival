@@ -28,15 +28,11 @@
                     <!-- ป้ายจำนวนกระทงทั้งหมด -->
                     <div
                         class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-slate-900/40 px-3.5 py-1.5 backdrop-blur-md shadow-[0_8px_24px_rgba(0,0,0,0.35)]">
-                        <!-- ไอคอนหยดน้ำ -->
-                        <svg class="h-4 w-4 sm:h-5 sm:w-5 opacity-90" viewBox="0 0 24 24" fill="currentColor"
-                            aria-hidden="true">
-                            <path
-                                d="M12 2.5c4.2 5.1 6.3 8.6 6.3 11.3 0 3.5-2.8 6.3-6.3 6.3s-6.3-2.8-6.3-6.3C5.7 11.1 7.8 7.6 12 2.5z" />
-                        </svg>
+                        <svg ...><!-- ไอคอน --></svg>
                         <span class="text-slate-200/90">จำนวนกระทงทั้งหมด</span>
                         <span class="mx-1 h-1 w-1 rounded-full bg-white/30"></span>
-                        <span id="totalCount" class="text-xl sm:text-2xl font-extrabold text-white font-mono tabular-nums"
+                        <span id="totalCount"
+                            class="text-3xl sm:text-5xl md:text-6xl font-extrabold text-white font-mono tabular-nums drop-shadow-lg bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-transparent"
                             aria-live="polite">
                             {{ number_format($total ?? 0) }}
                         </span>
