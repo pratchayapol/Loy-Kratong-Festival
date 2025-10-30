@@ -13,7 +13,85 @@
 /* ตั้งฟอนต์หลัก */
 @theme {
   --font-sans: "Sarabun", ui-sans-serif, system-ui, sans-serif,
-               "Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
 /* ไม่ต้องมี @tailwind base/components/utilities ใน v4 */
+
+.firework {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: transparent;
+  animation: fw-burst 1.8s ease-out infinite;
+  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.9));
+  opacity: 0.9;
+}
+
+/* ตำแหน่งแต่ละดอก */
+.firework-1 {
+  top: 14%;
+  left: 14%;
+  animation-delay: 0s;
+}
+
+.firework-2 {
+  top: 10%;
+  right: 18%;
+  animation-delay: 0.4s;
+}
+
+.firework-3 {
+  top: 22%;
+  left: 50%;
+  animation-delay: 0.8s;
+}
+
+.firework-4 {
+  top: 30%;
+  right: 40%;
+  animation-delay: 1.2s;
+}
+
+/* ใช้ box-shadow ยิงหลายทิศ */
+@keyframes fw-burst {
+  0% {
+    box-shadow:
+      0 0 0 0 rgba(255, 83, 83, 1),
+      0 0 0 0 rgba(255, 191, 73, 1),
+      0 0 0 0 rgba(131, 255, 150, 1),
+      0 0 0 0 rgba(117, 189, 255, 1),
+      0 0 0 0 rgba(204, 133, 255, 1),
+      0 0 0 0 rgba(255, 255, 255, 1);
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  60% {
+    box-shadow:
+      30px -40px 0 0 rgba(255, 83, 83, 0),
+      -45px -25px 0 0 rgba(255, 191, 73, 0),
+      35px 25px 0 0 rgba(131, 255, 150, 0),
+      -35px 35px 0 0 rgba(117, 189, 255, 0),
+      0 45px 0 0 rgba(204, 133, 255, 0),
+      0 -55px 0 0 rgba(255, 255, 255, 0);
+    transform: scale(1.15);
+    opacity: 0.35;
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+@media (max-width: 640px) {
+  .firework-4 {
+    display: none;
+  }
+
+  .firework {
+    animation-duration: 2.2s;
+  }
+}
