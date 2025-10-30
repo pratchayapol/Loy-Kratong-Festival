@@ -331,24 +331,18 @@
         const TOTAL_LANES = 2;
         const TOP_PAD = window.innerWidth < 640 ? 6 : 4;
         const BOTTOM_PAD = window.innerWidth < 640 ? 6 : 4;
-
-        // คำนวณพื้นที่ที่เหลือให้วางเลน
         const AVAILABLE = Math.max(0, WATER_BAND - TOP_PAD - BOTTOM_PAD);
 
-        // ตำแหน่ง top ของแต่ละเลน
         const laneTops = Array.from({
             length: TOTAL_LANES
         }, (_, i) => {
             if (TOTAL_LANES === 1) {
-                // วางกลางพื้นที่ AVAILABLE
                 return WATER_TOP + TOP_PAD + AVAILABLE / 2;
             }
-            // กระจายเต็มช่วง AVAILABLE โดยมีขอบบน–ล่างตาม PAD
             const step = AVAILABLE / (TOTAL_LANES - 1);
             return WATER_TOP + TOP_PAD + i * step;
         });
 
-        // ระยะห่างแนวนอนเดิม
         const TRACK_WIDTH = 140;
         const KRATHONG_WIDTH_PCT = window.innerWidth < 640 ? 20 : 15;
         const SAFE_GAP_PCT = KRATHONG_WIDTH_PCT * 1.25;
@@ -368,24 +362,21 @@
                 }
             }
             if (force) {
-                // ถ้าบังคับ ให้เลือกเลนที่ว่างเร็วสุด
                 let minIdx = 0;
                 for (let i = 1; i < TOTAL_LANES; i++) {
                     if (laneNextTime[i] < laneNextTime[minIdx]) minIdx = i;
                 }
-                laneNextTime[minIdx] = now + TIME_GAP_MS;
+                laneNextTime[minIdx] = performance.now() + TIME_GAP_MS;
                 currentLaneIndex = (minIdx + 1) % TOTAL_LANES;
                 return minIdx;
             }
             return -1;
         }
 
-        // สร้าง animation ที่นุ่มนวล
         const makeStyle = (topPct, laneIdx) => {
             const name = `drift_${Math.random().toString(36).slice(2)}`;
             const sheet = ensureKeyframeSheet();
 
-            // คลื่นน้ำอ่อนๆ
             const waveAmp = 1.5;
             const wavePhase = (laneIdx / TOTAL_LANES) * Math.PI * 2;
             const waveFreq = 2;
@@ -411,8 +402,37 @@
             return `animation:${name} ${DUR}s ease-in-out forwards;will-change:left,top,opacity,transform;`;
         };
 
+        // ทำให้ recent ปลอดภัยต่อการ sort
+        function normalizeRecord(raw) {
+            // บางแบ็กเอนด์ส่ง {data:{...}}
+            const r = raw?.data ? raw.data : raw || {};
+            const now = Date.now();
+
+            // ชื่อฟิลด์สำรอง
+            const idRaw = r.id ?? r.krathong_id ?? r.pk ?? now;
+            // แปลงเป็นเลข ถ้าไม่ได้ก็ใช้ timestamp
+            const idNum = Number(idRaw);
+            const id = Number.isFinite(idNum) ? idNum : now;
+
+            const type = r.type || r.krathong_type || 'banana';
+            const nickname = r.nickname || r.name || 'คนลอย';
+            const wish = r.wish || r.message || r.text || '';
+            const age = r.age || r.who || '';
+
+            return {
+                id,
+                type,
+                nickname,
+                wish,
+                age
+            };
+        }
+
         const order = Array
-            .from(new Map((recent || []).map(r => [r.id, r])).values())
+            .from(new Map((recent || []).map(r => {
+                const n = normalizeRecord(r);
+                return [n.id, n];
+            })).values())
             .sort((a, b) => b.id - a.id);
 
         const mkItem = (rec, force = false) => {
@@ -465,19 +485,16 @@
                 attempts++;
             }
 
-            // รีเซ็ตถ้าใช้ครบ
             usedIds.clear();
             const r = order[recPtr];
             recPtr = (recPtr + 1) % order.length;
             return r;
         }
 
-        // รอให้มีเลนว่าง - เพิ่มเวลารออีก
         function getNextSpawnDelay() {
             const now = performance.now();
             const waitTimes = laneNextTime.map(t => Math.max(0, t - now));
             const minWait = Math.min(...waitTimes);
-            // เพิ่ม buffer ให้มากขึ้น เพื่อไม่ให้ปล่อยถี่
             return Math.max(300, minWait + 200);
         }
 
@@ -505,14 +522,12 @@
             init() {
                 if (order.length === 0) return;
 
-                // เริ่มต้นด้วยจำนวนน้อย ค่อยๆ เติม
-                const initialGap = TIME_GAP_MS * 1.2; // เพิ่มช่องว่างตอนเริ่มต้น
+                const initialGap = TIME_GAP_MS * 1.2;
                 let spawnCount = 0;
                 const targetCount = Math.min(TOTAL_LANES, order.length);
 
                 const initialSpawn = () => {
                     if (spawnCount >= targetCount) {
-                        // รอนานก่อนเริ่มลูปต่อเนื่อง
                         setTimeout(() => this._continuousLoop(), TIME_GAP_MS);
                         return;
                     }
@@ -548,11 +563,11 @@
                         this.items.push(item);
                         if (this.items.length > MAX_ITEMS) {
                             const removed = this.items.shift();
-                            if (removed.__tid) {
+                            if (removed?.__tid) {
                                 clearTimeout(removed.__tid);
                                 __timers.delete(removed.__tid);
                             }
-                            usedIds.delete(removed.id);
+                            usedIds.delete(removed?.id);
                         }
                         scheduleRemoval(this, item, item.__life);
                     }
@@ -564,9 +579,11 @@
                 spawn();
             },
 
-            // ปรับให้รองรับการลอยสด แล้วบังคับลงเลน ถ้ายังไม่ว่างให้รีทราย
-            spawnFromRecord(r, force = false) {
-                // ถ้าเป็น data เก่า ให้กันซ้ำเหมือนเดิม
+            // ใส่ของใหม่จากเซิร์ฟเวอร์
+            spawnFromRecord(raw, force = false) {
+                const r = normalizeRecord(raw);
+
+                // ของสดไม่เข้าเช็กกันซ้ำ
                 if (!force && usedIds.has(r.id)) return;
 
                 const fresh = [r, ...order.filter(x => x.id !== r.id)].sort((a, b) => b.id - a.id);
@@ -574,23 +591,37 @@
                 order.push(...fresh);
 
                 const trySpawn = (retry = 0) => {
-                    const item = mkItem(r, force);
+                    let item = mkItem(r, force);
                     if (!item) {
-                        if (retry < 3) {
+                        // fallback สุดทาง
+                        if (retry >= 3) {
+                            const li = 0;
+                            item = {
+                                id: r.id,
+                                clientId: `item_${r.id}_${Math.random().toString(36).slice(2)}`,
+                                img: typeImg(r.type),
+                                wish: `${r.nickname} : ${r.wish}`,
+                                style: makeStyle(laneTops[li], li),
+                                show: false,
+                                paused: false,
+                                __life: DUR * 1000,
+                                __deadline: Date.now() + DUR * 1000
+                            };
+                        } else {
                             __schedule(() => trySpawn(retry + 1), 350);
+                            return;
                         }
-                        return;
                     }
 
                     usedIds.add(item.id);
                     this.items.unshift(item);
                     if (this.items.length > MAX_ITEMS) {
                         const removed = this.items.pop();
-                        if (removed.__tid) {
+                        if (removed?.__tid) {
                             clearTimeout(removed.__tid);
                             __timers.delete(removed.__tid);
                         }
-                        usedIds.delete(removed.id);
+                        usedIds.delete(removed?.id);
                     }
                     scheduleRemoval(this, item, item.__life);
                 };
@@ -598,15 +629,9 @@
                 trySpawn();
             },
 
-            // ใช้ตอนโพสต์จากฟอร์ม ต้องให้ขึ้นชัวร์
+            // เรียกจากฟอร์ม
             spawnNew(p) {
-                this.spawnFromRecord({
-                    id: p.id ?? Date.now(),
-                    type: p.type,
-                    nickname: p.nickname,
-                    age: p.age,
-                    wish: p.wish
-                }, true); // force
+                this.spawnFromRecord(p, true);
             }
         }
     }
@@ -626,8 +651,12 @@
                 this.error = '';
                 this.ok = '';
                 try {
-                    const meta = document.querySelector('meta[name="csrf-token"]').content;
+                    const meta = document.querySelector('meta[name="csrf-token"]')?.content || '';
                     const xsrf = readCookie('XSRF-TOKEN');
+                    const payload = {
+                        ...this.form
+                    };
+
                     const res = await fetch('/krathongs', {
                         method: 'POST',
                         headers: {
@@ -638,8 +667,9 @@
                             'X-Requested-With': 'XMLHttpRequest'
                         },
                         credentials: 'same-origin',
-                        body: JSON.stringify(this.form)
+                        body: JSON.stringify(payload)
                     });
+
                     if (!res.ok) {
                         let msg = `HTTP ${res.status}`;
                         try {
@@ -648,11 +678,19 @@
                         } catch (_) {}
                         throw new Error(msg);
                     }
+
                     const data = await res.json();
                     this.ok = 'ลอยแล้ว ✨';
-                    window.__fw?.burst();
-                    const api = Alpine.$data(document.getElementById('river'));
-                    api?.spawnNew?.(data); // แสดงกระทงที่เพิ่งลอยทันที แบบ force
+                    window.__fw?.burst?.();
+
+                    const apiEl = document.getElementById('river');
+                    const api = apiEl ? Alpine.$data(apiEl) : null;
+
+                    // รองรับทั้ง { ... } และ { data: { ... } }
+                    const record = data?.data ? data.data : data;
+
+                    api?.spawnNew?.(record);
+
                     this.form.wish = '';
                     setTimeout(() => {
                         Alpine.store('ui').open = false;
