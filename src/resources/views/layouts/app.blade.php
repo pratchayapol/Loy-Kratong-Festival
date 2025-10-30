@@ -97,10 +97,7 @@
 
     <!-- Base styles for layout & chart -->
     <style>
-        html,
-        body {
-            font-family: "Sarabun", "TH Sarabun New", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Thai", Tahoma, Arial, sans-serif;
-        }
+        
 
         button,
         input,
@@ -209,7 +206,8 @@
         }
 
         body {
-            touch-action: manipulation
+            touch-action: manipulation;
+            font-family: "Sarabun", "TH Sarabun New", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Thai", Tahoma, Arial, sans-serif;
         }
 
         /* ดาวตก */
