@@ -537,7 +537,8 @@
                                 <div class="font-semibold text-white">1.0.1</div>
                             </div>
                         </div>
-                        <div class="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10 w-full">
+                        <div
+                            class="hidden sm:flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10 w-full">
                             <!-- ==== Ping Chart (Recent Only) ==== -->
                             <div id="recent-ping"
                                 class="ping-chart-wrapper select-none w-full flex-1 min-w-0 block sm:block">
