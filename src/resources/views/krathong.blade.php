@@ -93,8 +93,9 @@
         <!-- ปุ่มลอยกระทง -->
         <button @click="$store.ui.open=true"
             class="inline-flex items-center gap-2 rounded-2xl
+               min-h-12 px-5 py-3
                bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600
-               px-5 py-3 font-semibold shadow-btn
+               font-semibold shadow-btn
                hover:shadow-[0_15px_50px_rgba(34,211,238,0.55)]
                hover:scale-105 active:scale-100
                transition-all duration-300
@@ -109,23 +110,23 @@
 
         <!-- ปุ่มเกี่ยวกับ -->
         <button @click="$store.ui.aboutOpen=true"
-            class="inline-flex items-center justify-center gap-2 rounded-2xl
-               bg-gradient-to-br from-purple-500 to-pink-600
-               w-12 h-12 sm:w-auto sm:h-auto sm:px-4 sm:py-2
-               shadow-lg hover:shadow-purple-500/50
+            class="inline-flex items-center gap-2 rounded-2xl
+               min-h-12 px-5 py-3
+               bg-gradient-to-r from-purple-500 to-pink-600
+               font-semibold shadow-btn
+               hover:shadow-purple-500/50
                hover:scale-105 active:scale-100
                transition-all duration-300
                focus:outline-none focus:ring-2 focus:ring-purple-400/50"
             title="เกี่ยวกับ">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                class="size-6 sm:size-5 sm:mr-1 group-hover:rotate-12 transition-transform" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <circle cx="12" cy="12" r="10" stroke-width="2" />
                 <path d="M12 16v-4M12 8h.01" stroke-width="2" stroke-linecap="round" />
             </svg>
             <span class="hidden sm:inline">เกี่ยวกับ</span>
         </button>
     </div>
+
     <!-- ฉากฟ้า/น้ำ แบบ responsive: ฟ้า 60% มือถือ, 58% บน sm+ -->
     <main class="relative min-h-[calc(var(--vh,1vh)*100)] sm:min-h-screen less-anim">
         <!-- SKY -->
