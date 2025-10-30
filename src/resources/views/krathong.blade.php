@@ -462,7 +462,8 @@
         <div class="absolute inset-0 bg-slate-950/85 backdrop-blur-md transition-opacity"
             @click="$store.ui.aboutOpen=false"></div>
 
-        <div class="absolute inset-0 flex items-center justify-center p-4" @click.stop>
+        <div class="absolute inset-0 flex items-start sm:items-center justify-center p-0 sm:p-6 pt-6 overflow-y-auto"
+            @click.stop>
             <div
                 class="w-full max-w-md modal-enter backdrop-blur-2xl rounded-3xl border border-purple-400/30 bg-gradient-to-br from-slate-900/80 to-purple-900/30 shadow-glass">
                 <div class="flex items-start justify-between p-6 border-b border-white/10">
