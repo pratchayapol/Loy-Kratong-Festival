@@ -182,54 +182,91 @@
         </div>
 
         <!-- ชั้นวางพลุ -->
-        <div id="firework-layer" class="pointer-events-none fixed inset-0 z-[35]"></div>
-
+        <div id="firework-layer" class="pointer-events-none fixed inset-0 z-[35] overflow-hidden"></div>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const layer = document.getElementById('firework-layer');
-                if (!layer) return; // กันพลาดอีกชั้น
+                if (!layer) return;
 
-                const isMobile = window.matchMedia('(max-width: 640px)').matches;
-                const maxBurst = isMobile ? 6 : 12;
-                const interval = isMobile ? 1400 : 900;
+                const isMobile = matchMedia('(max-width: 640px)').matches;
+                const maxAtOnce = isMobile ? 4 : 9;
+                const interval = isMobile ? 1300 : 800;
 
-                const colors = [
-                    '#ff5c5c',
-                    '#ffe066',
-                    '#6ee7b7',
-                    '#60a5fa',
-                    '#a855f7',
-                    '#ffffff'
+                const palettes = [
+                    ['#ff7676', '#ffe29f', '#ff9a9e'],
+                    ['#6ee7b7', '#3b82f6', '#a855f7'],
+                    ['#fff', '#ffe066', '#ff8d8d'],
+                    ['#38bdf8', '#a855f7', '#f97316']
                 ];
 
-                function spawnFirework() {
-                    if (!layer) return;
-                    if (layer.children.length >= maxBurst) return;
+                function createBurst(x, y) {
+                    // ดอกกลาง
+                    const core = document.createElement('div');
+                    core.className = 'fw-core';
+                    core.style.left = x + 'px';
+                    core.style.top = y + 'px';
+                    layer.appendChild(core);
+                    setTimeout(() => core.remove(), 1300);
 
-                    const fw = document.createElement('div');
-                    fw.className = 'js-firework';
+                    // เลือกพาเลตสี
+                    const colors = palettes[Math.floor(Math.random() * palettes.length)];
 
-                    const x = Math.random() * 100;
-                    const y = Math.random() * 35 + 5;
+                    // จำนวนเศษ
+                    const count = isMobile ? 12 : 22;
+                    for (let i = 0; i < count; i++) {
+                        const p = document.createElement('div');
+                        p.className = 'fw-burst';
+                        p.style.left = x + 'px';
+                        p.style.top = y + 'px';
+                        p.style.background = colors[i % colors.length];
 
-                    fw.style.left = x + '%';
-                    fw.style.top = y + '%';
+                        // มุมกระจาย 360 องศา
+                        const angle = (Math.PI * 2 * i) / count;
+                        const dist = 90 + Math.random() * 40; // ระยะ
+                        const tx = Math.cos(angle) * dist;
+                        const ty = Math.sin(angle) * dist;
+                        p.style.setProperty('--tx', tx + 'px');
+                        p.style.setProperty('--ty', ty + 'px');
 
-                    const baseColor = colors[Math.floor(Math.random() * colors.length)];
-                    fw.style.setProperty('--fw-color', baseColor);
-
-                    const scale = 0.7 + Math.random() * 0.8;
-                    fw.style.setProperty('--fw-scale', scale);
-
-                    layer.appendChild(fw);
-
-                    setTimeout(() => fw.remove(), 1800);
+                        layer.appendChild(p);
+                        setTimeout(() => p.remove(), 1500);
+                    }
                 }
 
+                function spawnFirework() {
+                    if (layer.children.length > maxAtOnce * 30) {
+                        // ถ้า DOM เยอะเกิน ล้าง
+                        layer.innerHTML = '';
+                    }
+
+                    const w = window.innerWidth;
+                    const h = window.innerHeight;
+
+                    // จุดสุ่มด้านบนครึ่งจอ
+                    const x = Math.random() * w * 0.9 + w * 0.05;
+                    const y = h * (Math.random() * 0.3 + 0.05); // 5%-35% จากบน
+
+                    // สร้างตัวพุ่งก่อน
+                    const shell = document.createElement('div');
+                    shell.className = 'fw-shell';
+                    shell.style.left = x + 'px';
+                    shell.style.top = (y + 140) + 'px'; // จุดเริ่มล่างกว่าจุดระเบิด
+                    layer.appendChild(shell);
+
+                    // ระเบิดตอนจบอนิเมะ
+                    setTimeout(() => {
+                        shell.remove();
+                        createBurst(x, y);
+                    }, 580);
+                }
+
+                // ยิงแรก
                 spawnFirework();
+                // ยิงต่อ
                 setInterval(spawnFirework, interval);
             });
         </script>
+
 
         <!-- HORIZON โค้ง -->
         <div class="pointer-events-none absolute inset-x-0 top-[62%] sm:top-[58%] max-w-full overflow-hidden">

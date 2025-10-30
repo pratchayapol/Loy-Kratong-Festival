@@ -100,44 +100,89 @@
 
     <!-- Base styles for layout & chart -->
     <style>
-        .js-firework {
+        /* จุดเริ่มพุ่งขึ้น */
+        .fw-shell {
             position: absolute;
             width: 6px;
-            height: 6px;
-            border-radius: 9999px;
-            animation: fw-burst-js 1.6s ease-out forwards;
-            filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.35));
+            height: 16px;
+            background: radial-gradient(circle, #fff, rgba(255, 255, 255, 0));
+            filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.8));
+            animation: fw-rise 0.6s ease-out forwards;
         }
 
-        @keyframes fw-burst-js {
+        @keyframes fw-rise {
             0% {
+                transform: translateY(0);
                 opacity: 1;
-                transform: scale(calc(var(--fw-scale, 1) * 0.5));
-                /* ยิงออกหลายทิศด้วยสีหลัก */
-                box-shadow:
-                    0 0 0 0 var(--fw-color, #fff),
-                    0 0 0 0 rgba(255, 255, 255, 0.9),
-                    0 0 0 0 rgba(255, 255, 255, 0.6);
-            }
-
-            40% {
-                opacity: 1;
-                transform: scale(calc(var(--fw-scale, 1) * 1.2));
-                box-shadow:
-                    28px -38px 0 0 rgba(255, 255, 255, 0),
-                    -30px -35px 0 0 rgba(255, 255, 255, 0),
-                    0 46px 0 0 rgba(255, 255, 255, 0);
             }
 
             100% {
+                transform: translateY(-140px);
                 opacity: 0;
-                transform: scale(calc(var(--fw-scale, 1) * 0.8));
             }
         }
 
+        /* ดอกพลุแตก */
+        .fw-burst {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--fw-color, #fff);
+            border-radius: 999px;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.9));
+            animation: fw-particle 1.4s ease-out forwards;
+            transform-origin: center;
+        }
+
+        @keyframes fw-particle {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+
+            80% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* ดอกกลางนุ่มๆ */
+        .fw-core {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border-radius: 9999px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0));
+            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.9));
+            animation: fw-core 1.2s ease-out forwards;
+            pointer-events: none;
+        }
+
+        @keyframes fw-core {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.4);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1.8);
+                opacity: 0;
+            }
+        }
+
+        /* มือถือเบาลง */
         @media (max-width: 640px) {
-            .js-firework {
-                animation-duration: 1.9s;
+            .fw-burst {
+                animation-duration: 1.1s;
             }
         }
 
