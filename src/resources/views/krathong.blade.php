@@ -59,7 +59,7 @@
                     </div>
 
                     <!-- แถบสถานะอัปเดตล่าสุด -->
-                    <div
+                    {{-- <div
                         class="hidden lg:inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-200/80">
                         <span class="relative flex h-2 w-2">
                             <span
@@ -68,7 +68,7 @@
                         </span>
                         <span>Online
                         </span>
-                    </div>
+                    </div> --}}
 
                 </div>
             </div>
