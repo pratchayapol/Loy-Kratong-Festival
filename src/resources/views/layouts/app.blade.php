@@ -1,3 +1,5 @@
+@vite(['resources/css/app.css', 'resources/js/app.js'])
+
 <head>
     <meta charset="utf-8" />
     <meta name="description"
@@ -90,7 +92,7 @@
             }
         }; // tailwindcss.com CDN จะอ่านตัวแปรนี้ตอนโหลด
     </script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    {{-- <script src="https://cdn.tailwindcss.com"></script> --}}
 
     <!-- Libs: ใส่ defer -->
     <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
