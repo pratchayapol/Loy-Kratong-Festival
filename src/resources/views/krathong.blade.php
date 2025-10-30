@@ -304,8 +304,10 @@
         </div>
 
 
+
         <!-- WATER -->
-        <div class="absolute left-0 right-0 top-[60%] sm:top-[58%] bottom-0 overflow-visible">
+        <div class="absolute left-0 right-0 top-[60%] sm:top-[58%] bottom-0 overflow-visible z-[40]">
+
             <div class="absolute inset-0 bg-gradient-to-b from-[#0b2e4a] via-[#082237] to-[#051827]"></div>
 
             <!-- คลื่นพื้นผิว -->
@@ -320,7 +322,8 @@
             </div>
 
             <!-- กระทง -->
-            <div id="river" class="absolute inset-0 overflow-hidden" x-data="riverScene(@js($types), @js($recent))" x-init="init()">
+            <div id="river" class="absolute inset-0 overflow-visible z-[40]" x-data="riverScene(@js($types), @js($recent))"
+                x-init="init()">
                 <template x-for="k in items" :key="k.clientId">
                     <div class="absolute flex flex-col items-center will-change-transform krathong-item"
                         :class="k.paused ? 'is-paused' : ''" :style="k.style" @mouseenter="pause(k); k.show=true"
