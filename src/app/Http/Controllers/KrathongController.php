@@ -16,6 +16,23 @@ class KrathongController extends Controller
         'silver'  => ['label' => 'กระทงเงิน', 'img' => '/images/krathongs/silver.png'],
         'gold'    => ['label' => 'กระทงทอง', 'img' => '/images/krathongs/gold.png'],
         'kurab'    => ['label' => 'กระทงกุหลาบ', 'img' => '/images/krathongs/kurab.png'],
+        
+        'dog'    => ['label' => 'กระทงสุนัข', 'img' => '/images/krathongs/dog.png'],
+        'cat'    => ['label' => 'กระทงเหมียว', 'img' => '/images/krathongs/cat.png'],
+        'baar'    => ['label' => 'กระทงหมี', 'img' => '/images/krathongs/baar.png'],
+        'bird'    => ['label' => 'กระทงนก', 'img' => '/images/krathongs/bird.png'],
+        'ped'    => ['label' => 'กระทงเป็ด', 'img' => '/images/krathongs/ped.png'],
+        'buf'    => ['label' => 'กระทงกระบือ', 'img' => '/images/krathongs/buf.png'],
+        'cown'    => ['label' => 'กระทงวัว', 'img' => '/images/krathongs/cown.png'],
+        'elephant'    => ['label' => 'กระทงช้าง', 'img' => '/images/krathongs/elephant.png'],
+        'hippo'    => ['label' => 'กระทงฮิปโป', 'img' => '/images/krathongs/hippo.png'],
+        'pik'    => ['label' => 'กระทงหมู', 'img' => '/images/krathongs/pik.png'],
+        'katai'    => ['label' => 'กระทงกระต่าง', 'img' => '/images/krathongs/katai.png'],
+        'tao'    => ['label' => 'กระทงเต่า', 'img' => '/images/krathongs/tao.png'],
+        'tao'    => ['label' => 'กระทงเต่า', 'img' => '/images/krathongs/tao.png'],
+        'juad'    => ['label' => 'กระทงบั้งไฟ', 'img' => '/images/krathongs/juad.png'],
+        'GateA'    => ['label' => 'กระทงเกรด A', 'img' => '/images/krathongs/GateA.png'],
+        'GateF'    => ['label' => 'กระทงเกรด F', 'img' => '/images/krathongs/GateF.png'],
     ];
 
     public function metrics()
