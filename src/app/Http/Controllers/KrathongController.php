@@ -55,8 +55,8 @@ class KrathongController extends Controller
             'types'  => $this->types,
             'recent' => $recent,
             'total'  => $total,
-            'shareUrl' => url()->current(),
-            'shareTitle' => 'ชวนมาลอยกระทง',
+            'shareUrl' => 'https://loykrathong.pcnone.com',
+            'shareTitle' => 'ชวนมาลอยกระทงกออนไลน์กันนะ',
         ]);
     }
 
