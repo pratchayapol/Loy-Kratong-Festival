@@ -106,141 +106,62 @@
         </svg>
     </button>
 
-    <!-- ฉากฟ้า/น้ำ แบบ responsive: ฟ้า 60% มือถือ, 58% บน sm+ -->
-    <main class="relative min-h-[calc(var(--vh,1vh)*100)] sm:min-h-screen less-anim">
-        <!-- SKY -->
-        <div class="absolute top-0 left-0 right-0 h-[60%] sm:h-[58%]">
-            <div class="absolute inset-0 bg-gradient-to-b from-[#020510] via-[#0a1628] to-[#0e2845]"></div>
+    <!-- WATER Section - เวอร์ชันมินิมอล -->
+    <div class="absolute left-0 right-0 top-[60%] sm:top-[58%] bottom-0 overflow-hidden">
+        <!-- พื้นหลังน้ำ - โทนสีเรียบขึ้น -->
+        <div class="absolute inset-0 bg-gradient-to-b from-[#0d3a5c] via-[#0a2d47] to-[#072030]"></div>
 
-            <!-- เมฆบาง ๆ เคลื่อนไหว -->
-            <div class="absolute inset-0 opacity-15">
-                <div
-                    class="absolute top-[20%] left-0 w-[400%] h-32 bg-gradient-to-r from-transparent via-slate-300/20 to-transparent blur-3xl animate-[waves_65s_linear_infinite]">
+        <!-- คลื่นพื้นผิว - แบบมินิมอล -->
+        <div
+            class="absolute left-0 w-[180%] h-16 top-[10%] opacity-12 blur-xl bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,.6)_0%,_transparent_70%)] animate-[waves_32s_linear_infinite]">
+        </div>
+        <div
+            class="absolute left-0 w-[180%] h-16 top-[40%] opacity-8 blur-xl bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,.5)_0%,_transparent_70%)] animate-[waves_38s_linear_infinite]">
+        </div>
+
+        <!-- เงาสะท้อนจากพระจันทร์ (optional - subtle) -->
+        <div
+            class="absolute top-[5%] right-[8%] w-32 h-40 opacity-6 blur-3xl bg-gradient-to-b from-yellow-100/20 to-transparent pointer-events-none">
+        </div>
+
+        <!-- กระทง -->
+        <div id="river" class="absolute inset-0 overflow-hidden" x-data="riverScene(@js($types), @js($recent))" x-init="init()">
+            <template x-for="k in items" :key="k.clientId">
+                <div class="absolute flex flex-col items-center will-change-transform krathong-item"
+                    :class="k.paused ? 'is-paused' : ''" :style="k.style" @mouseenter="pause(k); k.show=true"
+                    @mouseleave="resume(k); k.show=false" @touchstart.passive="pause(k); k.show=true"
+                    @touchend.passive="resume(k); k.show=false">
+                    <div class="px-3 py-2 rounded-2xl text-xs sm:text-sm max-w-[240px] sm:max-w-[300px] text-cyan-50 bg-slate-900/80 backdrop-blur-xl border border-cyan-400/30 shadow-lg shadow-cyan-500/20 whitespace-nowrap overflow-hidden text-ellipsis"
+                        x-text="k.wish"></div>
+
+                    <!-- popup ข้อความเต็ม -->
+                    <div x-show="k.show" x-transition.opacity.duration.120ms class="krathong-pop">
+                        <div class="text-[11px] leading-5 sm:text-sm text-slate-100" x-text="k.wish"></div>
+                    </div>
+
+                    <div class="relative mt-2">
+                        <img :src="k.img" alt="krathong" decoding="async" fetchpriority="low"
+                            class="w-16 h-16 sm:w-20 sm:h-20 drop-shadow-[0_15px_25px_rgba(0,0,0,0.6)] relative z-10">
+                        <div
+                            class="absolute inset-0 -z-10 blur-xl opacity-50 bg-gradient-radial from-amber-300/50 to-transparent rounded-full">
+                        </div>
+                    </div>
                 </div>
-                <div
-                    class="absolute top-[35%] left-[-50%] w-[400%] h-24 bg-gradient-to-r from-transparent via-slate-400/15 to-transparent blur-3xl animate-[waves_85s_linear_infinite]">
-                </div>
-            </div>
+            </template>
 
-            <!-- แสงฟ้า -->
+            <!-- เงามืดขอบล่าง - อ่อนลง -->
             <div
-                class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_70%_40%,rgba(100,150,255,0.12),transparent_50%)] mix-blend-screen">
-            </div>
-            <div
-                class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_50%,rgba(180,140,255,0.08),transparent_45%)] mix-blend-soft-light">
-            </div>
-
-            <!-- พระจันทร์ -->
-            <div
-                class="absolute top-[18%] right-[10%] w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-[#fffef0] via-[#fff8dc] to-[#ffe4b5] animate-moonGlow pointer-events-none z-10 opacity-95 shadow-[0_0_60px_rgba(255,248,220,0.8),0_0_120px_rgba(255,248,220,0.4),inset_0_0_20px_rgba(255,255,255,0.3)]">
-                <div class="absolute inset-0 rounded-full overflow-hidden opacity-20">
-                    <div class="absolute top-[30%] left-[20%] w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-slate-400/40 blur-sm">
-                    </div>
-                    <div class="absolute top-[55%] right-[25%] w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-slate-400/30 blur-sm">
-                    </div>
-                    <div
-                        class="absolute bottom-[35%] left-[40%] w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-slate-400/35 blur-sm">
-                    </div>
-                </div>
-            </div>
-
-            <!-- ลำแสง -->
-            <div
-                class="absolute top-[18%] right-[10%] w-1 sm:w-1.5 h-[50vh] opacity-8 bg-gradient-to-b from-yellow-100/30 via-yellow-50/10 to-transparent blur-xl rotate-[8deg] pointer-events-none">
-            </div>
-
-            <!-- ดาวระยิบ: จำนวนปรับตามจอ -->
-            <div class="pointer-events-none absolute inset-0" x-data="{ stars: [] }" x-init="const base = 90 + Math.min(window.innerWidth, window.innerHeight) / 10;
-            const cap = window.innerWidth < 400 ? 80 : 150;
-            const count = Math.round(Math.min(cap, base));
-            for (let i = 0; i < count; i++) {
-                const s = Math.random();
-                stars.push({ left: Math.random() * 100, top: Math.random() * 100, delay: Math.random() * 5, duration: 3 + Math.random() * 6, size: s > 0.92 ? 2.5 : (s > 0.75 ? 1.5 : 1), opacity: s > 0.85 ? 1 : 0.7 });
-            }">
-                <template x-for="(s,i) in stars" :key="i">
-                    <div class="absolute rounded-full bg-white animate-twinkle"
-                        :style="`left:${s.left}%;top:${s.top}%;width:${s.size}px;height:${s.size}px;animation-delay:${s.delay}s;animation-duration:${s.duration}s;opacity:${s.opacity};box-shadow:0 0 ${s.size*3}px rgba(255,255,255,${s.opacity*0.9}),0 0 ${s.size*6}px rgba(200,220,255,${s.opacity*0.5})`">
-                    </div>
-                </template>
-            </div>
-
-            <!-- ดาวพุ่ง -->
-            <div class="pointer-events-none absolute inset-0" x-data="{ shooting: [] }" x-init="const add = () => {
-                const id = Date.now() + Math.random();
-                shooting.push({ id, top: Math.random() * 40, left: 20 + Math.random() * 60, duration: 1.5 + Math.random() * 1 });
-                setTimeout(() => { shooting = shooting.filter(s => s.id !== id) }, 3000);
-                setTimeout(add, 8000 + Math.random() * 15000)
-            };
-            setTimeout(add, 3000);">
-                <template x-for="s in shooting" :key="s.id">
-                    <div class="absolute w-1 h-1 bg-white rounded-full"
-                        :style="`top:${s.top}%;left:${s.left}%;animation: shootingStar ${s.duration}s ease-out forwards;box-shadow:0 0 8px rgba(255,255,255,0.9),0 0 16px rgba(200,220,255,0.6)`">
-                    </div>
-                </template>
+                class="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-slate-950/60 via-slate-950/30 to-transparent">
             </div>
         </div>
 
-        <!-- HORIZON โค้ง -->
-        <svg class="absolute left-0 right-0 top-[60%] sm:top-[58%] h-20 pointer-events-none" viewBox="0 0 1440 160"
-            preserveAspectRatio="none" aria-hidden="true">
-            <path d="M0,100 C360,140 1080,60 1440,100" stroke="rgba(255,255,255,0.40)" stroke-width="1" fill="none" />
-            <path d="M0,100 C360,140 1080,60 1440,100 L1440,160 L0,160 Z" fill="rgba(255,255,255,0.08)" />
-        </svg>
-
-        <!-- WATER -->
-        <div class="absolute left-0 right-0 top-[60%] sm:top-[58%] bottom-0 overflow-hidden">
-            <div class="absolute inset-0 bg-gradient-to-b from-[#0b2e4a] via-[#082237] to-[#051827]"></div>
-
-            <!-- คลื่นพื้นผิว -->
-            <div
-                class="absolute left-0 w-[220%] h-24 top-[8%] opacity-28 blur-2xl bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,.9)_0%,_transparent_60%)] animate-[waves_28s_linear_infinite]">
-            </div>
-            <div
-                class="absolute left-0 w-[220%] h-24 top-[36%] opacity-20 blur-2xl bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,.85)_0%,_transparent_60%)] animate-[waves_34s_linear_infinite]">
-            </div>
-            <div
-                class="absolute left-0 w-[220%] h-24 top-[64%] opacity-16 blur-2xl bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,.8)_0%,_transparent_60%)] animate-[waves_40s_linear_infinite]">
-            </div>
-
-            <!-- กระทง -->
-            <div id="river" class="absolute inset-0 overflow-hidden" x-data="riverScene(@js($types), @js($recent))" x-init="init()">
-                <template x-for="k in items" :key="k.clientId">
-                    <div class="absolute flex flex-col items-center will-change-transform krathong-item"
-                        :class="k.paused ? 'is-paused' : ''" :style="k.style" @mouseenter="pause(k); k.show=true"
-                        @mouseleave="resume(k); k.show=false" @touchstart.passive="pause(k); k.show=true"
-                        @touchend.passive="resume(k); k.show=false">
-                        <div class="px-3 py-2 rounded-2xl text-xs sm:text-sm max-w-[240px] sm:max-w-[300px] text-cyan-50 bg-slate-900/80 backdrop-blur-xl border border-cyan-400/30 shadow-lg shadow-cyan-500/20 whitespace-nowrap overflow-hidden text-ellipsis"
-                            x-text="k.wish"></div>
-
-                        <!-- popup ข้อความเต็ม -->
-                        <div x-show="k.show" x-transition.opacity.duration.120ms class="krathong-pop">
-                            <div class="text-[11px] leading-5 sm:text-sm text-slate-100" x-text="k.wish"></div>
-                        </div>
-
-                        <div class="relative mt-2">
-                            <img :src="k.img" alt="krathong" decoding="async" fetchpriority="low"
-                                class="w-16 h-16 sm:w-20 sm:h-20 drop-shadow-[0_15px_25px_rgba(0,0,0,0.6)] relative z-10">
-                            <div
-                                class="absolute inset-0 -z-10 blur-xl opacity-50 bg-gradient-radial from-amber-300/50 to-transparent rounded-full">
-                            </div>
-                        </div>
-                    </div>
-                </template>
-
-                <!-- เงามืดขอบล่าง -->
-                <div
-                    class="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-slate-950/80 via-slate-950/40 to-transparent">
-                </div>
-            </div>
-
-            <!-- Fireflies layer -->
-            <div class="absolute inset-0 pointer-events-none" x-data="fireflies()" x-init="init()">
-                <template x-for="f in flies" :key="f.id">
-                    <div class="absolute rounded-full bg-yellow-200" :style="f.style" aria-hidden="true"></div>
-                </template>
-            </div>
-
+        <!-- Fireflies layer -->
+        <div class="absolute inset-0 pointer-events-none" x-data="fireflies()" x-init="init()">
+            <template x-for="f in flies" :key="f.id">
+                <div class="absolute rounded-full bg-yellow-200" :style="f.style" aria-hidden="true"></div>
+            </template>
         </div>
+    </div>
     </main>
 
     <!-- Modal ฟอร์ม -->
