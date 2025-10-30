@@ -8,11 +8,11 @@ use Illuminate\Http\Request;
 class KrathongController extends Controller
 {
     private array $types = [
-        'banana'  => ['label' => 'ใบตอง',   'img' => '/images/krathongs/banana.png'],
-        'banana1' => ['label' => 'ต้นกล้วย', 'img' => '/images/krathongs/nana1.png'],
-        'flower'  => ['label' => 'ดอกไม้',  'img' => '/images/krathongs/flower.png'],
-        'candle'  => ['label' => 'เทียน',    'img' => '/images/krathongs/candle.png'],
-        'eco'     => ['label' => 'รักษ์โลก', 'img' => '/images/krathongs/eco.png'],
+        'banana'  => ['label' => 'กระทงใบตอง',   'img' => '/images/krathongs/banana.png'],
+        'banana1' => ['label' => 'กระทงต้นกล้วย', 'img' => '/images/krathongs/nana1.png'],
+        'flower'  => ['label' => 'กระทงดอกไม้',  'img' => '/images/krathongs/flower.png'],
+        'candle'  => ['label' => 'กระทงเทียน',    'img' => '/images/krathongs/candle.png'],
+        'eco'     => ['label' => 'กระทงรักษ์โลก', 'img' => '/images/krathongs/eco.png'],
         'silver'  => ['label' => 'กระทงเงิน', 'img' => '/images/krathongs/silver.png'],
         'gold'    => ['label' => 'กระทงทอง', 'img' => '/images/krathongs/gold.png'],
         'kurab'    => ['label' => 'กระทงกุหลาบ', 'img' => '/images/krathongs/kurab.png'],
