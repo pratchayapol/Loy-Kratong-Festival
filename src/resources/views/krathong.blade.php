@@ -409,7 +409,7 @@
                     </button>
                 </div>
 
-                <form @submit.prevent="submit" class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5">
+                <form @submit.prevent="submit" class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 pb-28 sm:pb-6">
                     <div>
                         <label class="text-sm font-semibold text-slate-200">เลือกแบบกระทง</label>
                         <div class="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
