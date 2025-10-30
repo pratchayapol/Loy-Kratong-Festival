@@ -12,7 +12,6 @@
     <meta property="og:image" content="https://loykrathong.pcnone.com/images/krathongs/banana.png">
     <meta property="og:url" content="https://loykrathong.pcnone.com">
 
-    
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Loy Krathong Festival</title>
     <meta name="csrf-token" content="{{ csrf_token() }}" />
@@ -333,9 +332,7 @@
     @stack('head')
 </head>
 
-<body class="font-k2d min-h-screen bg-slate-950 text-slate-100
-         overflow-y-auto md:overflow-hidden"
-    x-data="{}">
+<body class="font-k2d min-h-screen bg-slate-950 text-slate-100 overflow-hidden" x-data="{}">
 
     {{-- เนื้อหาหน้า --}}
     @yield('content')
