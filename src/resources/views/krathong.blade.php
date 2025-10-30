@@ -305,7 +305,7 @@
 
 
         <!-- WATER -->
-        <div class="absolute left-0 right-0 top-[60%] sm:top-[58%] bottom-0 overflow-hidden">
+        <div class="absolute left-0 right-0 top-[60%] sm:top-[58%] bottom-0 overflow-visible">
             <div class="absolute inset-0 bg-gradient-to-b from-[#0b2e4a] via-[#082237] to-[#051827]"></div>
 
             <!-- คลื่นพื้นผิว -->
