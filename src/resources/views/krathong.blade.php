@@ -14,7 +14,7 @@
                 <!-- หัวเรื่อง -->
                 <div
                     class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-wide bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-transparent">
-                    ลอยกระทงออนไลน์
+                    Loy Krathong Festival
                 </div>
 
                 <!-- คำโปรย -->
@@ -29,11 +29,13 @@
                     <div
                         class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-slate-900/40 px-3.5 py-2 sm:py-2.5 backdrop-blur-md shadow-[0_8px_24px_rgba(0,0,0,0.35)]">
 
-                        <!-- ไอคอนหยดน้ำ -->
+                        <!-- ไอคอนพนมมือ -->
                         <svg class="h-4 w-4 sm:h-5 sm:w-5 opacity-90" viewBox="0 0 24 24" fill="currentColor"
                             aria-hidden="true">
                             <path
-                                d="M12 2.5c4.2 5.1 6.3 8.6 6.3 11.3 0 3.5-2.8 6.3-6.3 6.3s-6.3-2.8-6.3-6.3C5.7 11.1 7.8 7.6 12 2.5z" />
+                                d="M9.5 3.5c.4 0 .8.3.9.7l1 6.8-1.9 2.5-1.3-8.8c-.1-.6.3-1.2 1-1.2h.3Zm5 0c-.4 0-.8.3-.9.7l-1 6.8 1.9 2.5 1.3-8.8c.1-.6-.3-1.2-1-1.2h-.3Z" />
+                            <path
+                                d="M10.6 13.5 8 17.1c-.5.7-.4 1.6.3 2.1l2.5 1.7c.6.4 1.4.2 1.8-.4l.4-.7-2.4-6.3Zm2.8 0 2.6 3.6c.5.7.4 1.6-.3 2.1l-2.5 1.7c-.6.4-1.4.2-1.8-.4l-.4-.7 2.4-6.3Z" />
                         </svg>
 
                         <span class="text-slate-200/90">จำนวนกระทงล่าสุด</span>
