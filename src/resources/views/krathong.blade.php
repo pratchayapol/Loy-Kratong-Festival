@@ -387,9 +387,9 @@
     <div x-show="$store.ui.open" x-cloak class="fixed inset-0 z-50" @keydown.escape.window="$store.ui.open=false">
         <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" @click="$store.ui.open=false"></div>
 
-        <!-- wrapper ที่เลื่อน -->
-        <div class="absolute inset-0 flex items-start justify-center p-0 sm:p-6 overflow-y-auto pt-6 pb-28 sm:pt-8 sm:pb-10"
-            @click.stop>
+        <!-- ใส่ safe-area ล่างแบบบังคับ -->
+        <div class="absolute inset-0 flex items-start justify-center p-0 sm:p-6 overflow-y-auto pt-6 sm:pt-8"
+            style="padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 5rem);" @click.stop>
 
             <div class="w-full max-w-full sm:max-w-xl modal-enter backdrop-blur-2xl rounded-none sm:rounded-3xl border border-white/20 bg-slate-900/50 shadow-glass h-[calc(var(--vh,1vh)*100)] sm:h-auto flex flex-col pb-safe pt-safe"
                 x-data="krathongForm()">
@@ -412,7 +412,8 @@
                 </div>
 
                 <!-- ฟอร์ม -->
-                <form @submit.prevent="submit" class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 pb-28 sm:pb-6">
+                <form @submit.prevent="submit" class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5"
+                    style="padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 5rem);">
                     <div>
                         <label class="text-sm font-semibold text-slate-200">เลือกแบบกระทง</label>
                         <div class="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
