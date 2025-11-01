@@ -29,7 +29,7 @@ services:
     volumes:
       - ./src:/app
     ports:
-      - "80:80"
+      - "8090:80"
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -67,7 +67,7 @@ services:
       - UPLOAD_LIMIT=128M
       - TZ=Asia/Bangkok
     ports:
-      - "81:80"
+      - "8091:80"
     depends_on:
       db:
         condition: service_healthy
