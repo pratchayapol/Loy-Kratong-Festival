@@ -1,24 +1,27 @@
+version: "3.9"
+
 services:
   migrate:
     image: webdevops/php-nginx:8.3-alpine
     working_dir: /app
-    restart: unless-stopped
+    # one-shot ไม่ต้อง restart
+    restart: "no"
     volumes:
       - ./src:/app
     depends_on:
       db:
         condition: service_healthy
-    entrypoint: ["/bin/sh","-lc"]
+    entrypoint: ["/bin/sh", "-lc"]
     command: >
-      set -e
-      && cd /app
-      && [ -f .env ] || cp .env.example .env
-      && sed -i -E 's/^DB_CONNECTION=.*/DB_CONNECTION=mysql/; s/^DB_HOST=.*/DB_HOST=db/; s/^DB_PORT=.*/DB_PORT=3306/; s/^DB_DATABASE=.*/DB_DATABASE=laravel/; s/^DB_USERNAME=.*/DB_USERNAME=laravel/; s/^DB_PASSWORD=.*/DB_PASSWORD=secret/' .env
-      && composer install --no-interaction --prefer-dist --no-progress
-      && composer require laravel/socialite --no-interaction --no-progress
-      && php artisan key:generate --force
-      && php artisan migrate --force --no-interaction
-      && chmod -R ug+rwX storage bootstrap/cache
+      set -e &&
+      cd /app &&
+      [ -f .env ] || cp .env.example .env &&
+      sed -i -E 's/^DB_CONNECTION=.*/DB_CONNECTION=mysql/; s/^DB_HOST=.*/DB_HOST=db/; s/^DB_PORT=.*/DB_PORT=3306/; s/^DB_DATABASE=.*/DB_DATABASE=laravel/; s/^DB_USERNAME=.*/DB_USERNAME=laravel/; s/^DB_PASSWORD=.*/DB_PASSWORD=secret/' .env &&
+      composer install --no-interaction --prefer-dist --no-progress &&
+      composer require laravel/socialite --no-interaction --no-progress &&
+      php artisan key:generate --force &&
+      php artisan migrate --force --no-interaction &&
+      chmod -R ug+rwX storage bootstrap/cache
 
   app:
     image: webdevops/php-nginx:8.3-alpine
@@ -26,8 +29,8 @@ services:
     working_dir: /app
     restart: unless-stopped
     environment:
-      - WEB_DOCUMENT_ROOT=/app/public
-      - PHP_DATE_TIMEZONE=UTC
+      WEB_DOCUMENT_ROOT: /app/public
+      PHP_DATE_TIMEZONE: UTC
     volumes:
       - ./src:/app
     ports:
@@ -44,12 +47,11 @@ services:
     image: mariadb:10.11
     restart: unless-stopped
     environment:
-      - MYSQL_DATABASE=laravel      
-
-      - MYSQL_USER=laravel
-      - MYSQL_PASSWORD=secret
-      - MYSQL_ROOT_PASSWORD=root
-      - TZ=Asia/Bangkok
+      MYSQL_DATABASE: laravel
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: root
+      TZ: Asia/Bangkok
     # ports:
     #   - "3306:3306"
     volumes:
@@ -65,11 +67,11 @@ services:
     image: phpmyadmin:5-apache
     restart: unless-stopped
     environment:
-      - PMA_HOST=db
-      - PMA_PORT=3306
-      - PMA_ABSOLUTE_URI=http://localhost:8081/
-      - UPLOAD_LIMIT=128M
-      - TZ=Asia/Bangkok
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_ABSOLUTE_URI: http://localhost:8091/
+      UPLOAD_LIMIT: 128M
+      TZ: Asia/Bangkok
     ports:
       - "8091:80"
     depends_on:
