@@ -2,6 +2,7 @@ services:
   migrate:
     image: webdevops/php-nginx:8.3-alpine
     working_dir: /app
+    restart: unless-stopped
     volumes:
       - ./src:/app
     depends_on:
@@ -23,6 +24,7 @@ services:
     image: webdevops/php-nginx:8.3-alpine
     container_name: laravel-app
     working_dir: /app
+    restart: unless-stopped
     environment:
       - WEB_DOCUMENT_ROOT=/app/public
       - PHP_DATE_TIMEZONE=UTC
@@ -40,6 +42,7 @@ services:
 
   db:
     image: mariadb:10.11
+    restart: unless-stopped
     environment:
       - MYSQL_DATABASE=laravel      
 
@@ -60,6 +63,7 @@ services:
 
   phpmyadmin:
     image: phpmyadmin:5-apache
+    restart: unless-stopped
     environment:
       - PMA_HOST=db
       - PMA_PORT=3306
@@ -74,6 +78,7 @@ services:
 
   redis:
     image: redis:7-alpine
+    restart: unless-stopped
     ports:
       - "6379:6379"
 
